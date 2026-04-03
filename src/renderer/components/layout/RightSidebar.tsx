@@ -4,6 +4,7 @@ import { useEditorStore } from '../../stores/editorStore'
 import { useVaultStore } from '../../stores/vaultStore'
 import { useRightPanelStore } from '../../stores/rightPanelStore'
 import { OutlinePanel } from './OutlinePanel'
+import { PropertiesPanel } from './PropertiesPanel'
 import { ipc } from '../../lib/ipc'
 import type { BacklinkResult } from '@shared/types/Note'
 import styles from './RightSidebar.module.css'
@@ -60,9 +61,7 @@ export function RightSidebar(): JSX.Element {
 
         {activeTab === 'outline' && <OutlinePanel />}
 
-        {activeTab === 'properties' && (
-          <div className={styles.empty}>Properties panel — coming in next task</div>
-        )}
+        {activeTab === 'properties' && <PropertiesPanel />}
       </div>
     </div>
   )
