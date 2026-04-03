@@ -16,29 +16,72 @@
 }
 
 .titlebar {
-  height: 36px;
+  height: 40px;
   -webkit-app-region: drag;
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  padding: 0 80px 0 16px;
-  background: rgba(255, 255, 255, 0.025);
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  gap: 12px;
+  padding: 0 12px 0 80px;
+  background: #07101c;
+  border-bottom: 1px solid rgba(56, 182, 220, 0.12);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4), inset 0 -1px 0 rgba(124, 92, 247, 0.07);
+  gap: 8px;
+  position: relative;
+}
+
+/* Subtle gradient line at very bottom of titlebar */
+.titlebar::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 80px; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(56,182,220,0.25) 0%, rgba(124,92,247,0.2) 50%, transparent 100%);
+  pointer-events: none;
 }
 
 .titlebar > * { -webkit-app-region: no-drag; }
 
+.titlebarLeft {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.titlebarDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #38b6dc, #7c5cf7);
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
 .titleName {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.45);
   letter-spacing: 0.04em;
   font-weight: 500;
-  flex: 1;
-  text-align: center;
   pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.titlebarCenter {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.titlebarRight {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .body { flex: 1; display: flex; overflow: hidden; }
@@ -79,14 +122,19 @@
 
 .searchShortcut {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.35);
+  background: rgba(56, 182, 220, 0.07);
+  border: 1px solid rgba(56, 182, 220, 0.18);
   border-radius: 5px;
-  padding: 2px 8px;
+  padding: 3px 9px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
   font-family: inherit;
+  letter-spacing: 0.02em;
 }
 
-.searchShortcut:hover { background: rgba(255, 255, 255, 0.1); color: rgba(255,255,255,0.5); }
+.searchShortcut:hover {
+  background: rgba(56, 182, 220, 0.14);
+  color: rgba(56, 182, 220, 0.9);
+  border-color: rgba(56, 182, 220, 0.35);
+}

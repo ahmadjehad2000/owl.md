@@ -29,8 +29,14 @@ export function AppShell({ sidebar, children, rightPanel }: AppShellProps): JSX.
   return (
     <div className={styles.root}>
       <div className={styles.titlebar}>
-        <span className={styles.titleName}>{config?.name ?? 'owl.md'}</span>
-        <button className={styles.searchShortcut} onClick={openSearch}>⌘F</button>
+        <div className={styles.titlebarLeft}>
+          <div className={styles.titlebarDot} />
+          <span className={styles.titleName}>{config?.name ?? 'owl.md'}</span>
+        </div>
+        <div className={styles.titlebarCenter} />
+        <div className={styles.titlebarRight}>
+          <button className={styles.searchShortcut} onClick={openSearch}>⌘F</button>
+        </div>
       </div>
       <div className={styles.body}>
         <div className={styles.sidebarLeft}>{sidebar}</div>
