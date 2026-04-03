@@ -19,8 +19,11 @@ const LABELS: Record<CalloutType, string> = {
   danger:  'Danger',
 }
 
+const VALID_TYPES: CalloutType[] = ['info', 'warning', 'tip', 'danger']
+
 export function CalloutView({ node }: NodeViewProps): JSX.Element {
-  const type = node.attrs.type as CalloutType
+  const rawType = node.attrs.type as string
+  const type: CalloutType = VALID_TYPES.includes(rawType as CalloutType) ? (rawType as CalloutType) : 'info'
   return (
     <NodeViewWrapper>
       <div className={`${styles.callout} ${styles[type]}`} data-callout={type}>
