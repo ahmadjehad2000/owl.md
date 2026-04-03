@@ -3,6 +3,7 @@ import React, { useEffect, useCallback } from 'react'
 import { useSearchStore } from '../../stores/searchStore'
 import { useVaultStore } from '../../stores/vaultStore'
 import { useCommandPaletteStore } from '../../stores/commandPaletteStore'
+import { useTabStore } from '../../stores/tabStore'
 import { MenuBar } from './MenuBar'
 import { CommandPalette } from '../command/CommandPalette'
 import { VaultManagerModal } from '../vault/VaultManagerModal'
@@ -15,15 +16,29 @@ interface AppShellProps {
 }
 
 export function AppShell({ sidebar, children, rightPanel }: AppShellProps): JSX.Element {
-  const openSearch = useSearchStore(s => s.open)
-  const openPalette = useCommandPaletteStore(s => s.open)
+  const openSearch    = useSearchStore(s => s.open)
+  const openPalette   = useCommandPaletteStore(s => s.open)
   const openedConfigs = useVaultStore(s => s.openedConfigs)
   const activateVault = useVaultStore(s => s.activateVault)
   const activeConfig  = useVaultStore(s => s.config)
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'f') { e.preventDefault(); openSearch()  }
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openPalette() }
+    const mod = e.metaKey || e.ctrlKey
+    if (mod && e.key === 'f') { e.preventDefault(); openSearch() }
+    if (mod && e.key === 'k') { e.preventDefault(); openPalette() }
+    if (mod && e.key === 'w') {
+      e.preventDefault()
+      const { activeTabId, closeTab } = useTabStore.getState()
+      if (activeTabId) closeTab(activeTabId)
+    }
+    if (mod && e.key === 'Tab') {
+      e.preventDefault()
+      if (e.shiftKey) {
+        useTabStore.getState().prevTab()
+      } else {
+        useTabStore.getState().nextTab()
+      }
+    }
   }, [openSearch, openPalette])
 
   useEffect(() => {
