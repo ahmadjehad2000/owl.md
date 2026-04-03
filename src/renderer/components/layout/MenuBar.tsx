@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useSearchStore } from '../../stores/searchStore'
 import { useCommandPaletteStore } from '../../stores/commandPaletteStore'
+import { useVaultManagerStore } from '../../stores/vaultManagerStore'
 import styles from './MenuBar.module.css'
 
 type MenuAction = { label: string; shortcut?: string; action: () => void }
@@ -14,11 +15,11 @@ function isSep(e: MenuEntry): e is Separator { return 'separator' in e }
 
 export function MenuBar(): JSX.Element {
   const [openMenu, setOpenMenu] = useState<string | null>(null)
-  const openSearch = useSearchStore(s => s.open)
-  const openPalette = useCommandPaletteStore(s => s.open)
+  const openSearch        = useSearchStore(s => s.open)
+  const openPalette       = useCommandPaletteStore(s => s.open)
+  const showVaultManager  = useVaultManagerStore(s => s.show)
   const barRef = useRef<HTMLDivElement>(null)
 
-  // Close when clicking outside the bar
   useEffect(() => {
     if (!openMenu) return
     const handler = (e: MouseEvent) => {
@@ -28,7 +29,6 @@ export function MenuBar(): JSX.Element {
     return () => document.removeEventListener('mousedown', handler)
   }, [openMenu])
 
-  // Close on Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpenMenu(null) }
     document.addEventListener('keydown', onKey)
@@ -36,36 +36,30 @@ export function MenuBar(): JSX.Element {
   }, [])
 
   const toggle = (label: string) => setOpenMenu(prev => prev === label ? null : label)
-
-  const run = (action: () => void) => { action(); setOpenMenu(null) }
+  const run    = (action: () => void) => { action(); setOpenMenu(null) }
 
   const menus: MenuDef[] = [
     {
       label: 'File',
       items: [
-        { label: 'New Note', shortcut: 'Ctrl+N', action: () => window.dispatchEvent(new CustomEvent('owl:new-note')) },
-        { label: 'Command Palette', shortcut: 'Ctrl+K', action: () => { openPalette(); setOpenMenu(null) } },
+        { label: 'New Note',        shortcut: 'Ctrl+N', action: () => window.dispatchEvent(new CustomEvent('owl:new-note')) },
+        { label: 'Command Palette', shortcut: 'Ctrl+K', action: () => openPalette() },
         { separator: true },
         { label: 'Quit', action: () => window.close() },
       ],
     },
     {
+      label: 'Vaults',
+      items: [
+        { label: 'Create New Vault', action: () => showVaultManager('create') },
+        { label: 'Open Vault',       action: () => showVaultManager('open')   },
+      ],
+    },
+    {
       label: 'Edit',
       items: [
-        {
-          label: 'Undo',
-          shortcut: 'Ctrl+Z',
-          action: () => document.activeElement?.dispatchEvent(
-            new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true }),
-          ),
-        },
-        {
-          label: 'Redo',
-          shortcut: 'Ctrl+Shift+Z',
-          action: () => document.activeElement?.dispatchEvent(
-            new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, shiftKey: true, bubbles: true }),
-          ),
-        },
+        { label: 'Undo',       shortcut: 'Ctrl+Z',       action: () => document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true })) },
+        { label: 'Redo',       shortcut: 'Ctrl+Shift+Z', action: () => document.activeElement?.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, shiftKey: true, bubbles: true })) },
         { separator: true },
         { label: 'Cut',        shortcut: 'Ctrl+X', action: () => document.execCommand('cut') },
         { label: 'Copy',       shortcut: 'Ctrl+C', action: () => document.execCommand('copy') },
@@ -78,7 +72,7 @@ export function MenuBar(): JSX.Element {
     {
       label: 'Help',
       items: [
-        { label: 'About owl.md', action: () => alert('owl.md v0.1.0\nLocal-first knowledge workspace') },
+        { label: 'About owl.md', action: () => openPalette() },
       ],
     },
   ]
@@ -108,7 +102,7 @@ export function MenuBar(): JSX.Element {
                       <span className={styles.itemLabel}>{item.label}</span>
                       {item.shortcut && <span className={styles.itemShortcut}>{item.shortcut}</span>}
                     </button>
-                  ),
+                  )
               )}
             </div>
           )}
