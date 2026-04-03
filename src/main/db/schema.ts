@@ -50,9 +50,7 @@ export const CREATE_BLOCKS = `
 export const CREATE_NOTES_FTS = `
   CREATE VIRTUAL TABLE IF NOT EXISTS notes_fts USING fts5(
     title,
-    content,
-    content=notes,
-    content_rowid=rowid
+    content
   )
 `
 
