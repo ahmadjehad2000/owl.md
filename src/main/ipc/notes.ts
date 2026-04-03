@@ -1,0 +1,61 @@
+// src/main/ipc/notes.ts
+import { ipcMain } from 'electron'
+import { dirname, basename } from 'path'
+import type { Note, NoteContent } from '@shared/types/Note'
+import type { DatabaseService } from '../services/DatabaseService'
+import type { VaultService } from '../services/VaultService'
+import type { IndexService } from '../services/IndexService'
+
+export function registerNotesHandlers(services: {
+  db: () => DatabaseService
+  vault: () => VaultService
+  index: () => IndexService
+}): void {
+  const db = () => services.db().get()
+
+  ipcMain.handle('notes:list', (): Note[] =>
+    db().prepare('SELECT * FROM notes ORDER BY updated_at DESC').all() as Note[]
+  )
+
+  ipcMain.handle('notes:read', (_e, id: string): NoteContent => {
+    const note = db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
+    if (!note) throw new Error(`Note not found: ${id}`)
+    return { note, markdown: services.vault().readNote(note.path) }
+  })
+
+  ipcMain.handle('notes:save', (_e, id: string, markdown: string): Note => {
+    const note = db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
+    if (!note) throw new Error(`Note not found: ${id}`)
+    services.vault().writeNote(note.path, markdown)
+    const titleMatch = markdown.match(/^#\s+(.+)$/m)
+    const title = titleMatch ? titleMatch[1] : basename(note.path, '.md')
+    const folderPath = dirname(note.path) === '.' ? '' : dirname(note.path)
+    services.index().indexNote({ id, path: note.path, title, markdown, folderPath, noteType: note.noteType })
+    services.index().syncFTS(id, title, markdown)
+    services.index().resolveLinks()
+    return db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
+  })
+
+  ipcMain.handle('notes:create', (_e, title: string, folderPath: string): NoteContent => {
+    const id = crypto.randomUUID()
+    const fileName = `${title.replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '-')}.md`
+    const notePath = folderPath ? `${folderPath}/${fileName}` : fileName
+    const markdown = `# ${title}\n\n`
+    services.vault().writeNote(notePath, markdown)
+    services.index().indexNote({ id, path: notePath, title, markdown, folderPath, noteType: 'note' })
+    services.index().syncFTS(id, title, markdown)
+    const note = db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
+    return { note, markdown }
+  })
+
+  ipcMain.handle('notes:delete', (_e, id: string): void => {
+    const note = db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note | undefined
+    if (!note) return
+    services.vault().deleteNote(note.path)
+    services.index().removeNote(id)
+  })
+
+  ipcMain.handle('notes:getBacklinks', (_e, id: string) =>
+    services.index().getBacklinks(id)
+  )
+}
