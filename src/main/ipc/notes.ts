@@ -70,8 +70,8 @@ export function registerNotesHandlers(services: {
     db().prepare(`
       INSERT INTO notes (id, path, title, content_hash, created_at, updated_at,
                          parent_id, folder_path, note_type, order_index)
-      VALUES (?, '', ?, '', ?, ?, NULL, '', 'folder', ?)
-    `).run(id, name, now, now, result.m + 1)
+      VALUES (?, ?, ?, '', ?, ?, NULL, '', 'folder', ?)
+    `).run(id, `__folder__/${id}`, name, now, now, result.m + 1)
     return db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
   })
 
