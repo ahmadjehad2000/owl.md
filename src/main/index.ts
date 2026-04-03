@@ -7,6 +7,7 @@ function createWindow(): void {
     height: 800,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
+      contextIsolation: true,
       sandbox: false,
     },
     titleBarStyle: 'hiddenInset',
