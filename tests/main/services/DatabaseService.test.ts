@@ -47,7 +47,7 @@ describe('DatabaseService', () => {
     }
   })
 
-  it('records schema_version = 1 after migration', () => {
+  it('records schema_version = 2 after initial migration', () => {
     const row = db.get().prepare('SELECT version FROM schema_version').get() as { version: number }
     expect(row.version).toBe(2)
   })
