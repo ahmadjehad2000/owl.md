@@ -1,39 +1,59 @@
 // src/main/index.ts
-import { app, BrowserWindow, Menu } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import { join, relative, dirname, basename } from 'path'
+import { existsSync } from 'fs'
 import { DatabaseService } from './services/DatabaseService'
 import { VaultService } from './services/VaultService'
 import { IndexService } from './services/IndexService'
 import { WatcherService } from './services/WatcherService'
+import { SettingsService } from './services/SettingsService'
 import { registerVaultHandlers } from './ipc/vault'
 import { registerNotesHandlers } from './ipc/notes'
 import { registerSearchHandlers } from './ipc/search'
 import type { VaultConfig } from '@shared/types/Note'
 
-let vaultPath: string | null = null
-let dbService: DatabaseService | null = null
-let vaultService: VaultService | null = null
-let indexService: IndexService | null = null
-let watcherService: WatcherService | null = null
+type VaultSession = {
+  db:      DatabaseService
+  vault:   VaultService
+  index:   IndexService
+  watcher: WatcherService
+  config:  VaultConfig
+}
 
-async function openVault(path: string): Promise<VaultConfig> {
-  if (watcherService) await watcherService.stop()
-  if (dbService) dbService.close()
+const sessions = new Map<string, VaultSession>()
+let activePath: string | null = null
+let settingsService: SettingsService
 
-  vaultPath = path
-  vaultService = new VaultService(path)
-  vaultService.init(basename(path))
-  dbService = new DatabaseService(path)
+function activeSession(): VaultSession {
+  const s = sessions.get(activePath ?? '')
+  if (!s) throw new Error('No active vault')
+  return s
+}
+
+function safeVaultFolderName(name: string): string {
+  const safe = name.trim().replace(/[<>:"/\\|?*\x00-\x1f]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '')
+  return safe || 'my-vault'
+}
+
+async function openVault(vaultPath: string): Promise<VaultConfig> {
+  // Already open — just activate
+  if (sessions.has(vaultPath)) {
+    activePath = vaultPath
+    settingsService.setLastVaultPath(vaultPath)
+    return sessions.get(vaultPath)!.config
+  }
+
+  const vaultService   = new VaultService(vaultPath)
+  const dbService      = new DatabaseService(vaultPath)
   dbService.open()
-  indexService = new IndexService(dbService.get())
-  watcherService = new WatcherService(path)
+  const indexService   = new IndexService(dbService.get())
+  const watcherService = new WatcherService(vaultPath)
 
-  // Full initial scan
   for (const notePath of vaultService.listNotes()) {
-    const markdown = vaultService.readNote(notePath)
+    const markdown   = vaultService.readNote(notePath)
     const titleMatch = markdown.match(/^#\s+(.+)$/m)
-    const title = titleMatch ? titleMatch[1] : basename(notePath, '.md')
-    const id = getOrCreateNoteId(notePath)
+    const title      = titleMatch ? titleMatch[1] : basename(notePath, '.md')
+    const id         = getOrCreateNoteId(dbService, notePath)
     const folderPath = dirname(notePath) === '.' ? '' : dirname(notePath)
     indexService.indexNote({ id, path: notePath, title, markdown, folderPath, noteType: 'note' })
     indexService.syncFTS(id, title, markdown)
@@ -42,51 +62,72 @@ async function openVault(path: string): Promise<VaultConfig> {
 
   watcherService.start({
     onFileChanged: (absPath) => {
-      if (!vaultService || !indexService || !dbService) return
-      const rel = relative(join(path, 'notes'), absPath)
-      const markdown = vaultService.readNote(rel)
+      const rel        = relative(join(vaultPath, 'notes'), absPath)
+      const markdown   = vaultService.readNote(rel)
       const titleMatch = markdown.match(/^#\s+(.+)$/m)
-      const title = titleMatch ? titleMatch[1] : basename(rel, '.md')
-      const id = getOrCreateNoteId(rel)
+      const title      = titleMatch ? titleMatch[1] : basename(rel, '.md')
+      const id         = getOrCreateNoteId(dbService, rel)
       const folderPath = dirname(rel) === '.' ? '' : dirname(rel)
       indexService.indexNote({ id, path: rel, title, markdown, folderPath, noteType: 'note' })
       indexService.syncFTS(id, title, markdown)
       indexService.resolveLinks()
     },
     onFileDeleted: (absPath) => {
-      if (!dbService || !indexService) return
-      const rel = relative(join(path, 'notes'), absPath)
+      const rel = relative(join(vaultPath, 'notes'), absPath)
       const row = dbService.get().prepare('SELECT id FROM notes WHERE path = ?').get(rel) as
-        | { id: string } | undefined
+        { id: string } | undefined
       if (row) indexService.removeNote(row.id)
     },
   })
 
-  return vaultService.getConfig()
+  const config = vaultService.getConfig()
+  sessions.set(vaultPath, { db: dbService, vault: vaultService, index: indexService, watcher: watcherService, config })
+  activePath = vaultPath
+  settingsService.addKnownVault(config)
+  settingsService.setLastVaultPath(vaultPath)
+  return config
 }
 
-function getOrCreateNoteId(notePath: string): string {
-  if (!dbService) throw new Error('DB not open')
+async function createVault(name: string): Promise<VaultConfig> {
+  const vaultPath = join(app.getPath('documents'), safeVaultFolderName(name))
+  if (existsSync(vaultPath)) {
+    throw new Error(`A folder already exists at "${vaultPath}". Choose a different name.`)
+  }
+  const vaultService = new VaultService(vaultPath)
+  vaultService.init(name)
+  return openVault(vaultPath)
+}
+
+function getOrCreateNoteId(dbService: DatabaseService, notePath: string): string {
   const row = dbService.get().prepare('SELECT id FROM notes WHERE path = ?').get(notePath) as
-    | { id: string } | undefined
+    { id: string } | undefined
   return row?.id ?? crypto.randomUUID()
 }
 
 app.whenReady().then(() => {
+  settingsService = new SettingsService(app.getPath('userData'))
+
   registerVaultHandlers({
-    db: () => dbService!,
-    vault: () => vaultService!,
     openVault,
-    setVaultPath: (p) => { vaultPath = p },
+    createVault,
+    activateVault: async (path: string) => {
+      if (!sessions.has(path)) return openVault(path)
+      activePath = path
+      settingsService.setLastVaultPath(path)
+      return sessions.get(path)!.config
+    },
+    listKnownVaults:  () => settingsService.getKnownVaults(),
+    getLastVaultPath: () => settingsService.getLastVaultPath(),
+    getOpenSessions:  () => Array.from(sessions.values()).map(s => s.config),
   })
 
   registerNotesHandlers({
-    db: () => dbService!,
-    vault: () => vaultService!,
-    index: () => indexService!,
+    db:    () => activeSession().db,
+    vault: () => activeSession().vault,
+    index: () => activeSession().index,
   })
 
-  registerSearchHandlers(() => indexService!)
+  registerSearchHandlers(() => activeSession().index)
 
   const win = new BrowserWindow({
     width: 1280,
@@ -103,10 +144,7 @@ app.whenReady().then(() => {
     show: false,
   })
 
-  // Remove native in-window menu bar (File/Edit/Help) on Windows/Linux.
-  // We render a custom menu bar in the renderer instead.
   win.removeMenu()
-
   win.on('ready-to-show', () => win.show())
 
   if (process.env['ELECTRON_RENDERER_URL']) {
@@ -117,7 +155,13 @@ app.whenReady().then(() => {
 })
 
 app.on('window-all-closed', async () => {
-  if (watcherService) await watcherService.stop()
-  if (dbService) dbService.close()
+  for (const session of sessions.values()) {
+    try {
+      await session.watcher.stop()
+      session.db.close()
+    } catch {
+      // Best-effort cleanup — don't let one failure block others
+    }
+  }
   if (process.platform !== 'darwin') app.quit()
 })

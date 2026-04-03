@@ -4,16 +4,20 @@ import type { OwlAPI } from '@shared/types/IPC'
 
 const owl: OwlAPI = {
   vault: {
-    open:      (vaultPath)        => ipcRenderer.invoke('vault:open', vaultPath),
-    create:    (vaultPath, name)  => ipcRenderer.invoke('vault:create', vaultPath, name),
-    getConfig: ()                 => ipcRenderer.invoke('vault:getConfig'),
+    open:        (vaultPath) => ipcRenderer.invoke('vault:open',         vaultPath),
+    create:      (name)      => ipcRenderer.invoke('vault:create',       name),
+    activate:    (vaultPath) => ipcRenderer.invoke('vault:activate',     vaultPath),
+    listKnown:   ()          => ipcRenderer.invoke('vault:list-known'),
+    getLast:     ()          => ipcRenderer.invoke('vault:get-last'),
+    getSessions: ()          => ipcRenderer.invoke('vault:get-sessions'),
+    getConfig:   ()          => ipcRenderer.invoke('vault:getConfig'),
   },
   notes: {
     list:         ()              => ipcRenderer.invoke('notes:list'),
-    read:         (id)            => ipcRenderer.invoke('notes:read', id),
-    save:         (id, markdown)  => ipcRenderer.invoke('notes:save', id, markdown),
-    create:       (title, folder) => ipcRenderer.invoke('notes:create', title, folder),
-    delete:       (id)            => ipcRenderer.invoke('notes:delete', id),
+    read:         (id)            => ipcRenderer.invoke('notes:read',         id),
+    save:         (id, markdown)  => ipcRenderer.invoke('notes:save',         id, markdown),
+    create:       (title, folder) => ipcRenderer.invoke('notes:create',       title, folder),
+    delete:       (id)            => ipcRenderer.invoke('notes:delete',       id),
     getBacklinks: (id)            => ipcRenderer.invoke('notes:getBacklinks', id),
   },
   search: {
