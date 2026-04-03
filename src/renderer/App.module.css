@@ -76,41 +76,214 @@
 /* ─── Vault Gate ──────────────────────────────────── */
 
 .vaultGate {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  height: 100vh; gap: 24px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background:
-    radial-gradient(ellipse 55% 55% at 15% 70%, rgba(20,120,160,0.4) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 50% at 85% 25%, rgba(80,40,160,0.35) 0%, transparent 65%),
-    #060b12;
+  background: #060b12;
   color: rgba(255,255,255,0.85);
-  animation: fadeIn 0.5s ease;
+  animation: fadeIn 0.6s ease;
+}
+
+/* ─── Animated background scene ─────────────────── */
+
+.bgScene {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Aurora blobs */
+.orb1 {
+  position: absolute;
+  width: 520px; height: 520px;
+  left: -12%; bottom: -8%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, rgba(20,140,180,0.45) 0%, transparent 65%);
+  filter: blur(70px);
+  animation: orbDrift1 24s ease-in-out infinite;
+}
+
+.orb2 {
+  position: absolute;
+  width: 420px; height: 420px;
+  right: -10%; top: -10%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 55% 45%, rgba(90,40,190,0.5) 0%, transparent 65%);
+  filter: blur(65px);
+  animation: orbDrift2 19s ease-in-out infinite;
+}
+
+.orb3 {
+  position: absolute;
+  width: 300px; height: 300px;
+  right: 18%; bottom: 22%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, rgba(0,180,150,0.3) 0%, transparent 65%);
+  filter: blur(55px);
+  animation: orbDrift3 28s ease-in-out infinite;
+}
+
+.orb4 {
+  position: absolute;
+  width: 260px; height: 260px;
+  left: 22%; top: 18%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 55%, rgba(130,60,220,0.35) 0%, transparent 65%);
+  filter: blur(50px);
+  animation: orbDrift4 22s ease-in-out infinite;
+}
+
+@keyframes orbDrift1 {
+  0%   { transform: translate(0,    0)    scale(1);    }
+  20%  { transform: translate(50px, -70px) scale(1.06); }
+  45%  { transform: translate(90px, -30px) scale(1.12); }
+  70%  { transform: translate(40px,  50px) scale(1.04); }
+  100% { transform: translate(0,    0)    scale(1);    }
+}
+
+@keyframes orbDrift2 {
+  0%   { transform: translate(0,     0)    scale(1);    }
+  30%  { transform: translate(-55px, 65px) scale(1.1);  }
+  55%  { transform: translate(-90px, 30px) scale(0.94); }
+  80%  { transform: translate(-30px, 80px) scale(1.05); }
+  100% { transform: translate(0,     0)    scale(1);    }
+}
+
+@keyframes orbDrift3 {
+  0%   { transform: translate(0,     0)    scale(1);   opacity: 0.8; }
+  35%  { transform: translate(-60px,-50px) scale(1.15); opacity: 1;   }
+  70%  { transform: translate( 30px,-80px) scale(0.9);  opacity: 0.7; }
+  100% { transform: translate(0,     0)    scale(1);   opacity: 0.8; }
+}
+
+@keyframes orbDrift4 {
+  0%   { transform: translate(0,    0)    scale(1);    }
+  40%  { transform: translate(70px, 40px) scale(1.08); }
+  75%  { transform: translate(-20px,70px) scale(0.92); }
+  100% { transform: translate(0,    0)    scale(1);    }
+}
+
+/* Horizontal light sweep */
+.sweep {
+  position: absolute;
+  top: 0; left: -70%;
+  width: 50%; height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(56, 182, 220, 0.04) 40%,
+    rgba(124, 92, 247, 0.05) 60%,
+    transparent 100%
+  );
+  animation: sweepAcross 14s ease-in-out infinite;
+  transform: skewX(-8deg);
+}
+
+@keyframes sweepAcross {
+  0%   { transform: skewX(-8deg) translateX(0); }
+  50%  { transform: skewX(-8deg) translateX(320%); }
+  100% { transform: skewX(-8deg) translateX(0); }
+}
+
+/* Rising particles */
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(56, 182, 220, 0.8);
+  animation: particleFloat linear infinite;
+}
+
+@keyframes particleFloat {
+  0%   { transform: translateY(0)      scale(1);   opacity: 0;   }
+  8%   { opacity: 1; }
+  90%  { opacity: 0.6; }
+  100% { transform: translateY(-110vh) scale(0.4); opacity: 0;   }
+}
+
+/* ─── Gate content (above background) ───────────── */
+
+.gateContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.logoWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoHalo {
+  position: absolute;
+  width: 220px; height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(56,182,220,0.18) 0%, rgba(124,92,247,0.14) 50%, transparent 75%);
+  filter: blur(18px);
+  animation: haloPulse 3.5s ease-in-out infinite;
+}
+
+@keyframes haloPulse {
+  0%, 100% { transform: scale(1);    opacity: 0.8; }
+  50%       { transform: scale(1.18); opacity: 1;   }
 }
 
 .logo {
-  font-size: 48px; font-weight: 800;
-  background: linear-gradient(135deg, #38b6dc 0%, #7c5cf7 100%);
+  font-size: 52px; font-weight: 800;
+  background: linear-gradient(135deg, #38b6dc 20%, #7c5cf7 80%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text; letter-spacing: -0.02em;
+  animation: logoEntrance 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.tagline { font-size: 14px; color: rgba(255,255,255,0.3); }
+@keyframes logoEntrance {
+  from { opacity: 0; transform: translateY(16px) scale(0.94); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
 
-.buttonGroup { display: flex; gap: 12px; margin-top: 8px; }
+.tagline {
+  font-size: 14px;
+  color: rgba(255,255,255,0.3);
+  animation: fadeIn 0.8s 0.3s both;
+}
+
+.buttonGroup {
+  display: flex; gap: 12px;
+  animation: fadeIn 0.8s 0.5s both;
+}
 
 .btn {
   padding: 10px 22px; border-radius: 8px; font-size: 13px; font-weight: 500;
-  cursor: pointer; border: none; transition: opacity 0.15s, transform 0.1s;
+  cursor: pointer; border: none; transition: opacity 0.15s, transform 0.1s, box-shadow 0.2s;
   font-family: inherit;
 }
-.btn:hover { opacity: 0.85; }
-.btn:active { transform: scale(0.97); }
+.btn:hover  { opacity: 0.88; transform: translateY(-1px); }
+.btn:active { transform: scale(0.97) translateY(0); }
 
-.btnPrimary { background: linear-gradient(135deg, #38b6dc, #7c5cf7); color: white; }
+.btnPrimary {
+  background: linear-gradient(135deg, #38b6dc, #7c5cf7);
+  color: white;
+  box-shadow: 0 4px 24px rgba(56,182,220,0.25);
+}
+.btnPrimary:hover { box-shadow: 0 6px 32px rgba(56,182,220,0.4); }
 
 .btnSecondary {
   background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7);
   border: 1px solid rgba(255,255,255,0.12);
 }
 
-.error { font-size: 12px; color: rgba(220,80,80,0.8); max-width: 400px; text-align: center; }
+.error {
+  font-size: 12px; color: rgba(220,80,80,0.8);
+  max-width: 400px; text-align: center;
+  animation: fadeIn 0.3s ease;
+}
