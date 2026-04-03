@@ -1,0 +1,73 @@
+/* src/renderer/components/editor/TabBar.module.css */
+
+.tabBar {
+  display: flex;
+  align-items: stretch;
+  height: 32px;
+  background: rgba(4, 9, 18, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.tabList {
+  display: flex;
+  align-items: stretch;
+  overflow-x: auto;
+  flex: 1;
+  scrollbar-width: none;
+}
+.tabList::-webkit-scrollbar { display: none; }
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 10px;
+  font-size: 11px;
+  font-family: inherit;
+  color: rgba(255, 255, 255, 0.4);
+  background: transparent;
+  border: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.1s, color 0.1s;
+}
+.tab:hover { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.7); }
+
+.tabActive {
+  background: rgba(56, 182, 220, 0.1);
+  color: rgba(56, 182, 220, 0.9);
+  border-bottom: 2px solid rgba(56, 182, 220, 0.6);
+}
+
+.tabTitle { max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+.tabDirty { color: rgba(56, 182, 220, 0.7); font-size: 9px; flex-shrink: 0; }
+
+.tabClose {
+  font-size: 14px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.2);
+  padding: 0 2px;
+  border-radius: 3px;
+  transition: background 0.1s, color 0.1s;
+  flex-shrink: 0;
+}
+.tabClose:hover { background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.8); }
+
+.tabNew {
+  padding: 0 12px;
+  font-size: 16px;
+  line-height: 1;
+  font-family: inherit;
+  color: rgba(255, 255, 255, 0.3);
+  background: transparent;
+  border: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: color 0.1s, background 0.1s;
+  flex-shrink: 0;
+}
+.tabNew:hover { color: rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.05); }
