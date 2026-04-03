@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useCommandPaletteStore } from '../../stores/commandPaletteStore'
 import { useVaultStore } from '../../stores/vaultStore'
-import { useEditorStore } from '../../stores/editorStore'
+import { useTabStore } from '../../stores/tabStore'
 import { ipc } from '../../lib/ipc'
 import styles from './CommandPalette.module.css'
 
@@ -18,8 +18,6 @@ export function CommandPalette(): JSX.Element | null {
   const close  = useCommandPaletteStore(s => s.close)
   const notes  = useVaultStore(s => s.notes)
   const loadNotes   = useVaultStore(s => s.loadNotes)
-  const setOpenNote = useVaultStore(s => s.setOpenNote)
-  const loadNote    = useEditorStore(s => s.loadNote)
 
   const [query, setQuery]       = useState('')
   const [selected, setSelected] = useState(0)
@@ -42,7 +40,7 @@ export function CommandPalette(): JSX.Element | null {
       id: n.id,
       label: n.title,
       description: n.path,
-      action: () => { setOpenNote(n.id); loadNote(n.id); close() },
+      action: () => { useTabStore.getState().openTab(n.id, n.title); close() },
     }))
 
   const actionItems: PaletteItem[] = !q
@@ -53,8 +51,7 @@ export function CommandPalette(): JSX.Element | null {
         action: async () => {
           const { note } = await ipc.notes.create('Untitled', '')
           await loadNotes()
-          setOpenNote(note.id)
-          loadNote(note.id)
+          useTabStore.getState().openTab(note.id, note.title)
           close()
         },
       }]

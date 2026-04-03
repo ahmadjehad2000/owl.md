@@ -4,6 +4,7 @@ import { useSearchStore } from '../../stores/searchStore'
 import { useVaultStore } from '../../stores/vaultStore'
 import { useCommandPaletteStore } from '../../stores/commandPaletteStore'
 import { useTabStore } from '../../stores/tabStore'
+import { useEditorStore } from '../../stores/editorStore'
 import { MenuBar } from './MenuBar'
 import { CommandPalette } from '../command/CommandPalette'
 import { VaultManagerModal } from '../vault/VaultManagerModal'
@@ -22,14 +23,18 @@ export function AppShell({ sidebar, children, rightPanel }: AppShellProps): JSX.
   const activateVault = useVaultStore(s => s.activateVault)
   const activeConfig  = useVaultStore(s => s.config)
 
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+  const handleKeyDown = useCallback(async (e: KeyboardEvent) => {
     const mod = e.metaKey || e.ctrlKey
     if (mod && e.key === 'f') { e.preventDefault(); openSearch() }
     if (mod && e.key === 'k') { e.preventDefault(); openPalette() }
     if (mod && e.key === 'w') {
       e.preventDefault()
-      const { activeTabId, closeTab } = useTabStore.getState()
-      if (activeTabId) closeTab(activeTabId)
+      const { activeTabId, tabs, closeTab } = useTabStore.getState()
+      if (activeTabId) {
+        const tab = tabs.find(t => t.id === activeTabId)
+        if (tab?.isDirty) await useEditorStore.getState().save()
+        closeTab(activeTabId)
+      }
     }
     if (mod && e.key === 'Tab') {
       e.preventDefault()

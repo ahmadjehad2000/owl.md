@@ -6,7 +6,7 @@ import { RightSidebar } from './components/layout/RightSidebar'
 import { NoteEditor } from './components/editor/NoteEditor'
 import { SearchModal } from './components/search/SearchModal'
 import { useVaultStore } from './stores/vaultStore'
-import { useEditorStore } from './stores/editorStore'
+import { useTabStore } from './stores/tabStore'
 import { ipc } from './lib/ipc'
 import styles from './App.module.css'
 import type { VaultConfig } from '@shared/types/Note'
@@ -60,8 +60,6 @@ export default function App(): JSX.Element {
   const openVault   = useVaultStore(s => s.openVault)
   const createVault = useVaultStore(s => s.createVault)
   const notes       = useVaultStore(s => s.notes)
-  const setOpenNote = useVaultStore(s => s.setOpenNote)
-  const loadNote    = useEditorStore(s => s.loadNote)
 
   const [screen,      setScreen]      = useState<Screen>('init')
   const [error,       setError]       = useState<string | null>(null)
@@ -104,11 +102,11 @@ export default function App(): JSX.Element {
     const handler = (e: Event): void => {
       const { target } = (e as CustomEvent<{ target: string }>).detail
       const linked = notes.find(n => n.title === target)
-      if (linked) { setOpenNote(linked.id); loadNote(linked.id) }
+      if (linked) { useTabStore.getState().openTab(linked.id, linked.title) }
     }
     window.addEventListener('owl:open-wiki-link', handler)
     return () => window.removeEventListener('owl:open-wiki-link', handler)
-  }, [notes, setOpenNote, loadNote])
+  }, [notes])
 
   const handleCreate = async (): Promise<void> => {
     const name = vaultName.trim()

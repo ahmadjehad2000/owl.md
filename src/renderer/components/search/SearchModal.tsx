@@ -1,8 +1,7 @@
 // src/renderer/components/search/SearchModal.tsx
 import React, { useEffect, useRef } from 'react'
 import { useSearchStore } from '../../stores/searchStore'
-import { useVaultStore } from '../../stores/vaultStore'
-import { useEditorStore } from '../../stores/editorStore'
+import { useTabStore } from '../../stores/tabStore'
 import { SearchResults } from './SearchResults'
 import type { SearchResult } from '@shared/types/Note'
 import styles from './SearchModal.module.css'
@@ -14,8 +13,6 @@ export function SearchModal(): JSX.Element | null {
   const isLoading = useSearchStore(s => s.isLoading)
   const setQuery = useSearchStore(s => s.setQuery)
   const close = useSearchStore(s => s.close)
-  const setOpenNote = useVaultStore(s => s.setOpenNote)
-  const loadNote = useEditorStore(s => s.loadNote)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -29,8 +26,7 @@ export function SearchModal(): JSX.Element | null {
   }, [close])
 
   const selectResult = (r: SearchResult): void => {
-    setOpenNote(r.id)
-    loadNote(r.id)
+    useTabStore.getState().openTab(r.id, r.title)
     close()
   }
 

@@ -20,12 +20,16 @@ export function registerNotesHandlers(services: {
   ipcMain.handle('notes:read', (_e, id: string): NoteContent => {
     const note = db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
     if (!note) throw new Error(`Note not found: ${id}`)
+    const raw = note as unknown as Record<string, unknown>
+    if ((raw.note_type ?? raw.noteType) === 'folder') throw new Error(`Cannot read folder note: ${id}`)
     return { note, markdown: services.vault().readNote(note.path) }
   })
 
   ipcMain.handle('notes:save', (_e, id: string, markdown: string): Note => {
     const note = db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
     if (!note) throw new Error(`Note not found: ${id}`)
+    const rawSave = note as unknown as Record<string, unknown>
+    if ((rawSave.note_type ?? rawSave.noteType) === 'folder') throw new Error(`Cannot save folder note: ${id}`)
     services.vault().writeNote(note.path, markdown)
     const titleMatch = markdown.match(/^#\s+(.+)$/m)
     const title = titleMatch ? titleMatch[1] : basename(note.path, '.md')
@@ -53,6 +57,11 @@ export function registerNotesHandlers(services: {
   ipcMain.handle('notes:delete', (_e, id: string): void => {
     const note = db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note | undefined
     if (!note) return
+    const rawDel = note as unknown as Record<string, unknown>
+    if ((rawDel.note_type ?? rawDel.noteType) === 'folder') {
+      services.index().removeNote(id)
+      return
+    }
     services.vault().deleteNote(note.path)
     services.index().removeNote(id)
   })

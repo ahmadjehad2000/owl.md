@@ -1,6 +1,7 @@
 // src/renderer/components/editor/TabBar.tsx
 import React from 'react'
 import { useTabStore } from '../../stores/tabStore'
+import { useEditorStore } from '../../stores/editorStore'
 import { useVaultStore } from '../../stores/vaultStore'
 import { ipc } from '../../lib/ipc'
 import styles from './TabBar.module.css'
@@ -34,7 +35,12 @@ export function TabBar(): JSX.Element {
             <span
               className={styles.tabClose}
               role="button"
-              onClick={e => { e.stopPropagation(); closeTab(tab.id) }}
+              onClick={async e => {
+                e.stopPropagation()
+                const t = useTabStore.getState().tabs.find(x => x.id === tab.id)
+                if (t?.isDirty) await useEditorStore.getState().save()
+                closeTab(tab.id)
+              }}
             >
               ×
             </span>

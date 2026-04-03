@@ -1,7 +1,7 @@
 // src/renderer/components/layout/RightSidebar.tsx
 import React, { useEffect, useState } from 'react'
 import { useEditorStore } from '../../stores/editorStore'
-import { useVaultStore } from '../../stores/vaultStore'
+import { useTabStore } from '../../stores/tabStore'
 import { useRightPanelStore } from '../../stores/rightPanelStore'
 import { OutlinePanel } from './OutlinePanel'
 import { PropertiesPanel } from './PropertiesPanel'
@@ -17,8 +17,6 @@ const TABS: { id: 'backlinks' | 'outline' | 'properties'; label: string }[] = [
 
 export function RightSidebar(): JSX.Element {
   const note       = useEditorStore(s => s.note)
-  const setOpenNote = useVaultStore(s => s.setOpenNote)
-  const loadNote    = useEditorStore(s => s.loadNote)
   const activeTab   = useRightPanelStore(s => s.activeTab)
   const setTab      = useRightPanelStore(s => s.setTab)
   const [backlinks, setBacklinks] = useState<BacklinkResult[]>([])
@@ -28,7 +26,7 @@ export function RightSidebar(): JSX.Element {
     ipc.notes.getBacklinks(note.id).then(setBacklinks).catch(() => setBacklinks([]))
   }, [note?.id])
 
-  const open = (id: string): void => { setOpenNote(id); loadNote(id) }
+  const open = (id: string, title: string): void => { useTabStore.getState().openTab(id, title) }
 
   return (
     <div className={styles.root}>
@@ -50,7 +48,7 @@ export function RightSidebar(): JSX.Element {
             {backlinks.length === 0
               ? <div className={styles.empty}>{note ? 'No backlinks yet' : 'Open a note'}</div>
               : backlinks.map((bl, i) => (
-                  <button key={i} className={styles.backlink} onClick={() => open(bl.sourceNoteId)}>
+                  <button key={i} className={styles.backlink} onClick={() => open(bl.sourceNoteId, bl.sourceTitle)}>
                     <div className={styles.blTitle}>{bl.sourceTitle}</div>
                     <div className={styles.blLink}>← [[{bl.linkText}]]</div>
                   </button>
