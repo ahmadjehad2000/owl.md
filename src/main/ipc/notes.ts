@@ -30,7 +30,9 @@ export function registerNotesHandlers(services: {
     const titleMatch = markdown.match(/^#\s+(.+)$/m)
     const title = titleMatch ? titleMatch[1] : basename(note.path, '.md')
     const folderPath = dirname(note.path) === '.' ? '' : dirname(note.path)
-    services.index().indexNote({ id, path: note.path, title, markdown, folderPath, noteType: note.noteType })
+    const raw = note as unknown as Record<string, unknown>
+    const noteType = (raw.note_type ?? raw.noteType ?? 'note') as Note['noteType']
+    services.index().indexNote({ id, path: note.path, title, markdown, folderPath, noteType })
     services.index().syncFTS(id, title, markdown)
     services.index().resolveLinks()
     return db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
@@ -57,5 +59,27 @@ export function registerNotesHandlers(services: {
 
   ipcMain.handle('notes:getBacklinks', (_e, id: string) =>
     services.index().getBacklinks(id)
+  )
+
+  ipcMain.handle('notes:create-folder', (_e, name: string): Note => {
+    const id = crypto.randomUUID()
+    const now = Date.now()
+    const result = db().prepare(
+      `SELECT COALESCE(MAX(order_index), -1) as m FROM notes WHERE parent_id IS NULL`
+    ).get() as { m: number }
+    db().prepare(`
+      INSERT INTO notes (id, path, title, content_hash, created_at, updated_at,
+                         parent_id, folder_path, note_type, order_index)
+      VALUES (?, '', ?, '', ?, ?, NULL, '', 'folder', ?)
+    `).run(id, name, now, now, result.m + 1)
+    return db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
+  })
+
+  ipcMain.handle('notes:move',
+    (_e, noteId: string, newParentId: string | null, orderIndex: number): void => {
+      db().prepare(
+        'UPDATE notes SET parent_id = ?, order_index = ?, updated_at = ? WHERE id = ?'
+      ).run(newParentId, orderIndex, Date.now(), noteId)
+    }
   )
 }

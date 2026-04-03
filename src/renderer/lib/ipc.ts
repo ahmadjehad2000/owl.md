@@ -12,12 +12,17 @@ export const ipc = {
     getConfig:   ():              Promise<VaultConfig | null> => window.owl.vault.getConfig(),
   },
   notes: {
-    list:         (): Promise<Note[]>                               => window.owl.notes.list(),
-    read:         (id: string): Promise<NoteContent>               => window.owl.notes.read(id),
-    save:         (id: string, md: string): Promise<Note>          => window.owl.notes.save(id, md),
-    create:       (title: string, folder: string): Promise<NoteContent> => window.owl.notes.create(title, folder),
-    delete:       (id: string): Promise<void>                      => window.owl.notes.delete(id),
-    getBacklinks: (id: string): Promise<BacklinkResult[]>          => window.owl.notes.getBacklinks(id),
+    list:         (): Promise<Note[]>                    => window.owl.notes.list(),
+    read:         (id: string): Promise<NoteContent>    => window.owl.notes.read(id),
+    save:         (id: string, md: string): Promise<Note> => window.owl.notes.save(id, md),
+    create:       (title: string, folder: string): Promise<NoteContent> =>
+                    window.owl.notes.create(title, folder),
+    delete:       (id: string): Promise<void>           => window.owl.notes.delete(id),
+    getBacklinks: (id: string): Promise<BacklinkResult[]> =>
+                    window.owl.notes.getBacklinks(id),
+    createFolder: (name: string): Promise<Note>         => window.owl.notes.createFolder(name),
+    move: (noteId: string, newParentId: string | null, orderIndex: number): Promise<void> =>
+            window.owl.notes.move(noteId, newParentId, orderIndex),
   },
   search: {
     query: (q: string): Promise<SearchResult[]> => window.owl.search.query(q),

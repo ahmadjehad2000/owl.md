@@ -19,6 +19,9 @@ const owl: OwlAPI = {
     create:       (title, folder) => ipcRenderer.invoke('notes:create',       title, folder),
     delete:       (id)            => ipcRenderer.invoke('notes:delete',       id),
     getBacklinks: (id)            => ipcRenderer.invoke('notes:getBacklinks', id),
+    createFolder: (name)          => ipcRenderer.invoke('notes:create-folder', name),
+    move: (noteId, newParentId, orderIndex) =>
+            ipcRenderer.invoke('notes:move', noteId, newParentId, orderIndex),
   },
   search: {
     query: (q) => ipcRenderer.invoke('search:query', q),
