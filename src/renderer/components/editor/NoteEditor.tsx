@@ -7,7 +7,10 @@ import { Markdown } from 'tiptap-markdown'
 import { WikiLink } from './extensions/WikiLink'
 import { Callout } from './extensions/Callout'
 import { SlashCommand } from './extensions/SlashCommand'
+import { TabBar } from './TabBar'
 import { useEditorStore } from '../../stores/editorStore'
+import { useTabStore } from '../../stores/tabStore'
+import { useVaultStore } from '../../stores/vaultStore'
 import { useRightPanelStore } from '../../stores/rightPanelStore'
 import { extractHeadings } from '../../lib/markdown'
 import styles from './NoteEditor.module.css'
@@ -15,14 +18,33 @@ import styles from './NoteEditor.module.css'
 const AUTOSAVE_MS = 1500
 
 export function NoteEditor(): JSX.Element {
-  const note = useEditorStore(s => s.note)
-  const markdown = useEditorStore(s => s.markdown)
-  const isDirty = useEditorStore(s => s.isDirty)
-  const saveStatus = useEditorStore(s => s.saveStatus)
+  const note        = useEditorStore(s => s.note)
+  const markdown    = useEditorStore(s => s.markdown)
+  const isDirty     = useEditorStore(s => s.isDirty)
+  const saveStatus  = useEditorStore(s => s.saveStatus)
   const setMarkdown = useEditorStore(s => s.setMarkdown)
-  const save = useEditorStore(s => s.save)
+  const save        = useEditorStore(s => s.save)
+  const restoreTab  = useEditorStore(s => s.restoreTab)
+  const unloadNote  = useEditorStore(s => s.unloadNote)
+  const loadNote    = useEditorStore(s => s.loadNote)
   const setHeadings = useRightPanelStore(s => s.setHeadings)
+  const activeTabId = useTabStore(s => s.activeTabId)
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // When the active tab changes: restore from cache or load from disk
+  useEffect(() => {
+    if (activeTabId === null) { unloadNote(); return }
+    const tab = useTabStore.getState().tabs.find(t => t.id === activeTabId)
+    if (!tab) return
+    if (tab.markdown !== null && tab.frontmatter !== null) {
+      const allNotes = useVaultStore.getState().notes
+      const n = allNotes.find(n => n.id === tab.noteId) ?? null
+      restoreTab(tab.markdown, tab.frontmatter, tab.isDirty, n)
+    } else {
+      loadNote(tab.noteId)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTabId])
 
   const editor = useEditor({
     extensions: [
@@ -61,7 +83,8 @@ export function NoteEditor(): JSX.Element {
     const current = editor.storage.markdown?.getMarkdown() as string | undefined
     if (current !== markdown) editor.commands.setContent(markdown)
     setHeadings(extractHeadings(markdown))
-  }, [note?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [note?.id])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent): void => {
@@ -77,8 +100,6 @@ export function NoteEditor(): JSX.Element {
 
   useEffect(() => () => { if (autosaveTimer.current) clearTimeout(autosaveTimer.current) }, [])
 
-  if (!note) return <div className={styles.empty}>Open a note or create a new one</div>
-
   const statusLabel =
     saveStatus === 'saving' ? 'Saving…' :
     saveStatus === 'saved'  ? '✓ Saved' :
@@ -89,12 +110,19 @@ export function NoteEditor(): JSX.Element {
 
   return (
     <div className={styles.root}>
-      <div className={styles.toolbar}>
-        <span className={`${styles.saveStatus} ${statusClass}`}>{statusLabel}</span>
-      </div>
-      <div className={styles.editorWrap}>
-        <EditorContent editor={editor} />
-      </div>
+      <TabBar />
+      {note ? (
+        <>
+          <div className={styles.toolbar}>
+            <span className={`${styles.saveStatus} ${statusClass}`}>{statusLabel}</span>
+          </div>
+          <div className={styles.editorWrap}>
+            <EditorContent editor={editor} />
+          </div>
+        </>
+      ) : (
+        <div className={styles.empty}>Open a note or create a new one</div>
+      )}
     </div>
   )
 }
