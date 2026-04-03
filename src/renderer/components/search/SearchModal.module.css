@@ -1,0 +1,53 @@
+/* src/renderer/components/search/SearchModal.module.css */
+
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding-top: 15vh; z-index: 1000;
+}
+
+.modal {
+  width: 600px; max-width: 90vw;
+  background: rgba(10,16,28,0.95);
+  backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(56,182,220,0.2);
+  border-radius: 14px; overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
+}
+
+.inputWrap {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.searchIcon { font-size: 14px; color: rgba(255,255,255,0.3); flex-shrink: 0; }
+
+.input {
+  flex: 1; background: none; border: none; outline: none;
+  font-size: 15px; color: rgba(255,255,255,0.85); font-family: inherit;
+}
+.input::placeholder { color: rgba(255,255,255,0.25); }
+
+.results { max-height: 420px; overflow-y: auto; }
+.results::-webkit-scrollbar { width: 4px; }
+.results::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+.empty { padding: 24px; text-align: center; font-size: 13px; color: rgba(255,255,255,0.2); }
+
+.result {
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 10px 16px; cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: background 0.1s;
+  text-align: left; background: none; border-left: none; border-right: none; border-top: none;
+  width: 100%;
+}
+.result:hover { background: rgba(56,182,220,0.1); }
+
+.resultTitle { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.8); }
+.resultPath { font-size: 10px; color: rgba(255,255,255,0.25); }
+.resultExcerpt { font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.5; }
+.resultExcerpt :global(mark) {
+  background: rgba(56,182,220,0.25); color: #72d4f0; border-radius: 2px; padding: 0 2px;
+}
