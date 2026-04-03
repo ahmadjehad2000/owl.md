@@ -53,7 +53,7 @@ function coerceYamlValue(raw: string): FrontmatterValue {
   if (raw === 'true')  return true
   if (raw === 'false') return false
   const n = Number(raw)
-  if (!Number.isNaN(n) && raw !== '') return n
+  if (!Number.isNaN(n) && raw !== '' && /^-?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(raw) && !/^-?0\d/.test(raw)) return n
   return raw
 }
 

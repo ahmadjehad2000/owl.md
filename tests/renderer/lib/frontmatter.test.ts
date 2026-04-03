@@ -29,6 +29,12 @@ describe('parseFrontmatter', () => {
     const { body } = parseFrontmatter('---\ntitle: x\n---\n')
     expect(body).toBe('')
   })
+
+  it('preserves leading-zero strings and non-standard numerics as strings', () => {
+    const { frontmatter } = parseFrontmatter('---\nid: 007\nhex: 0xff\n---\n')
+    expect(frontmatter.id).toBe('007')
+    expect(frontmatter.hex).toBe('0xff')
+  })
 })
 
 describe('serializeFrontmatter', () => {
