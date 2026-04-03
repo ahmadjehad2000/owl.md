@@ -58,12 +58,8 @@ export const CREATE_FTS_TRIGGERS = `
   CREATE TRIGGER IF NOT EXISTS notes_fts_insert AFTER INSERT ON notes BEGIN
     INSERT INTO notes_fts(rowid, title, content) VALUES (new.rowid, new.title, '');
   END;
-  CREATE TRIGGER IF NOT EXISTS notes_fts_update AFTER UPDATE ON notes BEGIN
-    INSERT INTO notes_fts(notes_fts, rowid, title, content) VALUES('delete', old.rowid, old.title, '');
-    INSERT INTO notes_fts(rowid, title, content) VALUES (new.rowid, new.title, '');
-  END;
   CREATE TRIGGER IF NOT EXISTS notes_fts_delete AFTER DELETE ON notes BEGIN
-    INSERT INTO notes_fts(notes_fts, rowid, title, content) VALUES('delete', old.rowid, old.title, '');
+    DELETE FROM notes_fts WHERE rowid = old.rowid;
   END;
 `
 
