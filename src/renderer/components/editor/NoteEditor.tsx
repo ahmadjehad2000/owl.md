@@ -5,6 +5,8 @@ import StarterKit from '@tiptap/starter-kit'
 import { Placeholder } from '@tiptap/extension-placeholder'
 import { Markdown } from 'tiptap-markdown'
 import { WikiLink } from './extensions/WikiLink'
+import { Callout } from './extensions/Callout'
+import { SlashCommand } from './extensions/SlashCommand'
 import { useEditorStore } from '../../stores/editorStore'
 import styles from './NoteEditor.module.css'
 
@@ -25,6 +27,8 @@ export function NoteEditor(): JSX.Element {
       WikiLink,
       Placeholder.configure({ placeholder: 'Start writing…' }),
       Markdown.configure({ transformPastedText: true, transformCopiedText: true }),
+      Callout,
+      SlashCommand,
     ],
     content: markdown,
     onUpdate: ({ editor }) => {

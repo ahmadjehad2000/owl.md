@@ -1,0 +1,51 @@
+/* src/renderer/components/editor/SlashMenu.module.css */
+
+.menu {
+  z-index: 200;
+  min-width: 260px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: #0d1828;
+  border: 1px solid rgba(56,182,220,0.18);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+  padding: 4px;
+  animation: dropIn 0.1s ease;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.1s;
+}
+
+.item.selected,
+.item:hover { background: rgba(56,182,220,0.1); }
+
+.icon {
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.06);
+  border-radius: 5px;
+  font-size: 12px; font-weight: 700;
+  color: rgba(56,182,220,0.8);
+  flex-shrink: 0;
+}
+
+.text { display: flex; flex-direction: column; gap: 1px; }
+.title { font-size: 13px; color: rgba(255,255,255,0.8); font-weight: 500; }
+.desc  { font-size: 11px; color: rgba(255,255,255,0.3); }
