@@ -2,7 +2,9 @@
 import React, { useEffect, useCallback } from 'react'
 import { useSearchStore } from '../../stores/searchStore'
 import { useVaultStore } from '../../stores/vaultStore'
+import { useCommandPaletteStore } from '../../stores/commandPaletteStore'
 import { MenuBar } from './MenuBar'
+import { CommandPalette } from '../command/CommandPalette'
 import styles from './AppShell.module.css'
 
 interface AppShellProps {
@@ -14,13 +16,12 @@ interface AppShellProps {
 export function AppShell({ sidebar, children, rightPanel }: AppShellProps): JSX.Element {
   const config = useVaultStore(s => s.config)
   const openSearch = useSearchStore(s => s.open)
+  const openPalette = useCommandPaletteStore(s => s.open)
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
-      e.preventDefault()
-      openSearch()
-    }
-  }, [openSearch])
+    if ((e.metaKey || e.ctrlKey) && e.key === 'f') { e.preventDefault(); openSearch()  }
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openPalette() }
+  }, [openSearch, openPalette])
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown)
@@ -45,6 +46,7 @@ export function AppShell({ sidebar, children, rightPanel }: AppShellProps): JSX.
         <div className={styles.editorArea}>{children}</div>
         <div className={styles.sidebarRight}>{rightPanel}</div>
       </div>
+      <CommandPalette />
     </div>
   )
 }

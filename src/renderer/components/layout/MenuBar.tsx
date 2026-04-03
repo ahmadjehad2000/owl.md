@@ -1,6 +1,7 @@
 // src/renderer/components/layout/MenuBar.tsx
 import React, { useState, useRef, useEffect } from 'react'
 import { useSearchStore } from '../../stores/searchStore'
+import { useCommandPaletteStore } from '../../stores/commandPaletteStore'
 import styles from './MenuBar.module.css'
 
 type MenuAction = { label: string; shortcut?: string; action: () => void }
@@ -14,6 +15,7 @@ function isSep(e: MenuEntry): e is Separator { return 'separator' in e }
 export function MenuBar(): JSX.Element {
   const [openMenu, setOpenMenu] = useState<string | null>(null)
   const openSearch = useSearchStore(s => s.open)
+  const openPalette = useCommandPaletteStore(s => s.open)
   const barRef = useRef<HTMLDivElement>(null)
 
   // Close when clicking outside the bar
@@ -41,16 +43,10 @@ export function MenuBar(): JSX.Element {
     {
       label: 'File',
       items: [
-        {
-          label: 'New Note',
-          shortcut: 'Ctrl+N',
-          action: () => window.dispatchEvent(new CustomEvent('owl:new-note')),
-        },
+        { label: 'New Note', shortcut: 'Ctrl+N', action: () => window.dispatchEvent(new CustomEvent('owl:new-note')) },
+        { label: 'Command Palette', shortcut: 'Ctrl+K', action: () => { openPalette(); setOpenMenu(null) } },
         { separator: true },
-        {
-          label: 'Quit',
-          action: () => window.close(),
-        },
+        { label: 'Quit', action: () => window.close() },
       ],
     },
     {
