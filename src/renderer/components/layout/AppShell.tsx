@@ -2,6 +2,7 @@
 import React, { useEffect, useCallback } from 'react'
 import { useSearchStore } from '../../stores/searchStore'
 import { useVaultStore } from '../../stores/vaultStore'
+import { MenuBar } from './MenuBar'
 import styles from './AppShell.module.css'
 
 interface AppShellProps {
@@ -38,6 +39,7 @@ export function AppShell({ sidebar, children, rightPanel }: AppShellProps): JSX.
           <button className={styles.searchShortcut} onClick={openSearch}>⌘F</button>
         </div>
       </div>
+      <MenuBar />
       <div className={styles.body}>
         <div className={styles.sidebarLeft}>{sidebar}</div>
         <div className={styles.editorArea}>{children}</div>

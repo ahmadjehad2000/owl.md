@@ -1,5 +1,5 @@
 // src/main/index.ts
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, Menu } from 'electron'
 import { join, relative, dirname, basename } from 'path'
 import { DatabaseService } from './services/DatabaseService'
 import { VaultService } from './services/VaultService'
@@ -102,6 +102,10 @@ app.whenReady().then(() => {
     backgroundColor: '#060b12',
     show: false,
   })
+
+  // Remove native in-window menu bar (File/Edit/Help) on Windows/Linux.
+  // We render a custom menu bar in the renderer instead.
+  win.removeMenu()
 
   win.on('ready-to-show', () => win.show())
 

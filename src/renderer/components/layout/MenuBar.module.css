@@ -1,0 +1,100 @@
+/* src/renderer/components/layout/MenuBar.module.css */
+
+.menuBar {
+  height: 28px;
+  display: flex;
+  align-items: stretch;
+  padding: 0 4px;
+  background: rgba(4, 9, 18, 0.72);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+  backdrop-filter: blur(8px);
+  -webkit-app-region: no-drag;
+}
+
+/* ── Menu trigger buttons ── */
+
+.menuRoot {
+  position: relative;
+}
+
+.menuTrigger {
+  height: 100%;
+  padding: 0 10px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.5);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+}
+
+.menuTrigger:hover,
+.menuTriggerActive {
+  background: rgba(56, 182, 220, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ── Dropdown panel ── */
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  min-width: 200px;
+  background: #0d1828;
+  border: 1px solid rgba(56, 182, 220, 0.15);
+  border-radius: 6px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0,0,0,0.3);
+  padding: 4px;
+  z-index: 1000;
+  animation: dropIn 0.1s ease;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-family: inherit;
+  color: rgba(255, 255, 255, 0.7);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s, color 0.1s;
+  gap: 24px;
+}
+
+.dropdownItem:hover {
+  background: rgba(56, 182, 220, 0.12);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.itemLabel {
+  flex: 1;
+}
+
+.itemShortcut {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.28);
+  white-space: nowrap;
+}
+
+.separator {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 3px 6px;
+}
