@@ -287,3 +287,110 @@
   max-width: 400px; text-align: center;
   animation: fadeIn 0.3s ease;
 }
+
+/* ─── Create vault form ──────────────────────────── */
+
+.createForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 320px;
+  animation: fadeIn 0.3s ease;
+}
+
+.nameInput {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(56,182,220,0.25);
+  border-radius: 8px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s;
+  text-align: center;
+}
+
+.nameInput:focus {
+  border-color: rgba(56,182,220,0.55);
+  background: rgba(255,255,255,0.1);
+}
+
+.nameInput::placeholder { color: rgba(255,255,255,0.25); }
+
+.nameHint {
+  font-size: 11px;
+  color: rgba(255,255,255,0.2);
+  font-family: 'SF Mono', 'Fira Mono', monospace;
+  letter-spacing: 0.02em;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Vault list ─────────────────────────────────── */
+
+.vaultList {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 360px;
+  max-height: 320px;
+  overflow-y: auto;
+  animation: fadeIn 0.25s ease;
+}
+
+.vaultListEmpty {
+  font-size: 13px;
+  color: rgba(255,255,255,0.25);
+  padding: 24px 0;
+}
+
+.vaultCard {
+  width: 100%;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.vaultCard:hover {
+  background: rgba(56,182,220,0.12);
+  border-color: rgba(56,182,220,0.3);
+}
+
+.vaultCardName {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+}
+
+.vaultCardPath {
+  font-size: 10px;
+  color: rgba(255,255,255,0.2);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: 'SF Mono', 'Fira Mono', monospace;
+}
+
+.btnBack {
+  margin-top: 4px;
+  align-self: flex-start;
+}
+
+/* ─── Loading screen with background ────────────── */
+
+.loadingScreenBg {
+  position: relative;
+  overflow: hidden;
+}
