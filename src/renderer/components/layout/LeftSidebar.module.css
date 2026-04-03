@@ -14,6 +14,8 @@
   justify-content: space-between;
 }
 
+.headerActions { display: flex; align-items: center; gap: 2px; }
+
 .addButton {
   background: none; border: none;
   color: rgba(255, 255, 255, 0.3);
@@ -26,6 +28,25 @@
 .noteList::-webkit-scrollbar { width: 4px; }
 .noteList::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 
+/* ── Folder rows ── */
+
+.folderGroup { margin-bottom: 2px; }
+
+.folderRow {
+  display: flex; align-items: center; gap: 5px;
+  width: 100%; padding: 5px 8px; border-radius: 6px;
+  cursor: pointer; font-size: 12px; color: rgba(255,255,255,0.55);
+  background: none; border: none; text-align: left;
+  transition: background 0.1s, color 0.1s;
+}
+.folderRow:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+
+.folderArrow { font-size: 8px; color: rgba(255,255,255,0.25); flex-shrink: 0; width: 10px; }
+.folderIcon  { font-size: 12px; flex-shrink: 0; }
+.folderChildren { padding-left: 8px; }
+
+/* ── Note rows ── */
+
 .noteItem {
   display: flex; align-items: center; gap: 6px;
   padding: 5px 8px; border-radius: 6px; margin: 1px 0;
@@ -34,9 +55,18 @@
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   border: none; background: none; width: 100%; text-align: left;
 }
-.noteItem:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8); }
+.noteItem:hover  { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8); }
 .noteItem.active { background: rgba(56,182,220,0.15); color: #72d4f0; }
+.noteItem.indented { padding-left: 14px; }
 
-.icon { font-size: 12px; flex-shrink: 0; opacity: 0.7; }
-.title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.icon  { font-size: 12px; flex-shrink: 0; opacity: 0.7; }
+.title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
 .divider { height: 1px; background: rgba(255,255,255,0.05); margin: 6px 8px; }
+
+/* ── Drag states ── */
+.dragging   { opacity: 0.35; }
+.dropTarget {
+  background: rgba(56,182,220,0.1);
+  outline: 1px dashed rgba(56,182,220,0.4);
+  border-radius: 6px;
+}
