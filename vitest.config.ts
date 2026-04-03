@@ -10,8 +10,11 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    environment: 'jsdom',
     passWithNoTests: true,
     setupFiles: ['tests/renderer/setup.ts'],
+    environmentMatchGlobs: [
+      ['tests/main/**', 'node'],
+      ['tests/renderer/**', 'jsdom'],
+    ],
   }
 })
