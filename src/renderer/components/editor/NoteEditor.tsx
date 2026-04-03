@@ -8,6 +8,8 @@ import { WikiLink } from './extensions/WikiLink'
 import { Callout } from './extensions/Callout'
 import { SlashCommand } from './extensions/SlashCommand'
 import { useEditorStore } from '../../stores/editorStore'
+import { useRightPanelStore } from '../../stores/rightPanelStore'
+import { extractHeadings } from '../../lib/markdown'
 import styles from './NoteEditor.module.css'
 
 const AUTOSAVE_MS = 1500
@@ -19,6 +21,7 @@ export function NoteEditor(): JSX.Element {
   const saveStatus = useEditorStore(s => s.saveStatus)
   const setMarkdown = useEditorStore(s => s.setMarkdown)
   const save = useEditorStore(s => s.save)
+  const setHeadings = useRightPanelStore(s => s.setHeadings)
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const editor = useEditor({
@@ -34,6 +37,7 @@ export function NoteEditor(): JSX.Element {
     onUpdate: ({ editor }) => {
       const md = editor.storage.markdown.getMarkdown() as string
       setMarkdown(md)
+      setHeadings(extractHeadings(md))
       if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
       autosaveTimer.current = setTimeout(() => save(), AUTOSAVE_MS)
     },
@@ -56,6 +60,7 @@ export function NoteEditor(): JSX.Element {
     if (!editor) return
     const current = editor.storage.markdown?.getMarkdown() as string | undefined
     if (current !== markdown) editor.commands.setContent(markdown)
+    setHeadings(extractHeadings(markdown))
   }, [note?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {

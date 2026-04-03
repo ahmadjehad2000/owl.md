@@ -1,0 +1,52 @@
+/* src/renderer/components/layout/OutlinePanel.module.css */
+
+.outline {
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.empty {
+  padding: 16px 12px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.2);
+  font-style: italic;
+}
+
+.item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+  transition: background 0.1s;
+  min-width: 0;
+}
+
+.item:hover { background: rgba(255,255,255,0.05); }
+
+.level {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(56,182,220,0.5);
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+  width: 16px;
+  text-align: right;
+}
+
+.text {
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -2,14 +2,24 @@
 import React, { useEffect, useState } from 'react'
 import { useEditorStore } from '../../stores/editorStore'
 import { useVaultStore } from '../../stores/vaultStore'
+import { useRightPanelStore } from '../../stores/rightPanelStore'
+import { OutlinePanel } from './OutlinePanel'
 import { ipc } from '../../lib/ipc'
 import type { BacklinkResult } from '@shared/types/Note'
 import styles from './RightSidebar.module.css'
 
+const TABS: { id: 'backlinks' | 'outline' | 'properties'; label: string }[] = [
+  { id: 'backlinks',  label: 'Links'   },
+  { id: 'outline',    label: 'Outline' },
+  { id: 'properties', label: 'Props'   },
+]
+
 export function RightSidebar(): JSX.Element {
-  const note = useEditorStore(s => s.note)
+  const note       = useEditorStore(s => s.note)
   const setOpenNote = useVaultStore(s => s.setOpenNote)
-  const loadNote = useEditorStore(s => s.loadNote)
+  const loadNote    = useEditorStore(s => s.loadNote)
+  const activeTab   = useRightPanelStore(s => s.activeTab)
+  const setTab      = useRightPanelStore(s => s.setTab)
   const [backlinks, setBacklinks] = useState<BacklinkResult[]>([])
 
   useEffect(() => {
@@ -21,17 +31,38 @@ export function RightSidebar(): JSX.Element {
 
   return (
     <div className={styles.root}>
-      <div className={styles.section}>Backlinks {backlinks.length > 0 && `(${backlinks.length})`}</div>
-      <div className={styles.list}>
-        {backlinks.length === 0
-          ? <div className={styles.empty}>{note ? 'No backlinks yet' : 'Open a note to see backlinks'}</div>
-          : backlinks.map((bl, i) => (
-              <button key={i} className={styles.backlink} onClick={() => open(bl.sourceNoteId)}>
-                <div className={styles.blTitle}>{bl.sourceTitle}</div>
-                <div className={styles.blLink}>← [[{bl.linkText}]]</div>
-              </button>
-            ))
-        }
+      <div className={styles.tabs}>
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            className={`${styles.tab} ${activeTab === t.id ? styles.tabActive : ''}`}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div className={styles.body}>
+        {activeTab === 'backlinks' && (
+          <div className={styles.list}>
+            {backlinks.length === 0
+              ? <div className={styles.empty}>{note ? 'No backlinks yet' : 'Open a note'}</div>
+              : backlinks.map((bl, i) => (
+                  <button key={i} className={styles.backlink} onClick={() => open(bl.sourceNoteId)}>
+                    <div className={styles.blTitle}>{bl.sourceTitle}</div>
+                    <div className={styles.blLink}>← [[{bl.linkText}]]</div>
+                  </button>
+                ))
+            }
+          </div>
+        )}
+
+        {activeTab === 'outline' && <OutlinePanel />}
+
+        {activeTab === 'properties' && (
+          <div className={styles.empty}>Properties panel — coming in next task</div>
+        )}
       </div>
     </div>
   )
