@@ -1,0 +1,44 @@
+{
+  "name": "owl-md",
+  "version": "0.1.0",
+  "description": "Local-first knowledge workspace",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "package": "electron-vite build && electron-builder",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
+  },
+  "dependencies": {
+    "@tiptap/extension-placeholder": "^2.4.0",
+    "@tiptap/pm": "^2.4.0",
+    "@tiptap/react": "^2.4.0",
+    "@tiptap/starter-kit": "^2.4.0",
+    "better-sqlite3": "^12.8.0",
+    "chokidar": "^3.6.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tiptap-markdown": "^0.8.10",
+    "zustand": "^4.5.2"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.4.2",
+    "@testing-library/react": "^15.0.7",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/better-sqlite3": "^7.6.10",
+    "@types/node": "^20.14.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "@vitest/ui": "^1.6.0",
+    "electron": "^30.0.9",
+    "electron-builder": "^24.13.3",
+    "electron-vite": "^2.3.0",
+    "jsdom": "^24.1.0",
+    "typescript": "^5.5.2",
+    "vitest": "^1.6.0"
+  }
+}

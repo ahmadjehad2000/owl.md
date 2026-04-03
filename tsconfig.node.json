@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "composite": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "paths": { "@shared/*": ["src/shared/*"] }
+  },
+  "include": ["electron.vite.config.*", "src/main/**/*", "src/preload/**/*", "src/shared/**/*"]
+}
