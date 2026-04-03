@@ -5,7 +5,7 @@ import { getSlashItems } from '../../../src/renderer/components/editor/extension
 
 describe('getSlashItems', () => {
   it('returns all items when query is empty', () => {
-    expect(getSlashItems('').length).toBeGreaterThan(8)
+    expect(getSlashItems('')).toHaveLength(12)
   })
 
   it('filters items by query case-insensitively', () => {

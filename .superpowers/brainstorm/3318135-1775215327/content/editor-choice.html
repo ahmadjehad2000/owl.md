@@ -1,0 +1,70 @@
+<h2>Editor Engine</h2>
+<p class="subtitle">Your spec calls for "hybrid markdown + block model" with slash commands, drag-and-drop blocks, and live preview. Both options can do this — the trade-off is in how much you build vs how much you get for free.</p>
+
+<div class="options">
+  <div class="option" data-choice="prosemirror" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>ProseMirror (via TipTap)</h3>
+      <p>Rich document model — thinks in nodes and marks, not raw text</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>TipTap gives you slash commands, drag handles, block types out of the box</li>
+            <li>Native block model — block IDs, block references, drag-and-drop reordering are natural</li>
+            <li>Notion, Linear, and many block editors use this exact stack</li>
+            <li>Collaborative editing ready (Y.js integration is first-class)</li>
+            <li>Richer extension ecosystem for callouts, tables, embeds</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Document model is JSON, not raw Markdown — need serialization layer to stay markdown-on-disk</li>
+            <li>Markdown round-trip requires careful mapping (especially for custom nodes)</li>
+            <li>Heavier than CodeMirror for simple text editing</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="codemirror" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>CodeMirror 6</h3>
+      <p>Text-first editor — thinks in characters and ranges, with a powerful extension system</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Raw markdown stays as the document model — zero serialization risk</li>
+            <li>Live preview via decorations (Obsidian's approach)</li>
+            <li>Extremely fast even in large documents</li>
+            <li>Lightweight and predictable</li>
+            <li>Perfect markdown fidelity — what you see on disk is what the editor edits</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Block IDs and block-level drag-and-drop must be built manually</li>
+            <li>Slash commands, callout types, embed blocks require custom extensions</li>
+            <li>More boilerplate to get to feature parity with TipTap</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px; padding: 16px; background: rgba(255,200,50,0.08); border-left: 3px solid rgba(255,200,50,0.5); border-radius: 4px;">
+  <span class="label">My recommendation</span>
+  <p style="margin-top: 8px;">
+    <strong>ProseMirror via TipTap.</strong> Your spec explicitly wants slash commands, drag-and-drop block reordering, block IDs for AI chunking, and callout/embed blocks.
+    TipTap gives you all of that in v1 without building it from scratch. The markdown serialization cost is manageable — TipTap has a solid
+    <code>@tiptap/extension-markdown</code> serializer, and notes stay human-readable on disk.
+    CodeMirror is the right choice if you want Obsidian-exact markdown fidelity with simpler editing — but you'd be building the block layer yourself.
+  </p>
+</div>

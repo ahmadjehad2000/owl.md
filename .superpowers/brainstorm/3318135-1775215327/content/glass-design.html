@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>owl.md — Glass Design</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    background: #07080f;
+    color: #e8e8f4;
+    min-height: 100vh;
+    padding: 28px 20px 60px;
+  }
+
+  h2 { font-size: 20px; font-weight: 600; color: #f0f0fc; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 28px; line-height: 1.5; }
+
+  /* ── CARD SHELL ── */
+  .variants { display: flex; flex-direction: column; gap: 28px; }
+  .variant { border-radius: 16px; overflow: hidden; cursor: pointer; border: 1.5px solid rgba(255,255,255,0.06); transition: border-color 0.2s, box-shadow 0.2s; }
+  .variant:hover { border-color: rgba(255,255,255,0.15); }
+  .variant.selected { border-color: rgba(160,130,255,0.7); box-shadow: 0 0 0 3px rgba(140,110,250,0.2); }
+  .variant-label { padding: 12px 16px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: baseline; gap: 10px; }
+  .variant-label h3 { font-size: 13px; font-weight: 600; color: #dde; }
+  .variant-label p { font-size: 11px; color: #555; }
+
+  /* ══════════════════════════════════════
+     VARIANT A — Nebula: deep purple/indigo
+  ══════════════════════════════════════ */
+  .va { background: #0a0812; }
+  .va .app-bg {
+    position: relative;
+    height: 260px;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 60%, rgba(90,50,180,0.35) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 80% 30%, rgba(40,20,120,0.4) 0%, transparent 65%),
+      radial-gradient(ellipse 70% 40% at 50% 90%, rgba(130,60,200,0.2) 0%, transparent 70%),
+      #0a0812;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ══════════════════════════════════════
+     VARIANT B — Aurora: teal/violet
+  ══════════════════════════════════════ */
+  .vb { background: #060b12; }
+  .vb .app-bg {
+    position: relative;
+    height: 260px;
+    background:
+      radial-gradient(ellipse 55% 55% at 15% 70%, rgba(20,120,160,0.4) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 85% 25%, rgba(80,40,160,0.35) 0%, transparent 65%),
+      radial-gradient(ellipse 65% 40% at 55% 100%, rgba(0,160,140,0.18) 0%, transparent 70%),
+      #060b12;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ══════════════════════════════════════
+     VARIANT C — Ember: warm dark
+  ══════════════════════════════════════ */
+  .vc { background: #0d0807; }
+  .vc .app-bg {
+    position: relative;
+    height: 260px;
+    background:
+      radial-gradient(ellipse 55% 55% at 20% 65%, rgba(180,60,20,0.3) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 80% 30%, rgba(140,80,0,0.28) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 40% at 50% 95%, rgba(200,100,40,0.15) 0%, transparent 70%),
+      #0d0807;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ── GLASS PANELS (shared) ── */
+  .glass-sidebar-l {
+    width: 190px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border-right: 1px solid rgba(255,255,255,0.08);
+    padding: 8px 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .glass-sidebar-r {
+    width: 190px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    border-left: 1px solid rgba(255,255,255,0.07);
+    padding: 8px 0;
+  }
+  .glass-editor {
+    flex: 1;
+    background: rgba(255,255,255,0.025);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .glass-titlebar {
+    height: 36px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .app-shell { display: flex; flex-direction: column; width: 100%; }
+  .app-body-row { flex: 1; display: flex; overflow: hidden; }
+
+  /* titlebar elements */
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f57; }
+  .dot-y { background: #ffbd2e; }
+  .dot-g { background: #28c840; }
+  .tb-spacer { flex: 1; }
+  .tb-title { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.03em; }
+  .tb-search {
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 3px 10px;
+  }
+
+  /* sidebar content */
+  .sb-section { font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.25); padding: 8px 12px 4px; }
+  .sb-item { font-size: 10px; padding: 5px 12px; cursor: default; color: rgba(255,255,255,0.45); display: flex; align-items: center; gap: 6px; border-radius: 6px; margin: 1px 6px; }
+  .sb-item.active { color: rgba(255,255,255,0.9); }
+
+  /* variant-specific active color */
+  .va .sb-item.active { background: rgba(140,100,255,0.18); color: #c4b0ff; }
+  .vb .sb-item.active { background: rgba(50,180,220,0.15); color: #72d4f0; }
+  .vc .sb-item.active { background: rgba(230,130,60,0.16); color: #f0a870; }
+
+  /* editor content */
+  .ed-title { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.88); margin-bottom: 4px; }
+  .ed-tag { display: inline-block; font-size: 9px; padding: 2px 7px; border-radius: 10px; margin-right: 4px; margin-bottom: 8px; }
+  .va .ed-tag { background: rgba(140,100,255,0.15); color: #b090f0; border: 1px solid rgba(140,100,255,0.25); }
+  .vb .ed-tag { background: rgba(50,180,220,0.12); color: #60c8e8; border: 1px solid rgba(50,180,220,0.22); }
+  .vc .ed-tag { background: rgba(230,130,60,0.12); color: #e8a060; border: 1px solid rgba(230,130,60,0.22); }
+
+  .ed-line { height: 7px; border-radius: 3px; background: rgba(255,255,255,0.14); margin-bottom: 5px; }
+
+  /* glass callout block */
+  .ed-callout {
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 9px;
+    color: rgba(255,255,255,0.55);
+    margin: 6px 0;
+    border-left: 2px solid;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(8px);
+  }
+  .va .ed-callout { border-color: rgba(140,100,255,0.5); }
+  .vb .ed-callout { border-color: rgba(50,180,220,0.5); }
+  .vc .ed-callout { border-color: rgba(230,130,60,0.5); }
+
+  /* backlinks panel */
+  .bl-chip {
+    font-size: 9px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    margin: 2px 6px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.4);
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* AI panel glow */
+  .ai-box {
+    margin: 4px 6px;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-size: 9px;
+    color: rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+  .va .ai-box { border-color: rgba(140,100,255,0.2); color: rgba(180,160,255,0.5); }
+  .vb .ai-box { border-color: rgba(50,180,220,0.18); color: rgba(100,200,230,0.5); }
+  .vc .ai-box { border-color: rgba(230,130,60,0.18); color: rgba(230,160,90,0.5); }
+
+  /* bottom bar */
+  .fixed-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(7,8,15,0.92);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding: 10px 20px;
+    font-size: 12px; color: #555;
+  }
+  .fixed-bar b { color: #9988dd; }
+</style>
+</head>
+<body>
+
+<h2>Glass Design — Three Color Palettes</h2>
+<p class="subtitle">
+  All three use the same glass treatment: frosted translucent panels over a colored gradient nebula background,
+  layered depth, subtle borders. The difference is the accent color that bleeds through the glass.
+  Click a variant to select.
+</p>
+
+<div class="variants">
+
+  <!-- VARIANT A: NEBULA VIOLET -->
+  <div class="variant va" id="va" onclick="pick('a', this)">
+    <div class="variant-label">
+      <h3>A — Nebula</h3>
+      <p>Deep violet/indigo · purple-tinted glass · cool and focused</p>
+    </div>
+    <div class="app-bg">
+      <div class="app-shell">
+        <div class="glass-titlebar">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <div class="tb-spacer"></div>
+          <div class="tb-title">owl.md</div>
+          <div class="tb-spacer"></div>
+          <div class="tb-search">⌘K  Quick open…</div>
+        </div>
+        <div class="app-body-row">
+          <div class="glass-sidebar-l">
+            <div class="sb-section">Workspace</div>
+            <div class="sb-item active">📓 Getting Started</div>
+            <div class="sb-item">📁 Research</div>
+            <div class="sb-item">📁 Projects</div>
+            <div class="sb-item">🗓 Daily Notes</div>
+            <div class="sb-section" style="margin-top:4px">Favorites</div>
+            <div class="sb-item">⭐ Architecture</div>
+            <div class="sb-item">⭐ Reading List</div>
+          </div>
+          <div class="glass-editor">
+            <div class="ed-title">Getting Started</div>
+            <div>
+              <span class="ed-tag">#setup</span>
+              <span class="ed-tag">#guide</span>
+            </div>
+            <div class="ed-line" style="width:88%"></div>
+            <div class="ed-line" style="width:72%"></div>
+            <div class="ed-callout">💡 Use [[double brackets]] to link any note in your vault.</div>
+            <div class="ed-line" style="width:80%"></div>
+            <div class="ed-line" style="width:65%"></div>
+            <div class="ed-line" style="width:82%"></div>
+          </div>
+          <div class="glass-sidebar-r">
+            <div class="sb-section">Backlinks</div>
+            <div class="bl-chip">← Vault Overview</div>
+            <div class="bl-chip">← Index</div>
+            <div class="sb-section" style="margin-top:6px">AI Context</div>
+            <div class="ai-box">Ask this note…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VARIANT B: AURORA TEAL -->
+  <div class="variant vb" id="vb" onclick="pick('b', this)">
+    <div class="variant-label">
+      <h3>B — Aurora</h3>
+      <p>Teal/cyan + violet · cooler, more techy · sky-at-night feel</p>
+    </div>
+    <div class="app-bg">
+      <div class="app-shell">
+        <div class="glass-titlebar">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <div class="tb-spacer"></div>
+          <div class="tb-title">owl.md</div>
+          <div class="tb-spacer"></div>
+          <div class="tb-search">⌘K  Quick open…</div>
+        </div>
+        <div class="app-body-row">
+          <div class="glass-sidebar-l">
+            <div class="sb-section">Workspace</div>
+            <div class="sb-item active">📓 Getting Started</div>
+            <div class="sb-item">📁 Research</div>
+            <div class="sb-item">📁 Projects</div>
+            <div class="sb-item">🗓 Daily Notes</div>
+            <div class="sb-section" style="margin-top:4px">Favorites</div>
+            <div class="sb-item">⭐ Architecture</div>
+            <div class="sb-item">⭐ Reading List</div>
+          </div>
+          <div class="glass-editor">
+            <div class="ed-title">Getting Started</div>
+            <div>
+              <span class="ed-tag">#setup</span>
+              <span class="ed-tag">#guide</span>
+            </div>
+            <div class="ed-line" style="width:88%"></div>
+            <div class="ed-line" style="width:72%"></div>
+            <div class="ed-callout">💡 Use [[double brackets]] to link any note in your vault.</div>
+            <div class="ed-line" style="width:80%"></div>
+            <div class="ed-line" style="width:65%"></div>
+            <div class="ed-line" style="width:82%"></div>
+          </div>
+          <div class="glass-sidebar-r">
+            <div class="sb-section">Backlinks</div>
+            <div class="bl-chip">← Vault Overview</div>
+            <div class="bl-chip">← Index</div>
+            <div class="sb-section" style="margin-top:6px">AI Context</div>
+            <div class="ai-box">Ask this note…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VARIANT C: EMBER -->
+  <div class="variant vc" id="vc" onclick="pick('c', this)">
+    <div class="variant-label">
+      <h3>C — Ember</h3>
+      <p>Warm amber/orange · deeper, warmer · firelit writing den feel</p>
+    </div>
+    <div class="app-bg">
+      <div class="app-shell">
+        <div class="glass-titlebar">
+          <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+          <div class="tb-spacer"></div>
+          <div class="tb-title">owl.md</div>
+          <div class="tb-spacer"></div>
+          <div class="tb-search">⌘K  Quick open…</div>
+        </div>
+        <div class="app-body-row">
+          <div class="glass-sidebar-l">
+            <div class="sb-section">Workspace</div>
+            <div class="sb-item active">📓 Getting Started</div>
+            <div class="sb-item">📁 Research</div>
+            <div class="sb-item">📁 Projects</div>
+            <div class="sb-item">🗓 Daily Notes</div>
+            <div class="sb-section" style="margin-top:4px">Favorites</div>
+            <div class="sb-item">⭐ Architecture</div>
+            <div class="sb-item">⭐ Reading List</div>
+          </div>
+          <div class="glass-editor">
+            <div class="ed-title">Getting Started</div>
+            <div>
+              <span class="ed-tag">#setup</span>
+              <span class="ed-tag">#guide</span>
+            </div>
+            <div class="ed-line" style="width:88%"></div>
+            <div class="ed-line" style="width:72%"></div>
+            <div class="ed-callout">💡 Use [[double brackets]] to link any note in your vault.</div>
+            <div class="ed-line" style="width:80%"></div>
+            <div class="ed-line" style="width:65%"></div>
+            <div class="ed-line" style="width:82%"></div>
+          </div>
+          <div class="glass-sidebar-r">
+            <div class="sb-section">Backlinks</div>
+            <div class="bl-chip">← Vault Overview</div>
+            <div class="bl-chip">← Index</div>
+            <div class="sb-section" style="margin-top:6px">AI Context</div>
+            <div class="ai-box">Ask this note…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="fixed-bar">
+  All three: frosted glass panels · gradient nebula base · layered depth · <b>click to select</b>
+</div>
+
+<script>
+  let chosen = null;
+  function pick(id, el) {
+    document.querySelectorAll('.variant').forEach(v => v.classList.remove('selected'));
+    el.classList.add('selected');
+    chosen = id;
+    try {
+      if (window.__owlCompanion) window.__owlCompanion.record(id, el.querySelector('h3').textContent);
+    } catch(e) {}
+  }
+</script>
+
+</body>
+</html>

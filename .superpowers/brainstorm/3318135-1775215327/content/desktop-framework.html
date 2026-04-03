@@ -1,0 +1,73 @@
+<h2>Desktop Framework Choice</h2>
+<p class="subtitle">This is the single most foundational decision — it shapes build tooling, native access, bundle size, and long-term maintainability.</p>
+
+<div class="options">
+  <div class="option" data-choice="electron" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Electron</h3>
+      <p>Node.js + Chromium, full JavaScript stack end-to-end</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Huge ecosystem (VS Code, Obsidian, Notion desktop all use it)</li>
+            <li>Full Node.js APIs — filesystem, native modules, sqlite3, everything</li>
+            <li>One language (TypeScript) across the entire app</li>
+            <li>Best-in-class native module support (better-sqlite3, chokidar, etc.)</li>
+            <li>Proven at scale for knowledge apps</li>
+            <li>Simpler mental model — renderer ↔ main process IPC</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Large binary (~150–200 MB with app)</li>
+            <li>Higher memory baseline (~200 MB idle)</li>
+            <li>Slower cold start vs native</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="tauri" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Tauri 2.0</h3>
+      <p>Rust backend + system WebView, React/TS frontend via IPC</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Much smaller binary (~10–30 MB)</li>
+            <li>Lower memory footprint (~50–80 MB idle)</li>
+            <li>Rust backend is fast and memory-safe</li>
+            <li>Native filesystem watcher via Rust (no chokidar)</li>
+            <li>Better sandboxing model long-term</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Rust required for backend — split language stack (Rust + TS)</li>
+            <li>System WebView inconsistencies (especially Windows)</li>
+            <li>SQLite via Tauri plugin is less mature than better-sqlite3</li>
+            <li>More IPC ceremony for complex backend ops</li>
+            <li>Ecosystem for knowledge app primitives is thinner</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px; padding: 16px; background: rgba(255,200,50,0.08); border-left: 3px solid rgba(255,200,50,0.5); border-radius: 4px;">
+  <span class="label">My recommendation</span>
+  <p style="margin-top: 8px;">
+    <strong>Electron.</strong> Obsidian and VS Code both prove Electron works for complex local-first knowledge tools at production scale.
+    The <code>better-sqlite3</code> driver, <code>chokidar</code> FS watcher, and Node native module ecosystem are all battle-tested here.
+    Tauri's advantages (binary size, memory) matter more for simple utilities than for a feature-dense workspace app.
+    The Rust split-stack cost is real and will slow iteration during a phase-1 build.
+  </p>
+</div>

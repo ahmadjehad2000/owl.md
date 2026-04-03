@@ -37,11 +37,14 @@ export const SlashMenu = forwardRef<SlashMenuHandle, SlashMenuProps>(
         if (event.key === 'Enter') { selectItem(selectedIndex); return true }
         return false
       },
-    }))
+    }), [selectItem, selectedIndex, items])
 
+    const MENU_MAX_HEIGHT = 320
     const rect = clientRect?.()
     const style: React.CSSProperties = rect
-      ? { position: 'fixed', top: rect.bottom + 4, left: rect.left }
+      ? rect.bottom + 4 + MENU_MAX_HEIGHT > window.innerHeight
+        ? { position: 'fixed', bottom: window.innerHeight - rect.top + 4, left: rect.left }
+        : { position: 'fixed', top: rect.bottom + 4, left: rect.left }
       : { display: 'none' }
 
     if (!items.length) return null

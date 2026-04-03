@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>owl.md — Roadmap</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #060a12;
+    color: #c8d8f0;
+    min-height: 100vh;
+    padding: 28px 20px 60px;
+    font-size: 13px;
+  }
+
+  h2 { font-size: 20px; font-weight: 600; color: #e8eeff; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #445566; margin-bottom: 32px; line-height: 1.5; }
+
+  .phases { display: flex; flex-direction: column; gap: 0; position: relative; }
+
+  /* vertical spine */
+  .phases::before {
+    content: '';
+    position: absolute;
+    left: 28px;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom,
+      rgba(80,200,120,0.4),
+      rgba(80,140,220,0.4),
+      rgba(180,100,220,0.4),
+      rgba(220,150,60,0.4),
+      rgba(220,80,80,0.4)
+    );
+  }
+
+  .phase {
+    display: flex;
+    gap: 20px;
+    padding: 0 0 28px 0;
+    position: relative;
+  }
+
+  .phase-dot {
+    width: 56px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 4px;
+    position: relative;
+    z-index: 1;
+  }
+  .dot-circle {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700;
+    background: #060a12;
+  }
+
+  .p1 .dot-circle { border-color: #50cc80; color: #50cc80; }
+  .p2 .dot-circle { border-color: #70aaee; color: #70aaee; }
+  .p3 .dot-circle { border-color: #c080ee; color: #c080ee; }
+  .p4 .dot-circle { border-color: #e0aa60; color: #e0aa60; }
+  .p5 .dot-circle { border-color: #e08080; color: #e08080; }
+
+  .phase-body {
+    flex: 1;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .p1 .phase-body { border-color: rgba(80,200,120,0.2); }
+  .p2 .phase-body { border-color: rgba(80,140,220,0.18); }
+  .p3 .phase-body { border-color: rgba(180,100,220,0.18); }
+  .p4 .phase-body { border-color: rgba(220,150,60,0.18); }
+  .p5 .phase-body { border-color: rgba(220,80,80,0.16); }
+
+  .phase-header {
+    padding: 12px 16px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  }
+  .phase-num {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700;
+  }
+  .p1 .phase-num { color: #50cc80; }
+  .p2 .phase-num { color: #70aaee; }
+  .p3 .phase-num { color: #c080ee; }
+  .p4 .phase-num { color: #e0aa60; }
+  .p5 .phase-num { color: #e08080; }
+
+  .phase-name { font-size: 14px; font-weight: 600; color: #e0e8f8; }
+  .phase-unlock {
+    margin-left: auto;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    color: #4a6a8a;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .phase-content { padding: 12px 16px 14px; }
+
+  .deliverables { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .chip {
+    font-size: 11px; padding: 3px 10px; border-radius: 6px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #8098b8;
+  }
+  .p1 .chip { background: rgba(80,200,120,0.07); border-color: rgba(80,200,120,0.15); color: #60aa80; }
+  .p2 .chip { background: rgba(80,140,220,0.06); border-color: rgba(80,140,220,0.14); color: #6090cc; }
+  .p3 .chip { background: rgba(180,100,220,0.06); border-color: rgba(180,100,220,0.14); color: #a870cc; }
+  .p4 .chip { background: rgba(220,150,60,0.07);  border-color: rgba(220,150,60,0.15);  color: #c09050; }
+  .p5 .chip { background: rgba(220,80,80,0.06);   border-color: rgba(220,80,80,0.14);   color: #c07070; }
+
+  .phase-note { font-size: 11px; color: #3a5270; line-height: 1.6; margin-top: 4px; }
+
+  .mvp-banner {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(80,200,120,0.1);
+    border: 1px solid rgba(80,200,120,0.25);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 11px; color: #50cc80;
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+
+  .stack-summary {
+    margin-top: 32px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 16px 20px;
+  }
+  .stack-summary h3 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #2a4060; margin-bottom: 12px; }
+  .stack-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .stack-item {
+    font-size: 11px; padding: 4px 10px; border-radius: 6px;
+    background: rgba(50,120,200,0.08);
+    border: 1px solid rgba(50,120,200,0.15);
+    color: #5080b0;
+  }
+  .stack-item b { color: #7aaadd; }
+</style>
+</head>
+<body>
+
+<h2>Phased Roadmap</h2>
+<p class="subtitle">Five phases, each delivering a fully usable vertical slice. Phase 1 is the usable core — everything after extends it without breaking it.</p>
+
+<div class="mvp-banner">
+  ✦ MVP = Phase 1 only — vault, editor, backlinks, search. Fully usable as a note-taking app before Phase 2 begins.
+</div>
+
+<div class="phases">
+
+  <!-- P1 -->
+  <div class="phase p1">
+    <div class="phase-dot"><div class="dot-circle">1</div></div>
+    <div class="phase-body">
+      <div class="phase-header">
+        <span class="phase-num">Phase 1</span>
+        <span class="phase-name">Core Local Vault &amp; Editor</span>
+        <span class="phase-unlock">Unlock: usable note-taking app</span>
+      </div>
+      <div class="phase-content">
+        <div class="deliverables">
+          <span class="chip">Vault create / open</span>
+          <span class="chip">Markdown CRUD</span>
+          <span class="chip">TipTap editor</span>
+          <span class="chip">Folder tree sidebar</span>
+          <span class="chip">[[WikiLink]] extension</span>
+          <span class="chip">Backlink index</span>
+          <span class="chip">Backlinks panel</span>
+          <span class="chip">chokidar FS watcher</span>
+          <span class="chip">SQLite + migrations</span>
+          <span class="chip">FTS5 full-text search</span>
+          <span class="chip">Search modal</span>
+          <span class="chip">Aurora glass UI</span>
+          <span class="chip">Pinned / recent notes</span>
+          <span class="chip">Autosave</span>
+          <span class="chip">electron-vite scaffold</span>
+        </div>
+        <div class="phase-note">Foundation that all later phases extend. The <code style="color:#408060">.owl/</code> directory design and IPC bridge are established here and never restructured.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P2 -->
+  <div class="phase p2">
+    <div class="phase-dot"><div class="dot-circle">2</div></div>
+    <div class="phase-body">
+      <div class="phase-header">
+        <span class="phase-num">Phase 2</span>
+        <span class="phase-name">Rich UX &amp; Convenience</span>
+        <span class="phase-unlock">Unlock: power-user workflow</span>
+      </div>
+      <div class="phase-content">
+        <div class="deliverables">
+          <span class="chip">Command palette ⌘K</span>
+          <span class="chip">Tabs + split panes</span>
+          <span class="chip">Slash commands</span>
+          <span class="chip">Callout blocks</span>
+          <span class="chip">Outline sidebar</span>
+          <span class="chip">Templates</span>
+          <span class="chip">Daily notes</span>
+          <span class="chip">Tags + saved searches</span>
+          <span class="chip">Drag-and-drop hierarchy</span>
+          <span class="chip">Properties panel</span>
+          <span class="chip">Graph view (React Flow)</span>
+          <span class="chip">Note metadata YAML</span>
+          <span class="chip">Keyboard shortcut map</span>
+        </div>
+        <div class="phase-note">Everything that makes the editor feel native and fast. Graph view is introduced here using React Flow before the full canvas is added in P3.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P3 -->
+  <div class="phase p3">
+    <div class="phase-dot"><div class="dot-circle">3</div></div>
+    <div class="phase-body">
+      <div class="phase-header">
+        <span class="phase-num">Phase 3</span>
+        <span class="phase-name">Whiteboard &amp; Mind Maps</span>
+        <span class="phase-unlock">Unlock: spatial knowledge</span>
+      </div>
+      <div class="phase-content">
+        <div class="deliverables">
+          <span class="chip">React Flow canvas</span>
+          <span class="chip">Infinite pan / zoom</span>
+          <span class="chip">Note cards on canvas</span>
+          <span class="chip">Live note preview cards</span>
+          <span class="chip">Image / file / text cards</span>
+          <span class="chip">Labeled connectors</span>
+          <span class="chip">Node grouping</span>
+          <span class="chip">Canvas persistence (SQLite)</span>
+          <span class="chip">Mind map editor</span>
+          <span class="chip">Note → mind map</span>
+          <span class="chip">Mind map → note hierarchy</span>
+          <span class="chip">Node ↔ note linking</span>
+          <span class="chip">Viewport state persistence</span>
+        </div>
+        <div class="phase-note">Canvas and mind map reuse the same React Flow engine. Note cards on canvas embed live TipTap editors — this is why TipTap was chosen in P1.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P4 -->
+  <div class="phase p4">
+    <div class="phase-dot"><div class="dot-circle">4</div></div>
+    <div class="phase-body">
+      <div class="phase-header">
+        <span class="phase-num">Phase 4</span>
+        <span class="phase-name">Ollama AI Integration</span>
+        <span class="phase-unlock">Unlock: grounded local LLM</span>
+      </div>
+      <div class="phase-content">
+        <div class="deliverables">
+          <span class="chip">Ollama connection config</span>
+          <span class="chip">Model selector</span>
+          <span class="chip">nomic-embed embeddings</span>
+          <span class="chip">usearch HNSW index</span>
+          <span class="chip">Note chunking pipeline</span>
+          <span class="chip">RAG context assembly</span>
+          <span class="chip">Ask current note</span>
+          <span class="chip">Ask linked notes</span>
+          <span class="chip">Ask folder / workspace</span>
+          <span class="chip">Ask canvas selection</span>
+          <span class="chip">Ask mind map</span>
+          <span class="chip">Citation panel</span>
+          <span class="chip">Summarize / rewrite / extract</span>
+          <span class="chip">Suggest backlinks</span>
+          <span class="chip">Incremental embed invalidation</span>
+        </div>
+        <div class="phase-note">AI is purely additive — all of P1–P3 works with Ollama unreachable. The AI panel shows a "Ollama not connected" state gracefully.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P5 -->
+  <div class="phase p5">
+    <div class="phase-dot"><div class="dot-circle">5</div></div>
+    <div class="phase-body">
+      <div class="phase-header">
+        <span class="phase-num">Phase 5</span>
+        <span class="phase-name">Backup, Hardening &amp; Polish</span>
+        <span class="phase-unlock">Unlock: production-ready</span>
+      </div>
+      <div class="phase-content">
+        <div class="deliverables">
+          <span class="chip">Google Drive OAuth</span>
+          <span class="chip">Snapshot bundling</span>
+          <span class="chip">Versioned restore UI</span>
+          <span class="chip">Conflict detection</span>
+          <span class="chip">Scheduled backups</span>
+          <span class="chip">Crash recovery journal</span>
+          <span class="chip">Corrupted index repair</span>
+          <span class="chip">Large vault perf tuning</span>
+          <span class="chip">Import from Obsidian</span>
+          <span class="chip">Import from Notion</span>
+          <span class="chip">Export to PDF / HTML</span>
+          <span class="chip">Plugin extension points</span>
+        </div>
+        <div class="phase-note">Hardening, import/export, and backup. The plugin extension points are API-only in v1 — no plugin sandbox yet, just documented hooks for future work.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="stack-summary">
+  <h3>Confirmed Tech Stack</h3>
+  <div class="stack-grid">
+    <span class="stack-item"><b>Shell</b> Electron 30</span>
+    <span class="stack-item"><b>Frontend</b> React 18 + TypeScript</span>
+    <span class="stack-item"><b>Editor</b> TipTap 2 (ProseMirror)</span>
+    <span class="stack-item"><b>State</b> Zustand 4</span>
+    <span class="stack-item"><b>Canvas</b> React Flow 11</span>
+    <span class="stack-item"><b>DB</b> better-sqlite3 + FTS5</span>
+    <span class="stack-item"><b>Watcher</b> chokidar 3</span>
+    <span class="stack-item"><b>Vectors</b> usearch (HNSW)</span>
+    <span class="stack-item"><b>AI</b> Ollama local API</span>
+    <span class="stack-item"><b>Build</b> electron-vite + Vite 5</span>
+    <span class="stack-item"><b>Style</b> CSS modules + custom glass CSS</span>
+    <span class="stack-item"><b>Backup</b> Google Drive API + OAuth2</span>
+  </div>
+</div>
+
+</body>
+</html>

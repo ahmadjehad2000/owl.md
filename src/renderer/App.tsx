@@ -113,7 +113,7 @@ export default function App(): JSX.Element {
             <div className={styles.logoHalo} />
             <div className={styles.logo}>owl.md</div>
           </div>
-          <div className={styles.tagline}>local-first knowledge workspace</div>
+          <div className={styles.tagline}>a knowledge workspace</div>
           <div className={styles.buttonGroup}>
             <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={handleOpen}>Open Vault</button>
             <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={handleCreate}>Create Vault</button>

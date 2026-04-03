@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>owl.md — Data Model</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #060a12;
+    color: #c8d8f0;
+    min-height: 100vh;
+    padding: 28px 20px 60px;
+    font-size: 12px;
+  }
+
+  h2 { font-size: 20px; font-weight: 600; color: #e8eeff; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #445566; margin-bottom: 28px; line-height: 1.5; }
+
+  .grid { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+
+  .table-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    min-width: 220px;
+    flex: 1;
+  }
+
+  .table-header {
+    padding: 9px 14px 8px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .table-name { font-size: 12px; font-weight: 700; font-family: 'SF Mono', monospace; }
+  .badge {
+    font-size: 9px; padding: 2px 7px; border-radius: 4px; font-weight: 600; letter-spacing: 0.04em;
+  }
+  .mvp { background: rgba(80,200,120,0.15); color: #60cc90; border: 1px solid rgba(80,200,120,0.25); }
+  .p2  { background: rgba(80,140,220,0.13); color: #70aaee; border: 1px solid rgba(80,140,220,0.22); }
+  .p3  { background: rgba(180,100,220,0.13); color: #c080ee; border: 1px solid rgba(180,100,220,0.22); }
+  .p4  { background: rgba(220,150,60,0.13);  color: #e0aa60; border: 1px solid rgba(220,150,60,0.22); }
+
+  .col-list { padding: 6px 0; }
+  .col-row {
+    display: flex; align-items: baseline;
+    padding: 4px 14px;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .col-row:last-child { border-bottom: none; }
+  .col-name { font-family: 'SF Mono', monospace; font-size: 11px; color: #9ab8d8; flex: 1; }
+  .col-pk   { font-family: 'SF Mono', monospace; font-size: 11px; color: #60cc90; flex: 1; font-weight: 600; }
+  .col-fk   { font-family: 'SF Mono', monospace; font-size: 11px; color: #e0aa60; flex: 1; }
+  .col-type { font-size: 10px; color: #3a5470; white-space: nowrap; }
+  .col-note { font-size: 9px; color: #2a4460; white-space: nowrap; margin-left: auto; }
+
+  .section-label {
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: #2a4470; margin: 20px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .fts-box {
+    background: rgba(50,180,100,0.05);
+    border: 1px solid rgba(50,180,100,0.15);
+    border-radius: 10px;
+    padding: 12px 14px;
+    flex: 1; min-width: 220px;
+  }
+  .fts-box .table-name { color: #50cc80; font-family: 'SF Mono', monospace; font-size: 12px; font-weight: 700; }
+  .fts-desc { font-size: 11px; color: #3a7050; margin-top: 6px; line-height: 1.6; }
+  .fts-desc code { color: #60aa70; font-size: 10px; }
+
+  .rel-box {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 11px;
+    color: #3a5470;
+    line-height: 2;
+    flex: 1; min-width: 240px;
+  }
+  .rel-box h4 { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #2a4060; margin-bottom: 8px; }
+  .arrow { color: #50aacc; }
+  code { font-family: 'SF Mono', monospace; font-size: 10px; color: #7090b0; }
+</style>
+</head>
+<body>
+
+<h2>SQLite Schema — db.sqlite</h2>
+<p class="subtitle">All tables live in a single <code style="color:#7090b0">.owl/db.sqlite</code> file. The markdown files are authoritative; this database is a derived index that can be fully rebuilt from the vault.</p>
+
+<div class="section-label">Core — Phase 1 (MVP)</div>
+<div class="grid">
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">notes</span>
+      <span class="badge mvp">MVP</span>
+    </div>
+    <div class="col-list">
+      <div class="col-row"><span class="col-pk">id</span><span class="col-type">TEXT PK</span><span class="col-note">nanoid</span></div>
+      <div class="col-row"><span class="col-name">path</span><span class="col-type">TEXT UNIQUE</span><span class="col-note">vault-relative</span></div>
+      <div class="col-row"><span class="col-name">title</span><span class="col-type">TEXT</span></div>
+      <div class="col-row"><span class="col-name">content_hash</span><span class="col-type">TEXT</span><span class="col-note">sha256</span></div>
+      <div class="col-row"><span class="col-name">created_at</span><span class="col-type">INTEGER</span><span class="col-note">unix ms</span></div>
+      <div class="col-row"><span class="col-name">updated_at</span><span class="col-type">INTEGER</span></div>
+      <div class="col-row"><span class="col-fk">parent_id</span><span class="col-type">TEXT FK?</span><span class="col-note">→ notes.id</span></div>
+      <div class="col-row"><span class="col-name">folder_path</span><span class="col-type">TEXT</span></div>
+      <div class="col-row"><span class="col-name">note_type</span><span class="col-type">TEXT</span><span class="col-note">note|daily|canvas|map</span></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">links</span>
+      <span class="badge mvp">MVP</span>
+    </div>
+    <div class="col-list">
+      <div class="col-row"><span class="col-fk">source_note_id</span><span class="col-type">TEXT FK</span><span class="col-note">→ notes.id</span></div>
+      <div class="col-row"><span class="col-fk">target_note_id</span><span class="col-type">TEXT FK</span><span class="col-note">→ notes.id</span></div>
+      <div class="col-row"><span class="col-name">source_block_id</span><span class="col-type">TEXT?</span></div>
+      <div class="col-row"><span class="col-name">link_text</span><span class="col-type">TEXT</span><span class="col-note">[[raw text]]</span></div>
+      <div class="col-row"><span class="col-name">is_resolved</span><span class="col-type">INTEGER</span><span class="col-note">0/1</span></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">tags</span>
+      <span class="badge mvp">MVP</span>
+    </div>
+    <div class="col-list">
+      <div class="col-fk col-row"><span class="col-fk">note_id</span><span class="col-type">TEXT FK</span><span class="col-note">→ notes.id</span></div>
+      <div class="col-row"><span class="col-name">tag</span><span class="col-type">TEXT</span><span class="col-note">#without-hash</span></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">blocks</span>
+      <span class="badge mvp">MVP</span>
+    </div>
+    <div class="col-list">
+      <div class="col-row"><span class="col-pk">block_id</span><span class="col-type">TEXT PK</span><span class="col-note">nanoid</span></div>
+      <div class="col-row"><span class="col-fk">note_id</span><span class="col-type">TEXT FK</span><span class="col-note">→ notes.id</span></div>
+      <div class="col-row"><span class="col-name">block_type</span><span class="col-type">TEXT</span><span class="col-note">paragraph|heading|…</span></div>
+      <div class="col-row"><span class="col-name">content</span><span class="col-type">TEXT</span></div>
+      <div class="col-row"><span class="col-name">order_index</span><span class="col-type">INTEGER</span></div>
+    </div>
+  </div>
+
+  <div class="fts-box">
+    <div class="table-name">notes_fts <span class="badge mvp" style="margin-left:8px">MVP</span></div>
+    <div class="fts-desc">
+      SQLite <strong>FTS5 virtual table</strong> — mirrors <code>notes(title, content)</code>.<br>
+      Auto-updated via triggers on insert/update/delete.<br>
+      Supports: <code>MATCH 'phrase'</code>, prefix search, BM25 ranking.<br>
+      Query: <code>SELECT * FROM notes_fts WHERE notes_fts MATCH ?</code><br>
+      ORDER BY <code>bm25(notes_fts, 10, 1)</code> — title hits weighted 10×.
+    </div>
+  </div>
+
+</div>
+
+<div class="section-label">Spatial — Phase 3</div>
+<div class="grid">
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">canvas_nodes</span>
+      <span class="badge p3">P3</span>
+    </div>
+    <div class="col-list">
+      <div class="col-row"><span class="col-pk">node_id</span><span class="col-type">TEXT PK</span></div>
+      <div class="col-row"><span class="col-pk">canvas_id</span><span class="col-type">TEXT PK</span></div>
+      <div class="col-row"><span class="col-name">node_type</span><span class="col-type">TEXT</span><span class="col-note">note|text|image|file</span></div>
+      <div class="col-row"><span class="col-fk">ref_note_id</span><span class="col-type">TEXT FK?</span></div>
+      <div class="col-row"><span class="col-name">pos_x, pos_y</span><span class="col-type">REAL</span></div>
+      <div class="col-row"><span class="col-name">width, height</span><span class="col-type">REAL</span></div>
+      <div class="col-row"><span class="col-name">style_json</span><span class="col-type">TEXT</span><span class="col-note">color, label…</span></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">canvas_edges</span>
+      <span class="badge p3">P3</span>
+    </div>
+    <div class="col-list">
+      <div class="col-row"><span class="col-pk">edge_id</span><span class="col-type">TEXT PK</span></div>
+      <div class="col-row"><span class="col-pk">canvas_id</span><span class="col-type">TEXT PK</span></div>
+      <div class="col-row"><span class="col-fk">source_node_id</span><span class="col-type">TEXT FK</span></div>
+      <div class="col-row"><span class="col-fk">target_node_id</span><span class="col-type">TEXT FK</span></div>
+      <div class="col-row"><span class="col-name">label</span><span class="col-type">TEXT?</span></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">mindmap_nodes</span>
+      <span class="badge p3">P3</span>
+    </div>
+    <div class="col-list">
+      <div class="col-row"><span class="col-pk">node_id</span><span class="col-type">TEXT PK</span></div>
+      <div class="col-row"><span class="col-pk">mindmap_id</span><span class="col-type">TEXT PK</span></div>
+      <div class="col-row"><span class="col-fk">parent_node_id</span><span class="col-type">TEXT FK?</span></div>
+      <div class="col-row"><span class="col-name">label</span><span class="col-type">TEXT</span></div>
+      <div class="col-row"><span class="col-fk">ref_note_id</span><span class="col-type">TEXT FK?</span></div>
+      <div class="col-row"><span class="col-name">order_index</span><span class="col-type">INTEGER</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section-label">AI — Phase 4</div>
+<div class="grid">
+
+  <div class="table-card">
+    <div class="table-header">
+      <span class="table-name">embeddings</span>
+      <span class="badge p4">P4</span>
+    </div>
+    <div class="col-list">
+      <div class="col-row"><span class="col-pk">chunk_id</span><span class="col-type">TEXT PK</span></div>
+      <div class="col-row"><span class="col-fk">note_id</span><span class="col-type">TEXT FK</span></div>
+      <div class="col-row"><span class="col-fk">block_id</span><span class="col-type">TEXT FK?</span></div>
+      <div class="col-row"><span class="col-name">embedding_model</span><span class="col-type">TEXT</span><span class="col-note">e.g. nomic-embed</span></div>
+      <div class="col-row"><span class="col-name">vector_index</span><span class="col-type">INTEGER</span><span class="col-note">usearch key</span></div>
+      <div class="col-row"><span class="col-name">chunk_text</span><span class="col-type">TEXT</span></div>
+      <div class="col-row"><span class="col-name">chunk_hash</span><span class="col-type">TEXT</span><span class="col-note">invalidation</span></div>
+    </div>
+  </div>
+
+  <div class="rel-box">
+    <h4>Key relationships</h4>
+    <div><code>links.source_note_id</code> <span class="arrow">→</span> <code>notes.id</code></div>
+    <div><code>links.target_note_id</code> <span class="arrow">→</span> <code>notes.id</code></div>
+    <div><code>tags.note_id</code> <span class="arrow">→</span> <code>notes.id</code></div>
+    <div><code>blocks.note_id</code> <span class="arrow">→</span> <code>notes.id</code></div>
+    <div><code>canvas_nodes.ref_note_id</code> <span class="arrow">→</span> <code>notes.id</code></div>
+    <div><code>mindmap_nodes.ref_note_id</code> <span class="arrow">→</span> <code>notes.id</code></div>
+    <div><code>embeddings.note_id</code> <span class="arrow">→</span> <code>notes.id</code></div>
+    <div style="margin-top:10px; color:#2a4060; font-size:10px;">notes is the central hub — every other table references it. Deleting a note cascades cleanly via FK constraints.</div>
+  </div>
+
+</div>
+
+</body>
+</html>

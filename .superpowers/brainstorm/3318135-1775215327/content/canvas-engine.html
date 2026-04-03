@@ -1,0 +1,95 @@
+<h2>Canvas / Whiteboard Engine</h2>
+<p class="subtitle">Infinite pan/zoom, draggable note cards, connectors, grouping. Which foundation?</p>
+
+<div class="options">
+  <div class="option" data-choice="reactflow" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>React Flow</h3>
+      <p>Node-and-edge graph canvas, React-native, production-proven</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Nodes are React components — you render full TipTap editors inside canvas cards</li>
+            <li>Built-in pan/zoom, minimap, edge routing, selection, grouping</li>
+            <li>Used by Obsidian Canvas, many production tools</li>
+            <li>Excellent TypeScript support, well-maintained</li>
+            <li>Custom node types trivial — note card, image card, mind map card all just components</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Pro license required for some advanced features (background, grid snap)</li>
+            <li>Large canvas with hundreds of nodes needs viewport culling (manageable)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="tldraw" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>tldraw</h3>
+      <p>Full whiteboard SDK — shapes, freehand, sticky notes, arrows</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>More freeform / whiteboard-native feel (sticky notes, freehand drawing)</li>
+            <li>Rich shape library built in</li>
+            <li>Custom shapes can embed React content</li>
+            <li>Good persistence model</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Heavier runtime — designed for the full whiteboard experience</li>
+            <li>Custom shape / embed integration is more complex than React Flow nodes</li>
+            <li>Less node-graph-oriented — connecting shapes is not its primary model</li>
+            <li>License changed to BSL 1.1 — commercial use requires license</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="custom" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Custom (CSS transform + pointer events)</h3>
+      <p>Build your own lightweight infinite canvas over React</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Zero dependency, full control</li>
+            <li>Tailor exactly to owl.md's data model</li>
+            <li>No licensing concerns</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Pan/zoom, snap-to-grid, edge routing, selection box — all built by hand</li>
+            <li>Significant scope for phase 3</li>
+            <li>Not recommended unless you want the canvas to be a differentiator</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px; padding: 16px; background: rgba(255,200,50,0.08); border-left: 3px solid rgba(255,200,50,0.5); border-radius: 4px;">
+  <span class="label">My recommendation</span>
+  <p style="margin-top: 8px;">
+    <strong>React Flow.</strong> Its node-as-React-component model means you can drop a live TipTap editor directly inside a canvas card —
+    exactly what your spec asks for. Obsidian Canvas uses this same approach.
+    The edge routing, minimap, grouping, and selection are all production-ready.
+    tldraw is excellent but more whiteboard-focused than knowledge-graph-focused.
+  </p>
+</div>

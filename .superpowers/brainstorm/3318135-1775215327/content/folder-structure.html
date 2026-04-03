@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>owl.md — Project Structure</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    background: #070a12;
+    color: #c8d8f0;
+    min-height: 100vh;
+    padding: 28px 24px 48px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  h2 { font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 20px; font-weight: 600; color: #e8eeff; margin-bottom: 6px; font-family: system-ui; }
+  .subtitle { font-family: system-ui; font-size: 13px; color: #556; margin-bottom: 28px; }
+
+  .cols { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+  .col { flex: 1; min-width: 300px; }
+
+  .tree-box {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .tree-box h3 {
+    font-family: system-ui;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #4a6a9a;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .dir  { color: #72aaee; }
+  .file { color: #c8d8f0; }
+  .comment { color: #3a5470; }
+  .badge {
+    display: inline-block;
+    font-family: system-ui;
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .mvp  { background: rgba(80,200,120,0.15); color: #60cc90; border: 1px solid rgba(80,200,120,0.25); }
+  .p2   { background: rgba(80,140,220,0.13); color: #70aaee; border: 1px solid rgba(80,140,220,0.22); }
+  .p3   { background: rgba(180,100,220,0.13); color: #c080ee; border: 1px solid rgba(180,100,220,0.22); }
+  .p4   { background: rgba(220,150,60,0.13); color: #e0aa60; border: 1px solid rgba(220,150,60,0.22); }
+  .p5   { background: rgba(220,80,80,0.12); color: #e08080; border: 1px solid rgba(220,80,80,0.22); }
+
+  .indent-1 { padding-left: 16px; }
+  .indent-2 { padding-left: 32px; }
+  .indent-3 { padding-left: 48px; }
+  .indent-4 { padding-left: 64px; }
+
+  .line { display: flex; align-items: center; gap: 0; white-space: nowrap; }
+
+  .legend {
+    font-family: system-ui;
+    font-size: 11px;
+    display: flex; gap: 12px; flex-wrap: wrap;
+    margin-bottom: 20px; align-items: center;
+  }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+
+  .vault-box {
+    background: rgba(50,180,220,0.05);
+    border: 1px solid rgba(50,180,220,0.12);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+  }
+  .vault-box h3 {
+    font-family: system-ui;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #3a7a9a;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(50,180,220,0.1);
+  }
+</style>
+</head>
+<body>
+
+<h2>Project Structure</h2>
+<p class="subtitle">Source code layout (left) and on-disk vault layout (right). Badges show which phase each module is built in.</p>
+
+<div class="legend">
+  <span><span class="badge mvp">MVP</span> Phase 1</span>
+  <span><span class="badge p2">P2</span> Phase 2</span>
+  <span><span class="badge p3">P3</span> Phase 3</span>
+  <span><span class="badge p4">P4</span> Phase 4</span>
+  <span><span class="badge p5">P5</span> Phase 5</span>
+</div>
+
+<div class="cols">
+
+<!-- LEFT: SOURCE CODE -->
+<div class="col">
+<div class="tree-box">
+<h3>Source Code — owl.md/src/</h3>
+
+<div class="line"><span class="dir">main/</span> <span class="comment">&nbsp;&nbsp;← Electron main process</span></div>
+
+<div class="line indent-1"><span class="file">index.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-1"><span class="dir">ipc/</span></div>
+<div class="line indent-2"><span class="file">vault.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-2"><span class="file">notes.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-2"><span class="file">search.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-2"><span class="file">canvas.ts</span><span class="badge p3">P3</span></div>
+<div class="line indent-2"><span class="file">mindmap.ts</span><span class="badge p3">P3</span></div>
+<div class="line indent-2"><span class="file">ai.ts</span><span class="badge p4">P4</span></div>
+<div class="line indent-2"><span class="file">backup.ts</span><span class="badge p5">P5</span></div>
+
+<div class="line indent-1"><span class="dir">services/</span></div>
+<div class="line indent-2"><span class="file">VaultService.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-2"><span class="file">DatabaseService.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-2"><span class="file">IndexService.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-2"><span class="file">WatcherService.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-2"><span class="file">EmbeddingService.ts</span><span class="badge p4">P4</span></div>
+<div class="line indent-2"><span class="file">RagService.ts</span><span class="badge p4">P4</span></div>
+<div class="line indent-2"><span class="file">AIService.ts</span><span class="badge p4">P4</span></div>
+<div class="line indent-2"><span class="file">BackupService.ts</span><span class="badge p5">P5</span></div>
+
+<div class="line indent-1"><span class="dir">db/</span></div>
+<div class="line indent-2"><span class="file">schema.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-2"><span class="dir">migrations/</span><span class="badge mvp">MVP</span></div>
+
+<br>
+<div class="line"><span class="dir">renderer/</span> <span class="comment">&nbsp;&nbsp;← React frontend</span></div>
+
+<div class="line indent-1"><span class="file">index.tsx</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-1"><span class="file">App.tsx</span><span class="badge mvp">MVP</span></div>
+
+<div class="line indent-1"><span class="dir">stores/</span></div>
+<div class="line indent-2"><span class="file">vaultStore.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-2"><span class="file">editorStore.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-2"><span class="file">searchStore.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-2"><span class="file">canvasStore.ts</span><span class="badge p3">P3</span></div>
+<div class="line indent-2"><span class="file">aiStore.ts</span><span class="badge p4">P4</span></div>
+
+<div class="line indent-1"><span class="dir">components/</span></div>
+<div class="line indent-2"><span class="dir">layout/</span></div>
+<div class="line indent-3"><span class="file">AppShell.tsx</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-3"><span class="file">LeftSidebar.tsx</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-3"><span class="file">RightSidebar.tsx</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-3"><span class="file">CommandPalette.tsx</span><span class="badge p2">P2</span></div>
+<div class="line indent-3"><span class="file">TabBar.tsx</span><span class="badge p2">P2</span></div>
+<div class="line indent-2"><span class="dir">editor/</span></div>
+<div class="line indent-3"><span class="file">NoteEditor.tsx</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-3"><span class="dir">extensions/</span></div>
+<div class="line indent-4"><span class="file">WikiLink.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-4"><span class="file">BlockId.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-4"><span class="file">SlashCommand.ts</span><span class="badge p2">P2</span></div>
+<div class="line indent-4"><span class="file">Callout.ts</span><span class="badge p2">P2</span></div>
+<div class="line indent-2"><span class="dir">canvas/</span><span class="badge p3">P3</span></div>
+<div class="line indent-3"><span class="file">CanvasView.tsx</span></div>
+<div class="line indent-3"><span class="dir">nodes/</span></div>
+<div class="line indent-4"><span class="file">NoteCard.tsx</span></div>
+<div class="line indent-4"><span class="file">ImageCard.tsx</span></div>
+<div class="line indent-2"><span class="dir">mindmap/</span><span class="badge p3">P3</span></div>
+<div class="line indent-3"><span class="file">MindMapView.tsx</span></div>
+<div class="line indent-2"><span class="dir">ai/</span><span class="badge p4">P4</span></div>
+<div class="line indent-3"><span class="file">AIPanel.tsx</span></div>
+<div class="line indent-3"><span class="file">ChatThread.tsx</span></div>
+<div class="line indent-3"><span class="file">ContextSelector.tsx</span></div>
+<div class="line indent-2"><span class="dir">graph/</span><span class="badge p2">P2</span></div>
+<div class="line indent-3"><span class="file">GraphView.tsx</span></div>
+
+<div class="line indent-1"><span class="dir">lib/</span></div>
+<div class="line indent-2"><span class="file">ipc.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-2"><span class="file">markdown.ts</span><span class="badge mvp">MVP</span></div>
+
+<br>
+<div class="line"><span class="dir">shared/</span></div>
+<div class="line indent-1"><span class="dir">types/</span></div>
+<div class="line indent-2"><span class="file">Note.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-2"><span class="file">Canvas.ts</span><span class="badge p3">P3</span></div>
+<div class="line indent-2"><span class="file">AI.ts</span><span class="badge p4">P4</span></div>
+<div class="line indent-2"><span class="file">IPC.ts</span><span class="badge mvp">MVP</span></div>
+
+<br>
+<div class="line"><span class="dir">preload/</span></div>
+<div class="line indent-1"><span class="file">index.ts</span><span class="badge mvp">MVP</span></div>
+
+</div><!-- tree-box -->
+
+<div class="tree-box">
+<h3>Config files</h3>
+<div class="line"><span class="file">electron.vite.config.ts</span><span class="badge mvp">MVP</span></div>
+<div class="line"><span class="file">package.json</span><span class="badge mvp">MVP</span></div>
+<div class="line"><span class="file">tsconfig.json</span><span class="badge mvp">MVP</span></div>
+<div class="line"><span class="file">electron-builder.yml</span><span class="badge mvp">MVP</span></div>
+</div>
+
+</div><!-- col -->
+
+<!-- RIGHT: VAULT ON DISK -->
+<div class="col">
+
+<div class="vault-box">
+<h3>On-Disk Vault — ~/my-vault/</h3>
+
+<div class="line"><span class="dir">notes/</span> <span class="comment">&nbsp;← human-readable markdown</span></div>
+<div class="line indent-1"><span class="dir">Research/</span></div>
+<div class="line indent-2"><span class="file">paper-notes.md</span></div>
+<div class="line indent-2"><span class="dir">papers/</span></div>
+<div class="line indent-3"><span class="file">arxiv-2024-01.md</span></div>
+<div class="line indent-1"><span class="dir">Projects/</span></div>
+<div class="line indent-2"><span class="file">owl-md-spec.md</span></div>
+<div class="line indent-1"><span class="file">daily-2026-04-03.md</span></div>
+<div class="line indent-1"><span class="file">index.md</span></div>
+
+<br>
+<div class="line"><span class="dir">attachments/</span></div>
+<div class="line indent-1"><span class="dir">images/</span></div>
+<div class="line indent-1"><span class="dir">files/</span></div>
+<div class="line indent-1"><span class="dir">pdfs/</span></div>
+
+<br>
+<div class="line"><span class="dir">.owl/</span> <span class="comment">&nbsp;← app metadata (gitignore-able)</span></div>
+<div class="line indent-1"><span class="file">db.sqlite</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-1 comment">&nbsp;&nbsp;&nbsp;├ notes · links · tags · blocks</div>
+<div class="line indent-1 comment">&nbsp;&nbsp;&nbsp;├ FTS5 virtual table</div>
+<div class="line indent-1 comment">&nbsp;&nbsp;&nbsp;├ canvas_nodes · canvas_edges</div>
+<div class="line indent-1 comment">&nbsp;&nbsp;&nbsp;└ mindmap_nodes · embeddings</div>
+<div class="line indent-1"><span class="file">vectors.usearch</span><span class="badge p4">P4</span></div>
+<div class="line indent-1"><span class="file">config.json</span><span class="badge mvp">MVP</span></div>
+<div class="line indent-1"><span class="dir">backups/</span><span class="badge p5">P5</span></div>
+</div>
+
+<div class="tree-box" style="margin-top:0">
+<h3>Key invariants</h3>
+<div style="font-family:system-ui; font-size:12px; line-height:1.8; color:#7090b0;">
+  <div>• Notes are plain <code style="color:#9ac">.md</code> files — readable without owl.md</div>
+  <div>• <code style="color:#9ac">.owl/</code> is derived state — deletable and rebuildable</div>
+  <div>• SQLite is the only process that writes <code style="color:#9ac">db.sqlite</code></div>
+  <div>• Filesystem watcher triggers incremental reindex on external edits</div>
+  <div>• Vault path is user-chosen at open time — no hardcoded locations</div>
+  <div>• <code style="color:#9ac">config.json</code> stores vault name, created date, schema version</div>
+</div>
+</div>
+
+<div class="tree-box">
+<h3>Build output</h3>
+<div class="line"><span class="dir">dist/</span></div>
+<div class="line indent-1"><span class="dir">main/</span><span class="comment">&nbsp;&nbsp;← compiled main process</span></div>
+<div class="line indent-1"><span class="dir">preload/</span></div>
+<div class="line indent-1"><span class="dir">renderer/</span><span class="comment">&nbsp;&nbsp;← Vite-bundled React</span></div>
+<div class="line"><span class="dir">release/</span></div>
+<div class="line indent-1"><span class="file">owl.md-1.0.0.dmg</span></div>
+<div class="line indent-1"><span class="file">owl.md-1.0.0.AppImage</span></div>
+<div class="line indent-1"><span class="file">owl.md-1.0.0-setup.exe</span></div>
+</div>
+
+</div><!-- col -->
+</div><!-- cols -->
+
+</body>
+</html>
