@@ -2,14 +2,15 @@
 
 export interface Note {
   id: string
-  path: string              // vault-relative, e.g. "Research/paper.md"
+  path: string              // vault-relative, e.g. "Research/paper.md". Empty for folders.
   title: string
   contentHash: string
   createdAt: number         // unix ms
   updatedAt: number
   parentId: string | null
-  folderPath: string        // e.g. "Research"
-  noteType: 'note' | 'daily' | 'canvas' | 'mindmap'
+  folderPath: string
+  noteType: 'note' | 'daily' | 'canvas' | 'mindmap' | 'folder'
+  orderIndex: number
 }
 
 export interface NoteContent {

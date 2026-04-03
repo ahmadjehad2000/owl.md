@@ -18,6 +18,8 @@ export interface OwlNotesAPI {
   create:       (title: string, folderPath: string) => Promise<NoteContent>
   delete:       (id: string) => Promise<void>
   getBacklinks: (id: string) => Promise<BacklinkResult[]>
+  createFolder: (name: string) => Promise<Note>
+  move:         (noteId: string, newParentId: string | null, orderIndex: number) => Promise<void>
 }
 
 export interface OwlSearchAPI {

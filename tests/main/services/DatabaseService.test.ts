@@ -49,12 +49,60 @@ describe('DatabaseService', () => {
 
   it('records schema_version = 1 after migration', () => {
     const row = db.get().prepare('SELECT version FROM schema_version').get() as { version: number }
-    expect(row.version).toBe(1)
+    expect(row.version).toBe(2)
   })
 
   it('is idempotent — reopening does not throw', () => {
     db.close()
     const db2 = new DatabaseService(tmpDir)
     expect(() => { db2.open(); db2.close() }).not.toThrow()
+  })
+
+  it('adds order_index column via migration 002', () => {
+    const cols = db.get()
+      .prepare('PRAGMA table_info(notes)')
+      .all() as Array<{ name: string }>
+    expect(cols.some(c => c.name === 'order_index')).toBe(true)
+  })
+
+  it('records schema_version = 2 after both migrations', () => {
+    const row = db.get()
+      .prepare('SELECT version FROM schema_version')
+      .get() as { version: number }
+    expect(row.version).toBe(2)
+  })
+
+  it('can store a folder note (note_type = folder)', () => {
+    const d = db.get()
+    const now = Date.now()
+    d.prepare(`
+      INSERT INTO notes (id, path, title, content_hash, created_at, updated_at,
+                         parent_id, folder_path, note_type, order_index)
+      VALUES ('f1', '', 'Research', '', ?, ?, NULL, '', 'folder', 0)
+    `).run(now, now)
+    const row = d.prepare('SELECT * FROM notes WHERE id = ?').get('f1') as Record<string, unknown>
+    expect(row.note_type).toBe('folder')
+    expect(row.path).toBe('')
+  })
+
+  it('can move a note into a parent folder', () => {
+    const d = db.get()
+    const now = Date.now()
+    d.prepare(`INSERT INTO notes (id, path, title, content_hash, created_at, updated_at, parent_id, folder_path, note_type, order_index) VALUES ('f2', '', 'Folder', '', ?, ?, NULL, '', 'folder', 0)`).run(now, now)
+    d.prepare(`INSERT INTO notes (id, path, title, content_hash, created_at, updated_at, parent_id, folder_path, note_type, order_index) VALUES ('n2', 'n.md', 'Note', 'h', ?, ?, NULL, '', 'note', 0)`).run(now, now)
+    d.prepare('UPDATE notes SET parent_id = ?, order_index = ? WHERE id = ?').run('f2', 1, 'n2')
+    const row = d.prepare('SELECT * FROM notes WHERE id = ?').get('n2') as Record<string, unknown>
+    expect(row.parent_id).toBe('f2')
+    expect(row.order_index).toBe(1)
+  })
+
+  it('can move a note back to root (parent_id = null)', () => {
+    const d = db.get()
+    const now = Date.now()
+    d.prepare(`INSERT INTO notes (id, path, title, content_hash, created_at, updated_at, parent_id, folder_path, note_type, order_index) VALUES ('f3', '', 'Folder', '', ?, ?, NULL, '', 'folder', 0)`).run(now, now)
+    d.prepare(`INSERT INTO notes (id, path, title, content_hash, created_at, updated_at, parent_id, folder_path, note_type, order_index) VALUES ('n3', 'n3.md', 'Note3', 'h', ?, ?, 'f3', '', 'note', 0)`).run(now, now)
+    d.prepare('UPDATE notes SET parent_id = NULL, order_index = 0 WHERE id = ?').run('n3')
+    const row = d.prepare('SELECT * FROM notes WHERE id = ?').get('n3') as Record<string, unknown>
+    expect(row.parent_id).toBeNull()
   })
 })
