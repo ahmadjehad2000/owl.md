@@ -1,0 +1,85 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.menu {
+  position: fixed;
+  z-index: 1001;
+  background: #1e2433;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 4px;
+  min-width: 180px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  font-size: 13px;
+  user-select: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #e2e8f0;
+  text-align: left;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.item:hover {
+  background: rgba(167, 139, 250, 0.15);
+}
+
+.item:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.item.danger {
+  color: #f87171;
+}
+
+.item.danger:hover {
+  background: rgba(248, 113, 113, 0.12);
+}
+
+.itemIcon {
+  width: 16px;
+  text-align: center;
+  font-size: 12px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.itemLabel {
+  flex: 1;
+}
+
+.itemShortcut {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+  font-family: monospace;
+}
+
+.itemArrow {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.separator {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 3px 8px;
+}
+
+.backItem {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+}
