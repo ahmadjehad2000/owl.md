@@ -91,4 +91,26 @@ export function registerNotesHandlers(services: {
       ).run(newParentId, orderIndex, Date.now(), noteId)
     }
   )
+
+  ipcMain.handle('notes:rename', (_e, id: string, newTitle: string): Note => {
+    const note = db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note | undefined
+    if (!note) throw new Error(`Note not found: ${id}`)
+    const raw = note as unknown as Record<string, unknown>
+    const noteType = (raw.note_type ?? raw.noteType ?? 'note') as Note['noteType']
+    if (noteType === 'folder') {
+      // Folders have no markdown file — just update the DB title
+      db().prepare('UPDATE notes SET title = ?, updated_at = ? WHERE id = ?')
+        .run(newTitle, Date.now(), id)
+      return db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
+    }
+    const markdown = services.vault().readNote(note.path)
+    const updated = markdown.match(/^#\s+.+$/m)
+      ? markdown.replace(/^#\s+.+$/m, `# ${newTitle}`)
+      : `# ${newTitle}\n\n${markdown}`
+    services.vault().writeNote(note.path, updated)
+    const folderPath = dirname(note.path) === '.' ? '' : dirname(note.path)
+    services.index().indexNote({ id, path: note.path, title: newTitle, markdown: updated, folderPath, noteType })
+    services.index().syncFTS(id, newTitle, updated)
+    return db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
+  })
 }
