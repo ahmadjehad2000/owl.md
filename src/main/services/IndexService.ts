@@ -95,6 +95,34 @@ export class IndexService {
     }
   }
 
+  /** Resolve links only for a single source note */
+  resolveLinksForNote(sourceNoteId: string): void {
+    const unresolved = this.db.prepare(
+      'SELECT rowid, link_text FROM links WHERE source_note_id = ? AND is_resolved = 0'
+    ).all(sourceNoteId) as Array<{ rowid: number; link_text: string }>
+
+    for (const link of unresolved) {
+      let target = this.db.prepare(
+        "SELECT id FROM notes WHERE title = ? AND note_type != 'folder'"
+      ).get(link.link_text) as { id: string } | undefined
+
+      if (!target) {
+        const aliasRows = this.db.prepare(
+          "SELECT id, aliases FROM notes WHERE aliases != ''"
+        ).all() as Array<{ id: string; aliases: string }>
+        for (const row of aliasRows) {
+          const aliases = row.aliases.split(',').map((a: string) => a.trim()).filter(Boolean)
+          if (aliases.includes(link.link_text)) { target = { id: row.id }; break }
+        }
+      }
+
+      if (target) {
+        this.db.prepare('UPDATE links SET target_note_id = ?, is_resolved = 1 WHERE rowid = ?')
+          .run(target.id, link.rowid)
+      }
+    }
+  }
+
   getBacklinks(noteId: string): BacklinkResult[] {
     return this.db.prepare(`
       SELECT l.source_note_id as sourceNoteId, n.title as sourceTitle,

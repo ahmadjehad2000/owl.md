@@ -76,7 +76,7 @@ async function openVault(vaultPath: string): Promise<VaultConfig> {
       const title  = stored?.title ?? (markdown.match(/^#\s+(.+)$/m)?.[1] ?? basename(rel, '.md'))
       indexService.indexNote({ id, path: rel, title, markdown, folderPath, noteType: 'note' })
       indexService.syncFTS(id, title, markdown)
-      indexService.resolveLinks()
+      indexService.resolveLinksForNote(id)
     },
     onFileDeleted: (absPath) => {
       const rel = relative(join(vaultPath, 'notes'), absPath)

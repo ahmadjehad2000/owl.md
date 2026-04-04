@@ -40,7 +40,7 @@ export function registerNotesHandlers(services: {
     const dbTitle = (db().prepare('SELECT title FROM notes WHERE id = ?').get(id) as { title: string }).title
     services.index().indexNote({ id, path: note.path, title: dbTitle, markdown, folderPath, noteType })
     services.index().syncFTS(id, dbTitle, markdown)
-    services.index().resolveLinks()
+    services.index().resolveLinksForNote(id)
     return db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
   })
 

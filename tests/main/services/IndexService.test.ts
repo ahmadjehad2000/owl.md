@@ -76,4 +76,35 @@ describe('IndexService', () => {
     const row = dbService.get().prepare('SELECT id FROM notes WHERE id = ?').get('del')
     expect(row).toBeUndefined()
   })
+
+  it('resolveLinksForNote only resolves links from the given source', () => {
+    index.indexNote({ id: 'src1', path: 's1.md', title: 'Source 1',
+      markdown: 'Links to [[Target A]]', folderPath: '', noteType: 'note' })
+    index.indexNote({ id: 'src2', path: 's2.md', title: 'Source 2',
+      markdown: 'Links to [[Target B]]', folderPath: '', noteType: 'note' })
+    index.indexNote({ id: 'tgtA', path: 'ta.md', title: 'Target A',
+      markdown: '# A', folderPath: '', noteType: 'note' })
+    index.indexNote({ id: 'tgtB', path: 'tb.md', title: 'Target B',
+      markdown: '# B', folderPath: '', noteType: 'note' })
+
+    // Only resolve for src1
+    index.resolveLinksForNote('src1')
+
+    const blA = index.getBacklinks('tgtA')
+    expect(blA).toHaveLength(1)
+
+    // src2's link should still be unresolved
+    const blB = index.getBacklinks('tgtB')
+    expect(blB).toHaveLength(0)
+  })
+
+  it('resolveLinks (full scan) still works for vault open', () => {
+    index.indexNote({ id: 'src', path: 's.md', title: 'Source',
+      markdown: 'Links to [[Target]]', folderPath: '', noteType: 'note' })
+    index.indexNote({ id: 'tgt', path: 't.md', title: 'Target',
+      markdown: '# Target', folderPath: '', noteType: 'note' })
+    index.resolveLinks()
+    const bl = index.getBacklinks('tgt')
+    expect(bl).toHaveLength(1)
+  })
 })
