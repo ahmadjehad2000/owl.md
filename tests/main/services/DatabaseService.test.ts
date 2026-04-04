@@ -47,9 +47,9 @@ describe('DatabaseService', () => {
     }
   })
 
-  it('records schema_version = 2 after initial migration', () => {
+  it('records schema_version after all migrations', () => {
     const row = db.get().prepare('SELECT version FROM schema_version').get() as { version: number }
-    expect(row.version).toBe(2)
+    expect(row.version).toBe(5)
   })
 
   it('is idempotent — reopening does not throw', () => {
@@ -65,11 +65,11 @@ describe('DatabaseService', () => {
     expect(cols.some(c => c.name === 'order_index')).toBe(true)
   })
 
-  it('records schema_version = 2 after both migrations', () => {
+  it('records correct schema_version after all migrations', () => {
     const row = db.get()
       .prepare('SELECT version FROM schema_version')
       .get() as { version: number }
-    expect(row.version).toBe(2)
+    expect(row.version).toBe(5)
   })
 
   it('can store a folder note (note_type = folder)', () => {

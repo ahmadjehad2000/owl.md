@@ -7,8 +7,9 @@ import { up as migration001 } from '../db/migrations/001_initial'
 import { up as migration002 } from '../db/migrations/002_order_index'
 import { up as migration003 } from '../db/migrations/003_pinned'
 import { up as migration004 } from '../db/migrations/004_aliases'
+import { up as migration005 } from '../db/migrations/005_trash.sql'
 
-const MIGRATIONS: Array<(db: Database.Database) => void> = [migration001, migration002, migration003, migration004]
+const MIGRATIONS: Array<(db: Database.Database) => void> = [migration001, migration002, migration003, migration004, migration005]
 
 export class DatabaseService {
   private _db: Database.Database | null = null

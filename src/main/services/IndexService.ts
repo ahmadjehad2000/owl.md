@@ -54,6 +54,12 @@ export class IndexService {
       ).run(id, '', target)
     }
 
+    // Sync alias index table
+    this.db.prepare('DELETE FROM note_aliases WHERE note_id = ?').run(id)
+    for (const alias of IndexService.extractAliasesFromFrontmatter(markdown)) {
+      this.db.prepare('INSERT INTO note_aliases (note_id, alias) VALUES (?, ?)').run(id, alias)
+    }
+
     return true
   }
 
@@ -77,15 +83,12 @@ export class IndexService {
         "SELECT id FROM notes WHERE title = ? AND note_type != 'folder'"
       ).get(link.link_text) as { id: string } | undefined
 
-      // Alias fallback
+      // Alias fallback — O(1) lookup via index table
       if (!target) {
-        const aliasRows = this.db.prepare(
-          "SELECT id, aliases FROM notes WHERE aliases != ''"
-        ).all() as Array<{ id: string; aliases: string }>
-        for (const row of aliasRows) {
-          const aliases = row.aliases.split(',').map((a: string) => a.trim()).filter(Boolean)
-          if (aliases.includes(link.link_text)) { target = { id: row.id }; break }
-        }
+        const aliasRow = this.db.prepare(
+          "SELECT note_id FROM note_aliases WHERE alias = ?"
+        ).get(link.link_text) as { note_id: string } | undefined
+        if (aliasRow) target = { id: aliasRow.note_id }
       }
 
       if (target) {
@@ -107,13 +110,10 @@ export class IndexService {
       ).get(link.link_text) as { id: string } | undefined
 
       if (!target) {
-        const aliasRows = this.db.prepare(
-          "SELECT id, aliases FROM notes WHERE aliases != ''"
-        ).all() as Array<{ id: string; aliases: string }>
-        for (const row of aliasRows) {
-          const aliases = row.aliases.split(',').map((a: string) => a.trim()).filter(Boolean)
-          if (aliases.includes(link.link_text)) { target = { id: row.id }; break }
-        }
+        const aliasRow = this.db.prepare(
+          "SELECT note_id FROM note_aliases WHERE alias = ?"
+        ).get(link.link_text) as { note_id: string } | undefined
+        if (aliasRow) target = { id: aliasRow.note_id }
       }
 
       if (target) {
