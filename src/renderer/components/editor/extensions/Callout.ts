@@ -41,12 +41,20 @@ export const Callout = Node.create({
     return {
       insertCallout:
         (type: CalloutType) =>
-        ({ commands }) =>
-          commands.insertContent({
+        ({ commands, state }: { commands: { insertContent: (content: unknown) => boolean }; state: { selection: { from: number; to: number }; doc: { textBetween: (from: number, to: number, separator: string) => string } } }) => {
+          const { from, to } = state.selection
+          const selectedText = from !== to ? state.doc.textBetween(from, to, ' ') : ''
+          return commands.insertContent({
             type: this.name,
             attrs: { type },
-            content: [{ type: 'paragraph' }],
-          }),
+            content: [
+              {
+                type: 'paragraph',
+                content: selectedText ? [{ type: 'text', text: selectedText }] : [],
+              },
+            ],
+          })
+        },
     }
   },
 

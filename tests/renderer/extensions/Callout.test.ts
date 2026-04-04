@@ -16,4 +16,13 @@ describe('Callout extension', () => {
     const attrs = Callout.config.addAttributes?.call(Callout) as Record<string, { default: string }>
     expect(attrs.type.default).toBe('info')
   })
+
+  it('insertCallout command factory returns a function accepting command helpers', () => {
+    const cmds = Callout.config.addCommands?.call(Callout) as Record<string, unknown>
+    expect(typeof cmds.insertCallout).toBe('function')
+    const inner = (cmds.insertCallout as (t: string) => (...args: unknown[]) => unknown)('info')
+    expect(typeof inner).toBe('function')
+    // The inner function takes one destructured argument ({ commands, state, ... })
+    expect(inner.length).toBe(1)
+  })
 })
