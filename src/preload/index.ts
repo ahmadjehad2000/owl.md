@@ -12,6 +12,7 @@ const owl: OwlAPI = {
     getSessions: ()          => ipcRenderer.invoke('vault:get-sessions'),
     getConfig:   ()          => ipcRenderer.invoke('vault:getConfig'),
     removeKnown: (path)      => ipcRenderer.invoke('vault:remove-known', path),
+    close:       (path)      => ipcRenderer.invoke('vault:close',        path),
   },
   notes: {
     list:         ()              => ipcRenderer.invoke('notes:list'),

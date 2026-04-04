@@ -11,6 +11,7 @@ export const ipc = {
     getSessions: ():              Promise<VaultConfig[]>      => window.owl.vault.getSessions(),
     getConfig:   ():              Promise<VaultConfig | null> => window.owl.vault.getConfig(),
     removeKnown: (path: string):  Promise<void>              => window.owl.vault.removeKnown(path),
+    close:       (path: string):  Promise<VaultConfig | null> => window.owl.vault.close(path),
   },
   notes: {
     list:         (): Promise<Note[]>                          => window.owl.notes.list(),

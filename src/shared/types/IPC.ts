@@ -10,6 +10,7 @@ export interface OwlVaultAPI {
   getSessions: ()                  => Promise<VaultConfig[]>
   getConfig:   ()                  => Promise<VaultConfig | null>
   removeKnown: (path: string)      => Promise<void>
+  close:       (path: string)      => Promise<VaultConfig | null>
 }
 
 export interface OwlNotesAPI {

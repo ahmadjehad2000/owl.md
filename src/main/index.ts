@@ -88,6 +88,24 @@ async function openVault(vaultPath: string): Promise<VaultConfig> {
   return config
 }
 
+async function closeVault(path: string): Promise<VaultConfig | null> {
+  const session = sessions.get(path)
+  if (!session) return null
+  try {
+    await session.watcher.stop()
+    session.db.close()
+  } catch { /* best-effort */ }
+  sessions.delete(path)
+
+  if (activePath === path) {
+    const remaining = Array.from(sessions.keys())
+    activePath = remaining[0] ?? null
+    if (activePath) settingsService.setLastVaultPath(activePath)
+  }
+
+  return activePath ? sessions.get(activePath)!.config : null
+}
+
 async function createVault(name: string): Promise<VaultConfig> {
   const vaultPath = join(app.getPath('documents'), safeVaultFolderName(name))
   if (existsSync(vaultPath)) {
@@ -120,6 +138,7 @@ app.whenReady().then(() => {
     getLastVaultPath: () => settingsService.getLastVaultPath(),
     getOpenSessions:  () => Array.from(sessions.values()).map(s => s.config),
     removeKnownVault: (path: string) => settingsService.removeKnown(path),
+    closeVault,
   })
 
   registerNotesHandlers({
