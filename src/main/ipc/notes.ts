@@ -44,8 +44,15 @@ export function registerNotesHandlers(services: {
 
   ipcMain.handle('notes:create', (_e, title: string, folderPath: string): NoteContent => {
     const id = crypto.randomUUID()
-    const fileName = `${title.replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '-')}.md`
-    const notePath = folderPath ? `${folderPath}/${fileName}` : fileName
+    const base = title.replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '-') || 'untitled'
+    let fileName = `${base}.md`
+    let notePath = folderPath ? `${folderPath}/${fileName}` : fileName
+    let counter = 1
+    while (services.vault().noteExists(notePath)) {
+      fileName = `${base}-${counter}.md`
+      notePath = folderPath ? `${folderPath}/${fileName}` : fileName
+      counter++
+    }
     const markdown = `# ${title}\n\n`
     services.vault().writeNote(notePath, markdown)
     services.index().indexNote({ id, path: notePath, title, markdown, folderPath, noteType: 'note' })

@@ -43,6 +43,10 @@ export class VaultService {
     writeFileSync(abs, content, 'utf-8')
   }
 
+  noteExists(notePath: string): boolean {
+    return existsSync(this.noteAbsPath(notePath))
+  }
+
   deleteNote(notePath: string): void {
     unlinkSync(this.noteAbsPath(notePath))
   }

@@ -163,15 +163,23 @@ export function LeftSidebar(): JSX.Element {
   }, [openTab])
 
   const createNote = useCallback(async () => {
-    const title = `Untitled ${new Date().toLocaleDateString()}`
-    const { note } = await ipc.notes.create(title, '')
-    await loadNotes()
-    openTab(note.id, note.title)
+    try {
+      const title = `Untitled ${new Date().toLocaleDateString()}`
+      const { note } = await ipc.notes.create(title, '')
+      await loadNotes()
+      openTab(note.id, note.title)
+    } catch (e) {
+      console.error('Failed to create note:', e)
+    }
   }, [loadNotes, openTab])
 
   const handleNewFolder = useCallback(async () => {
-    const name = `New Parent Knowledge Base ${Date.now().toString().slice(-4)}`
-    await createFolder(name)
+    try {
+      const name = `New Parent Knowledge Base ${Date.now().toString().slice(-4)}`
+      await createFolder(name)
+    } catch (e) {
+      console.error('Failed to create folder:', e)
+    }
   }, [createFolder])
 
   const handleRenameCommit = useCallback(async (id: string, newTitle: string) => {
