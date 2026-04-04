@@ -452,3 +452,23 @@
 [data-theme="modern-light"] .editorWrap :global(.ProseMirror p.is-editor-empty:first-child::before) { color: rgba(0,0,0,0.2); }
 [data-theme="modern-light"] .emptyTitle { color: rgba(0,0,0,0.38); }
 [data-theme="modern-light"] .emptyDesc { color: rgba(0,0,0,0.25); }
+
+/* ── Fold headings ───────────────────────────────────────────────────────── */
+.editorWrap :global(.ProseMirror h1),
+.editorWrap :global(.ProseMirror h2),
+.editorWrap :global(.ProseMirror h3),
+.editorWrap :global(.ProseMirror h4),
+.editorWrap :global(.ProseMirror h5),
+.editorWrap :global(.ProseMirror h6) { position: relative; }
+
+.editorWrap :global(.ProseMirror h1:hover .fold-toggle),
+.editorWrap :global(.ProseMirror h2:hover .fold-toggle),
+.editorWrap :global(.ProseMirror h3:hover .fold-toggle),
+.editorWrap :global(.ProseMirror h4:hover .fold-toggle),
+.editorWrap :global(.ProseMirror h5:hover .fold-toggle),
+.editorWrap :global(.ProseMirror h6:hover .fold-toggle) { opacity: 1 !important; }
+
+.editorWrap :global(.fold-toggle:hover) {
+  color: rgba(255,255,255,0.7) !important;
+  background: rgba(255,255,255,0.08) !important;
+}

@@ -6,6 +6,7 @@ import { Placeholder } from '@tiptap/extension-placeholder'
 import { Markdown } from 'tiptap-markdown'
 import { WikiLink } from './extensions/WikiLink'
 import { WikiLinkPicker } from './extensions/WikiLinkPicker'
+import { FoldHeadings } from './extensions/FoldHeadings'
 import { Callout } from './extensions/Callout'
 import { SlashCommand } from './extensions/SlashCommand'
 import { TaskList } from '@tiptap/extension-task-list'
@@ -128,6 +129,7 @@ export function NoteEditor(): JSX.Element {
       StarterKit,
       WikiLink,
       WikiLinkPicker,
+      FoldHeadings,
       Placeholder.configure({ placeholder: 'Start writing…' }),
       Markdown.configure({ transformPastedText: true, transformCopiedText: true }),
       Callout,
