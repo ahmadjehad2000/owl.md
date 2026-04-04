@@ -11,6 +11,7 @@ export interface Note {
   folderPath: string
   noteType: 'note' | 'daily' | 'canvas' | 'mindmap' | 'folder'
   orderIndex: number
+  pinned: boolean
 }
 
 export interface NoteContent {

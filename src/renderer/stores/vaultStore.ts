@@ -16,6 +16,7 @@ export function normalizeNote(raw: unknown): Note {
     folderPath:  (r.folder_path ?? r.folderPath ?? '')   as string,
     noteType:    (r.note_type   ?? r.noteType   ?? 'note') as Note['noteType'],
     orderIndex:  (r.order_index ?? r.orderIndex ?? 0)    as number,
+    pinned:      Boolean(r.pinned ?? 0),
   }
 }
 

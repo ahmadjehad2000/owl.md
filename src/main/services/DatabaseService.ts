@@ -5,8 +5,9 @@ import { join } from 'path'
 import { CREATE_SCHEMA_VERSION } from '../db/schema'
 import { up as migration001 } from '../db/migrations/001_initial'
 import { up as migration002 } from '../db/migrations/002_order_index'
+import { up as migration003 } from '../db/migrations/003_pinned'
 
-const MIGRATIONS: Array<(db: Database.Database) => void> = [migration001, migration002]
+const MIGRATIONS: Array<(db: Database.Database) => void> = [migration001, migration002, migration003]
 
 export class DatabaseService {
   private _db: Database.Database | null = null
