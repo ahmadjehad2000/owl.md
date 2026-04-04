@@ -104,6 +104,16 @@ export function NoteEditor(): JSX.Element {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [save])
 
+  useEffect(() => {
+    if (!editor) return
+    const onInsertText = (e: Event): void => {
+      const text = (e as CustomEvent<string>).detail
+      editor.chain().focus().insertContent(text).run()
+    }
+    window.addEventListener('owl:insert-text', onInsertText)
+    return () => window.removeEventListener('owl:insert-text', onInsertText)
+  }, [editor])
+
   useEffect(() => () => { if (autosaveTimer.current) clearTimeout(autosaveTimer.current) }, [])
 
   const statusLabel =

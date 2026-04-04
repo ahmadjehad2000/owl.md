@@ -205,6 +205,13 @@ export function LeftSidebar(): JSX.Element {
     const items: ContextMenuEntry[] = [
       { label: 'Rename', icon: '✏️', shortcut: 'F2', onClick: () => setRenamingId(note.id) },
       { label: 'Duplicate', icon: '📋', onClick: () => handleDuplicate(note) },
+      {
+        label: 'Insert link in current note',
+        icon: '🔗',
+        onClick: () => {
+          window.dispatchEvent(new CustomEvent('owl:insert-text', { detail: `[[${note.title}]]` }))
+        },
+      },
       { separator: true },
     ]
 
