@@ -15,9 +15,20 @@ interface IndexNoteParams {
 export class IndexService {
   constructor(private readonly db: Database.Database) {}
 
-  indexNote(params: IndexNoteParams): void {
+  indexNote(params: IndexNoteParams): boolean {
     const { id, path, title, markdown, folderPath, noteType } = params
     const hash = createHash('sha256').update(markdown).digest('hex')
+
+    const existing = this.db.prepare(
+      'SELECT content_hash, path, title, folder_path, note_type FROM notes WHERE id = ?'
+    ).get(id) as { content_hash: string; path: string; title: string; folder_path: string; note_type: string } | undefined
+
+    if (existing && existing.content_hash === hash && existing.path === path
+        && existing.title === title && existing.folder_path === folderPath
+        && existing.note_type === noteType) {
+      return false
+    }
+
     const now = Date.now()
     const aliases = IndexService.extractAliasesFromFrontmatter(markdown).join(', ')
 
@@ -42,6 +53,8 @@ export class IndexService {
         'INSERT INTO links (source_note_id, target_note_id, link_text, is_resolved) VALUES (?, ?, ?, 0)'
       ).run(id, '', target)
     }
+
+    return true
   }
 
   syncFTS(id: string, title: string, content: string): void {

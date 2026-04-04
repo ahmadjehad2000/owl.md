@@ -59,8 +59,8 @@ async function openVault(vaultPath: string): Promise<VaultConfig> {
     // Only extract from file content for notes that don't exist in the DB yet.
     const stored = dbService.get().prepare('SELECT title FROM notes WHERE id = ?').get(id) as { title: string } | undefined
     const title  = stored?.title ?? (markdown.match(/^#\s+(.+)$/m)?.[1] ?? basename(notePath, '.md'))
-    indexService.indexNote({ id, path: notePath, title, markdown, folderPath, noteType: 'note' })
-    indexService.syncFTS(id, title, markdown)
+    const changed = indexService.indexNote({ id, path: notePath, title, markdown, folderPath, noteType: 'note' })
+    if (changed) indexService.syncFTS(id, title, markdown)
   }
   indexService.resolveLinks()
 
