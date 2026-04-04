@@ -1,0 +1,19 @@
+.root { border-bottom: 1px solid rgba(255,255,255,0.06); padding: 0 12px; background: rgba(255,255,255,0.015); }
+.toggle { display: flex; align-items: center; gap: 6px; background: none; border: none; cursor: pointer; color: rgba(255,255,255,0.4); font-size: 11px; padding: 8px 0; width: 100%; text-align: left; user-select: none; }
+.toggle:hover { color: rgba(255,255,255,0.65); }
+.toggleIcon { font-size: 8px; }
+.toggleLabel { font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; }
+.badge { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 1px 6px; font-size: 10px; }
+.table { padding-bottom: 8px; }
+.row { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+.key { width: 120px; flex-shrink: 0; font-size: 11px; color: rgba(255,255,255,0.45); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.value { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid transparent; border-radius: 4px; color: rgba(255,255,255,0.8); font-size: 12px; padding: 3px 6px; outline: none; }
+.value:focus { border-color: rgba(56,182,220,0.4); }
+.remove { background: none; border: none; color: rgba(255,255,255,0.25); cursor: pointer; font-size: 14px; padding: 0 2px; line-height: 1; }
+.remove:hover { color: rgba(255,80,80,0.7); }
+.addRow { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+.newKey { flex: 1; background: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); font-size: 11px; padding: 2px 4px; outline: none; }
+.newKey::placeholder { color: rgba(255,255,255,0.25); }
+.newKey:focus { border-bottom-color: rgba(56,182,220,0.5); }
+.addBtn { background: none; border: 1px solid rgba(255,255,255,0.15); border-radius: 3px; color: rgba(255,255,255,0.4); cursor: pointer; font-size: 14px; padding: 1px 6px; line-height: 1.4; }
+.addBtn:hover { color: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.3); }
