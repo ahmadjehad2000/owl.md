@@ -1,12 +1,10 @@
 // src/renderer/components/layout/RightSidebar.tsx
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useEditorStore } from '../../stores/editorStore'
 import { useTabStore } from '../../stores/tabStore'
 import { useRightPanelStore } from '../../stores/rightPanelStore'
 import { OutlinePanel } from './OutlinePanel'
 import { PropertiesPanel } from './PropertiesPanel'
-import { ipc } from '../../lib/ipc'
-import type { BacklinkResult } from '@shared/types/Note'
 import styles from './RightSidebar.module.css'
 
 const TABS: { id: 'backlinks' | 'outline' | 'properties'; label: string }[] = [
@@ -16,15 +14,16 @@ const TABS: { id: 'backlinks' | 'outline' | 'properties'; label: string }[] = [
 ]
 
 export function RightSidebar(): JSX.Element {
-  const note       = useEditorStore(s => s.note)
-  const activeTab   = useRightPanelStore(s => s.activeTab)
-  const setTab      = useRightPanelStore(s => s.setTab)
-  const [backlinks, setBacklinks] = useState<BacklinkResult[]>([])
+  const note           = useEditorStore(s => s.note)
+  const activeTab      = useRightPanelStore(s => s.activeTab)
+  const setTab         = useRightPanelStore(s => s.setTab)
+  const backlinks      = useRightPanelStore(s => s.backlinks)
+  const fetchBacklinks = useRightPanelStore(s => s.fetchBacklinks)
 
   useEffect(() => {
-    if (!note) { setBacklinks([]); return }
-    ipc.notes.getBacklinks(note.id).then(setBacklinks).catch(() => setBacklinks([]))
-  }, [note?.id])
+    if (!note) return
+    void fetchBacklinks(note.id)
+  }, [note?.id, fetchBacklinks])
 
   const open = (id: string, title: string): void => { useTabStore.getState().openTab(id, title) }
 
