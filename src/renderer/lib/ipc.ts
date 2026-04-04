@@ -10,19 +10,21 @@ export const ipc = {
     getLast:     ():              Promise<string | null>      => window.owl.vault.getLast(),
     getSessions: ():              Promise<VaultConfig[]>      => window.owl.vault.getSessions(),
     getConfig:   ():              Promise<VaultConfig | null> => window.owl.vault.getConfig(),
+    removeKnown: (path: string):  Promise<void>              => window.owl.vault.removeKnown(path),
   },
   notes: {
-    list:         (): Promise<Note[]>                    => window.owl.notes.list(),
-    read:         (id: string): Promise<NoteContent>    => window.owl.notes.read(id),
-    save:         (id: string, md: string): Promise<Note> => window.owl.notes.save(id, md),
+    list:         (): Promise<Note[]>                          => window.owl.notes.list(),
+    read:         (id: string): Promise<NoteContent>           => window.owl.notes.read(id),
+    save:         (id: string, md: string): Promise<Note>      => window.owl.notes.save(id, md),
     create:       (title: string, folder: string): Promise<NoteContent> =>
                     window.owl.notes.create(title, folder),
-    delete:       (id: string): Promise<void>           => window.owl.notes.delete(id),
-    getBacklinks: (id: string): Promise<BacklinkResult[]> =>
-                    window.owl.notes.getBacklinks(id),
-    createFolder: (name: string): Promise<Note>         => window.owl.notes.createFolder(name),
+    delete:       (id: string): Promise<void>                  => window.owl.notes.delete(id),
+    getBacklinks: (id: string): Promise<BacklinkResult[]>      => window.owl.notes.getBacklinks(id),
+    createFolder: (name: string): Promise<Note>                => window.owl.notes.createFolder(name),
     move: (noteId: string, newParentId: string | null, orderIndex: number): Promise<void> =>
             window.owl.notes.move(noteId, newParentId, orderIndex),
+    rename:    (id: string, newTitle: string): Promise<Note>   => window.owl.notes.rename(id, newTitle),
+    duplicate: (id: string): Promise<NoteContent>              => window.owl.notes.duplicate(id),
   },
   search: {
     query: (q: string): Promise<SearchResult[]> => window.owl.search.query(q),

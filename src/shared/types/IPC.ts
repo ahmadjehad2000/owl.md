@@ -9,6 +9,7 @@ export interface OwlVaultAPI {
   getLast:     ()                  => Promise<string | null>
   getSessions: ()                  => Promise<VaultConfig[]>
   getConfig:   ()                  => Promise<VaultConfig | null>
+  removeKnown: (path: string)      => Promise<void>
 }
 
 export interface OwlNotesAPI {
@@ -20,6 +21,8 @@ export interface OwlNotesAPI {
   getBacklinks: (id: string) => Promise<BacklinkResult[]>
   createFolder: (name: string) => Promise<Note>
   move:         (noteId: string, newParentId: string | null, orderIndex: number) => Promise<void>
+  rename:       (id: string, newTitle: string) => Promise<Note>
+  duplicate:    (id: string) => Promise<NoteContent>
 }
 
 export interface OwlSearchAPI {
