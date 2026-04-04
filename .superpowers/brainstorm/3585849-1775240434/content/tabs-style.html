@@ -1,0 +1,63 @@
+<h2>Editor Tab Bar — which style fits owl.md?</h2>
+<p class="subtitle">Choose the tab bar design for opening multiple notes side-by-side</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#07101c;border-radius:6px;overflow:hidden;font-family:-apple-system,sans-serif;">
+        <div style="display:flex;gap:2px;padding:4px 8px;background:#060b12;border-bottom:1px solid rgba(56,182,220,0.15);">
+          <div style="padding:4px 12px;font-size:11px;background:rgba(56,182,220,0.12);color:rgba(56,182,220,0.9);border-radius:4px 4px 0 0;border:1px solid rgba(56,182,220,0.2);border-bottom:none;white-space:nowrap;">My Note</div>
+          <div style="padding:4px 12px;font-size:11px;background:transparent;color:rgba(255,255,255,0.35);border-radius:4px 4px 0 0;white-space:nowrap;">Research</div>
+          <div style="padding:4px 12px;font-size:11px;background:transparent;color:rgba(255,255,255,0.35);border-radius:4px 4px 0 0;white-space:nowrap;">Daily Log ●</div>
+          <div style="margin-left:auto;padding:4px 8px;font-size:14px;color:rgba(255,255,255,0.3);cursor:pointer;">+</div>
+        </div>
+        <div style="padding:16px;min-height:60px;">
+          <div style="font-size:11px;color:rgba(255,255,255,0.3);">editor content…</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Browser-style tab bar</h3>
+      <p>Classic tabs above the editor. Active tab is highlighted, unsaved notes show a dot (●). Familiar and discoverable.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#07101c;border-radius:6px;overflow:hidden;font-family:-apple-system,sans-serif;display:flex;">
+        <div style="width:36px;background:#060b12;border-right:1px solid rgba(56,182,220,0.1);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px;">
+          <div style="width:24px;height:24px;background:rgba(56,182,220,0.12);border-radius:4px;border:1px solid rgba(56,182,220,0.2);display:flex;align-items:center;justify-content:center;font-size:9px;color:rgba(56,182,220,0.8);">N</div>
+          <div style="width:24px;height:24px;background:transparent;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:rgba(255,255,255,0.3);">R</div>
+          <div style="width:24px;height:24px;background:transparent;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:rgba(255,255,255,0.3);">D</div>
+        </div>
+        <div style="flex:1;padding:16px;">
+          <div style="font-size:11px;color:rgba(255,255,255,0.3);">editor content…</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Vertical icon rail</h3>
+      <p>Compact icon column between the sidebar and editor. Space-efficient, but requires learning icons/tooltips.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#07101c;border-radius:6px;overflow:hidden;font-family:-apple-system,sans-serif;">
+        <div style="padding:16px;min-height:80px;position:relative;">
+          <div style="font-size:11px;color:rgba(255,255,255,0.3);">editor content…</div>
+          <div style="position:absolute;bottom:0;left:0;right:0;display:flex;gap:2px;padding:0 8px;background:linear-gradient(transparent,rgba(6,11,18,0.95));">
+            <div style="padding:3px 10px;font-size:10px;background:rgba(56,182,220,0.1);color:rgba(56,182,220,0.8);border-radius:4px 4px 0 0;white-space:nowrap;">My Note</div>
+            <div style="padding:3px 10px;font-size:10px;color:rgba(255,255,255,0.3);white-space:nowrap;">Research</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Bottom tab strip</h3>
+      <p>Thin strip at the bottom of the editor area. Keeps the top clean, similar to VS Code's tab row at the very bottom.</p>
+    </div>
+  </div>
+
+</div>

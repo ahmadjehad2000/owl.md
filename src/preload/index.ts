@@ -3,6 +3,9 @@ import { contextBridge, ipcRenderer } from 'electron'
 import type { OwlAPI } from '@shared/types/IPC'
 
 const owl: OwlAPI = {
+  shell: {
+    openExternal: (url) => ipcRenderer.invoke('shell:open-external', url),
+  },
   vault: {
     open:        (vaultPath) => ipcRenderer.invoke('vault:open',         vaultPath),
     create:      (name)      => ipcRenderer.invoke('vault:create',       name),

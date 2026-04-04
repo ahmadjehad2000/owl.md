@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useSearchStore } from '../../stores/searchStore'
 import { useCommandPaletteStore } from '../../stores/commandPaletteStore'
 import { useVaultManagerStore } from '../../stores/vaultManagerStore'
+import { useSettingsStore } from '../../stores/settingsStore'
 import styles from './MenuBar.module.css'
 
 type MenuAction = { label: string; shortcut?: string; action: () => void }
@@ -18,6 +19,7 @@ export function MenuBar(): JSX.Element {
   const openSearch        = useSearchStore(s => s.open)
   const openPalette       = useCommandPaletteStore(s => s.open)
   const showVaultManager  = useVaultManagerStore(s => s.show)
+  const openSettings      = useSettingsStore(s => s.open)
   const barRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -49,10 +51,10 @@ export function MenuBar(): JSX.Element {
       ],
     },
     {
-      label: 'Vaults',
+      label: 'Knowledge Buckets',
       items: [
-        { label: 'Create New Vault', action: () => showVaultManager('create') },
-        { label: 'Open Vault',       action: () => showVaultManager('open')   },
+        { label: 'Create Knowledge Bucket', action: () => showVaultManager('create') },
+        { label: 'Open Knowledge Bucket',   action: () => showVaultManager('open')   },
       ],
     },
     {
@@ -108,6 +110,16 @@ export function MenuBar(): JSX.Element {
           )}
         </div>
       ))}
+
+      {/* Settings button — pinned to the right */}
+      <button
+        className={styles.settingsBtn}
+        onClick={openSettings}
+        title="Settings"
+      >
+        <span className={styles.settingsBtnIcon}>⚙</span>
+        Settings
+      </button>
     </div>
   )
 }

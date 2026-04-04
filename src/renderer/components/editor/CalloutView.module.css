@@ -17,7 +17,19 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   user-select: none;
+  cursor: pointer;
 }
+.header:hover { filter: brightness(1.1); }
+
+.toggle {
+  margin-left: auto;
+  font-size: 8px;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+.header:hover .toggle { opacity: 1; }
+
+.collapsed { opacity: 0.85; }
 
 .icon { font-style: normal; line-height: 1; }
 .label { font-size: 11px; }

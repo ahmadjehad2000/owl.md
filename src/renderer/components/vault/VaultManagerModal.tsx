@@ -4,6 +4,7 @@ import { useVaultManagerStore } from '../../stores/vaultManagerStore'
 import { useVaultStore } from '../../stores/vaultStore'
 import { ipc } from '../../lib/ipc'
 import { ContextMenu, type ContextMenuEntry } from '../ui/ContextMenu'
+import { ConfirmModal } from '../ui/ConfirmModal'
 import type { VaultConfig } from '@shared/types/Note'
 import styles from './VaultManagerModal.module.css'
 
@@ -39,6 +40,7 @@ export function VaultManagerModal(): JSX.Element | null {
   const [vaultMenuOpen,  setVaultMenuOpen]  = useState(false)
   const [vaultMenuPos,   setVaultMenuPos]   = useState({ x: 0, y: 0 })
   const [vaultMenuItems, setVaultMenuItems] = useState<ContextMenuEntry[]>([])
+  const [confirmVault,   setConfirmVault]   = useState<VaultConfig | null>(null)
 
   // Reset on close
   useEffect(() => {
@@ -119,17 +121,13 @@ export function VaultManagerModal(): JSX.Element | null {
     e.preventDefault()
     e.stopPropagation()
     const items: ContextMenuEntry[] = [
-      { label: 'Switch to this vault', icon: '↩', onClick: () => handleOpenExisting(v.path) },
+      { label: 'Switch to this bucket', icon: '↩', onClick: () => handleOpenExisting(v.path) },
       { separator: true },
       {
         label: 'Remove from list',
         icon: '✕',
         danger: true,
-        onClick: async () => {
-          await ipc.vault.removeKnown(v.path)
-          const updated = await ipc.vault.listKnown()
-          setKnownVaults(updated)
-        },
+        onClick: () => setConfirmVault(v),
       },
     ]
     setVaultMenuPos({ x: e.clientX, y: e.clientY })
@@ -139,7 +137,7 @@ export function VaultManagerModal(): JSX.Element | null {
 
   if (!isOpen) return null
 
-  const safeFolder  = vaultName.trim().replace(/[<>:"/\\|?*]/g, '-') || 'my-vault'
+  const safeFolder  = vaultName.trim().replace(/[<>:"/\\|?*]/g, '-') || 'my-bucket'
   const pendingLabel = mode === 'create'
     ? pendingName
     : knownVaults.find(v => v.path === pendingPath)?.name ?? pendingPath
@@ -151,11 +149,11 @@ export function VaultManagerModal(): JSX.Element | null {
 
         {screen === 'input' && mode === 'create' && (
           <>
-            <h2 className={styles.title}>Create New Vault</h2>
+            <h2 className={styles.title}>Create Knowledge Bucket</h2>
             <input
               ref={nameInputRef}
               className={styles.nameInput}
-              placeholder="Vault name…"
+              placeholder="Bucket name…"
               value={vaultName}
               onChange={e => setVaultName(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') handleCreateSubmit() }}
@@ -174,9 +172,9 @@ export function VaultManagerModal(): JSX.Element | null {
 
         {screen === 'input' && mode === 'open' && (
           <>
-            <h2 className={styles.title}>Open Vault</h2>
+            <h2 className={styles.title}>Open Knowledge Bucket</h2>
             {knownVaults.length === 0
-              ? <div className={styles.empty}>No saved vaults. Create one first.</div>
+              ? <div className={styles.empty}>No saved Knowledge Buckets. Create one first.</div>
               : <div className={styles.vaultList}>
                   {knownVaults.map(v => (
                     <button
@@ -204,12 +202,12 @@ export function VaultManagerModal(): JSX.Element | null {
             </p>
             <div className={styles.choiceButtons}>
               <button className={styles.choiceBtn} onClick={handleChoiceReplace}>
-                <span className={styles.choiceBtnTitle}>Replace current vault</span>
-                <span className={styles.choiceBtnDesc}>Close the current vault and open this one</span>
+                <span className={styles.choiceBtnTitle}>Replace current bucket</span>
+                <span className={styles.choiceBtnDesc}>Close the current bucket and open this one</span>
               </button>
               <button className={styles.choiceBtn} onClick={handleChoiceBoth}>
                 <span className={styles.choiceBtnTitle}>Open alongside</span>
-                <span className={styles.choiceBtnDesc}>Keep both vaults accessible via the switcher</span>
+                <span className={styles.choiceBtnDesc}>Keep both buckets accessible via the switcher</span>
               </button>
             </div>
             {error && <div className={styles.error}>{error}</div>}
@@ -232,6 +230,21 @@ export function VaultManagerModal(): JSX.Element | null {
         position={vaultMenuPos}
         items={vaultMenuItems}
         onClose={() => setVaultMenuOpen(false)}
+      />
+
+      <ConfirmModal
+        isOpen={confirmVault !== null}
+        title="Remove knowledge bucket?"
+        message={`"${confirmVault?.name}" will be removed from the list. The files on disk will not be deleted.`}
+        confirmLabel="Remove"
+        onConfirm={async () => {
+          if (!confirmVault) return
+          setConfirmVault(null)
+          await ipc.vault.removeKnown(confirmVault.path)
+          const updated = await ipc.vault.listKnown()
+          setKnownVaults(updated)
+        }}
+        onCancel={() => setConfirmVault(null)}
       />
     </div>
   )

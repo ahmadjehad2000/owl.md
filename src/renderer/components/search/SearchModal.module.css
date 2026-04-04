@@ -1,53 +1,108 @@
 /* src/renderer/components/search/SearchModal.module.css */
 
 .overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex; align-items: flex-start; justify-content: center;
-  padding-top: 15vh; z-index: 1000;
+  padding-top: 14vh; z-index: 1000;
+  animation: fadeIn 0.1s ease;
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Apple sheet — 14px radius, heavy blur */
 .modal {
-  width: 600px; max-width: 90vw;
-  background: rgba(10,16,28,0.95);
-  backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid rgba(56,182,220,0.2);
-  border-radius: 14px; overflow: hidden;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
+  width: 600px;
+  max-width: 90vw;
+  background: rgba(12, 18, 30, 0.94);
+  backdrop-filter: blur(48px) saturate(200%);
+  -webkit-backdrop-filter: blur(48px) saturate(200%);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    0 24px 80px rgba(0,0,0,0.6),
+    0 8px 24px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+  animation: slideIn 0.16s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: scale(0.96) translateY(-6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0);    }
 }
 
 .inputWrap {
   display: flex; align-items: center; gap: 10px;
-  padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.07);
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
-.searchIcon { font-size: 14px; color: rgba(255,255,255,0.3); flex-shrink: 0; }
+.searchIcon { font-size: 14px; color: rgba(255,255,255,0.28); flex-shrink: 0; }
 
 .input {
   flex: 1; background: none; border: none; outline: none;
-  font-size: 15px; color: rgba(255,255,255,0.85); font-family: inherit;
+  font-size: 15px; color: rgba(255,255,255,0.88);
+  font-family: inherit; letter-spacing: -0.01em;
 }
-.input::placeholder { color: rgba(255,255,255,0.25); }
+.input::placeholder { color: rgba(255,255,255,0.22); }
 
-.results { max-height: 420px; overflow-y: auto; }
-.results::-webkit-scrollbar { width: 4px; }
+.results {
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 5px;
+}
+.results::-webkit-scrollbar { width: 0; }
+.results:hover::-webkit-scrollbar { width: 4px; }
+.results::-webkit-scrollbar-track { background: transparent; }
 .results::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 
-.empty { padding: 24px; text-align: center; font-size: 13px; color: rgba(255,255,255,0.2); }
+.empty { padding: 28px; text-align: center; font-size: 13px; color: rgba(255,255,255,0.2); }
 
+/* No dividers between results — depth via hover fill */
 .result {
   display: flex; flex-direction: column; gap: 3px;
-  padding: 10px 16px; cursor: pointer;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  transition: background 0.1s;
-  text-align: left; background: none; border-left: none; border-right: none; border-top: none;
+  padding: 9px 12px;
+  cursor: pointer;
+  border: none;
+  border-radius: 9px;
+  transition: background 0.1s, transform 0.1s;
+  text-align: left; background: none;
   width: 100%;
+  margin: 1px 0;
 }
-.result:hover { background: rgba(56,182,220,0.1); }
+.result:hover { background: rgba(255,255,255,0.07); }
+.result:active { transform: scale(0.99); }
 
-.resultTitle { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.8); }
-.resultPath { font-size: 10px; color: rgba(255,255,255,0.25); }
-.resultExcerpt { font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.5; }
+.resultTitle { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.82); }
+.resultPath { font-size: 10px; color: rgba(255,255,255,0.22); }
+.resultExcerpt { font-size: 11px; color: rgba(255,255,255,0.38); line-height: 1.5; }
 .resultExcerpt :global(mark) {
-  background: rgba(56,182,220,0.25); color: #72d4f0; border-radius: 2px; padding: 0 2px;
+  background: rgba(56,182,220,0.22); color: #72d4f0; border-radius: 3px; padding: 0 2px;
+}
+
+/* ── Light theme overrides ── */
+[data-theme="modern-light"] .modal {
+  background: rgba(255,255,255,0.97);
+  border-color: rgba(0,0,0,0.12);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.18), 0 8px 24px rgba(0,0,0,0.12);
+}
+[data-theme="modern-light"] .inputWrap { border-bottom-color: rgba(0,0,0,0.08); }
+[data-theme="modern-light"] .searchIcon { color: rgba(0,0,0,0.3); }
+[data-theme="modern-light"] .input { color: rgba(0,0,0,0.85); }
+[data-theme="modern-light"] .input::placeholder { color: rgba(0,0,0,0.25); }
+[data-theme="modern-light"] .results::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }
+[data-theme="modern-light"] .empty { color: rgba(0,0,0,0.3); }
+[data-theme="modern-light"] .result:hover { background: rgba(0,0,0,0.05); }
+[data-theme="modern-light"] .resultTitle { color: rgba(0,0,0,0.82); }
+[data-theme="modern-light"] .resultPath { color: rgba(0,0,0,0.3); }
+[data-theme="modern-light"] .resultExcerpt { color: rgba(0,0,0,0.48); }
+[data-theme="modern-light"] .resultExcerpt :global(mark) {
+  background: rgba(2,132,199,0.14);
+  color: #0369a1;
 }

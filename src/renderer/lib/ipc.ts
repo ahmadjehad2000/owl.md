@@ -30,4 +30,7 @@ export const ipc = {
   search: {
     query: (q: string): Promise<SearchResult[]> => window.owl.search.query(q),
   },
+  shell: {
+    openExternal: (url: string): Promise<void> => window.owl.shell.openExternal(url),
+  },
 }

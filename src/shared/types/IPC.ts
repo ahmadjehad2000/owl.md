@@ -30,10 +30,15 @@ export interface OwlSearchAPI {
   query: (q: string) => Promise<SearchResult[]>
 }
 
+export interface OwlShellAPI {
+  openExternal: (url: string) => Promise<void>
+}
+
 export interface OwlAPI {
   vault:  OwlVaultAPI
   notes:  OwlNotesAPI
   search: OwlSearchAPI
+  shell:  OwlShellAPI
 }
 
 declare global {

@@ -19,6 +19,7 @@ interface TabStore {
   activateTab:      (tabId: string) => void
   updateTabContent: (tabId: string, markdown: string, frontmatter: Frontmatter, isDirty: boolean) => void
   markTabClean:     (tabId: string) => void
+  reorderTabs:      (fromId: string, toId: string) => void
   nextTab:          () => void
   prevTab:          () => void
 }
@@ -63,6 +64,18 @@ export const useTabStore = create<TabStore>((set, get) => ({
     set(s => ({
       tabs: s.tabs.map(t => t.id === tabId ? { ...t, isDirty: false } : t),
     }))
+  },
+
+  reorderTabs: (fromId, toId) => {
+    set(s => {
+      const tabs = [...s.tabs]
+      const fromIdx = tabs.findIndex(t => t.id === fromId)
+      const toIdx   = tabs.findIndex(t => t.id === toId)
+      if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return s
+      const [moved] = tabs.splice(fromIdx, 1)
+      tabs.splice(toIdx, 0, moved)
+      return { tabs }
+    })
   },
 
   nextTab: () => {

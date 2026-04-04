@@ -7,6 +7,7 @@ import { NoteEditor } from './components/editor/NoteEditor'
 import { SearchModal } from './components/search/SearchModal'
 import { useVaultStore } from './stores/vaultStore'
 import { useTabStore } from './stores/tabStore'
+import { useEditorStore } from './stores/editorStore'
 import { ipc } from './lib/ipc'
 import styles from './App.module.css'
 import type { VaultConfig } from '@shared/types/Note'
@@ -97,12 +98,47 @@ export default function App(): JSX.Element {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Wiki-link navigation
+  // Wiki-link navigation — handles [[Note]], [[Note#Heading]], [[#Heading]], [[https://...]]
   useEffect(() => {
-    const handler = (e: Event): void => {
-      const { target } = (e as CustomEvent<{ target: string }>).detail
-      const linked = notes.find(n => n.title === target)
-      if (linked) { useTabStore.getState().openTab(linked.id, linked.title) }
+    const handler = async (e: Event): Promise<void> => {
+      const { href } = (e as CustomEvent<{ href: string }>).detail
+
+      // External URL → open in default browser
+      if (/^https?:\/\//.test(href)) {
+        await ipc.shell.openExternal(href)
+        return
+      }
+
+      // Parse "NoteName#heading" or "#heading"
+      const hashIdx  = href.indexOf('#')
+      const noteName = (hashIdx === -1 ? href : href.slice(0, hashIdx)).trim()
+      const heading  = hashIdx === -1 ? '' : href.slice(hashIdx + 1).trim()
+
+      if (noteName) {
+        const linked = notes.find(n => n.title === noteName && n.noteType !== 'folder')
+        if (linked) {
+          const { isDirty, save } = useEditorStore.getState()
+          if (isDirty) await save()
+          useTabStore.getState().openTab(linked.id, linked.title)
+        }
+      }
+
+      if (heading) {
+        // Give the editor time to mount if we just switched notes
+        const delay = noteName ? 150 : 0
+        setTimeout(() => {
+          const pm = document.querySelector('.ProseMirror')
+          if (!pm) return
+          const headings = pm.querySelectorAll('h1, h2, h3, h4, h5, h6')
+          for (const h of headings) {
+            const text = (h.textContent ?? '').trim()
+            if (text === heading || text.toLowerCase().replace(/\s+/g, '-') === heading.toLowerCase().replace(/\s+/g, '-')) {
+              h.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              return
+            }
+          }
+        }, delay)
+      }
     }
     window.addEventListener('owl:open-wiki-link', handler)
     return () => window.removeEventListener('owl:open-wiki-link', handler)
@@ -150,7 +186,7 @@ export default function App(): JSX.Element {
     }
   }
 
-  const safeFolder = vaultName.trim().replace(/[<>:"/\\|?*]/g, '-') || 'my-vault'
+  const safeFolder = vaultName.trim().replace(/[<>:"/\\|?*]/g, '-') || 'my-bucket'
 
   if (screen === 'init') {
     return (
@@ -189,10 +225,10 @@ export default function App(): JSX.Element {
           {screen === 'welcome' && (
             <div className={styles.buttonGroup}>
               <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setScreen('create')}>
-                Create Vault
+                Create Knowledge Bucket
               </button>
               <button className={`${styles.btn} ${styles.btnSecondary}`} onClick={handleShowVaultList}>
-                Open Vault
+                Open Knowledge Bucket
               </button>
             </div>
           )}
@@ -202,7 +238,7 @@ export default function App(): JSX.Element {
               <input
                 ref={nameInputRef}
                 className={styles.nameInput}
-                placeholder="Vault name…"
+                placeholder="Bucket name…"
                 value={vaultName}
                 onChange={e => setVaultName(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') handleCreate() }}
@@ -232,7 +268,7 @@ export default function App(): JSX.Element {
           {screen === 'vault-list' && (
             <div className={styles.vaultList}>
               {knownVaults.length === 0
-                ? <div className={styles.vaultListEmpty}>No saved vaults yet.</div>
+                ? <div className={styles.vaultListEmpty}>No saved Knowledge Buckets yet.</div>
                 : knownVaults.map(v => (
                     <button key={v.path} className={styles.vaultCard} onClick={() => handleOpenExisting(v.path)}>
                       <div className={styles.vaultCardName}>{v.name}</div>

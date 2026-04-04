@@ -3,7 +3,7 @@ import { create } from 'zustand'
 import { ipc } from '../lib/ipc'
 import type { Note, VaultConfig } from '@shared/types/Note'
 
-function normalizeNote(raw: unknown): Note {
+export function normalizeNote(raw: unknown): Note {
   const r = raw as Record<string, unknown>
   return {
     id:          r.id          as string,

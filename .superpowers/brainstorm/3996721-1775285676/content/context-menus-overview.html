@@ -1,0 +1,140 @@
+<style>
+  .surfaces {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 8px;
+  }
+  .surface-block {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .surface-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #a78bfa;
+    margin-bottom: 12px;
+  }
+  .ctx-menu {
+    background: #1e2433;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 4px;
+    width: 200px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    font-size: 13px;
+  }
+  .ctx-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-radius: 5px;
+    color: #e2e8f0;
+    gap: 8px;
+  }
+  .ctx-item:hover {
+    background: rgba(167,139,250,0.15);
+  }
+  .ctx-item .icon { width: 16px; text-align: center; font-size: 12px; opacity: 0.7; }
+  .ctx-item .label { flex: 1; }
+  .ctx-item .kbd {
+    font-size: 10px;
+    color: rgba(255,255,255,0.35);
+    font-family: monospace;
+  }
+  .ctx-item.danger { color: #f87171; }
+  .ctx-separator {
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+    margin: 3px 8px;
+  }
+  .ctx-item.dim { opacity: 0.45; }
+  .trigger-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    cursor: default;
+  }
+  .trigger-note { background: rgba(139,92,246,0.12); color: #c4b5fd; border: 1px dashed rgba(139,92,246,0.3); }
+  .trigger-folder { background: rgba(251,191,36,0.08); color: #fcd34d; border: 1px dashed rgba(251,191,36,0.25); }
+  .trigger-editor { background: rgba(52,211,153,0.08); color: #6ee7b7; border: 1px dashed rgba(52,211,153,0.25); }
+  .trigger-vault { background: rgba(96,165,250,0.08); color: #93c5fd; border: 1px dashed rgba(96,165,250,0.25); }
+  .arrow {
+    font-size: 18px;
+    color: rgba(255,255,255,0.2);
+    margin: 6px 0 4px 4px;
+  }
+</style>
+
+<h2>Proposed Right-Click Context Menus</h2>
+<p class="subtitle">One menu per surface — approve or adjust before implementation</p>
+
+<div class="surfaces">
+
+  <!-- NOTE ROW -->
+  <div class="surface-block">
+    <div class="surface-label">Note row (sidebar)</div>
+    <div class="trigger-row trigger-note">📄 My Research Note <span style="opacity:0.4;margin-left:auto;font-size:11px">right-click →</span></div>
+    <div class="arrow">↓</div>
+    <div class="ctx-menu">
+      <div class="ctx-item"><span class="icon">✏️</span><span class="label">Rename</span><span class="kbd">F2</span></div>
+      <div class="ctx-item"><span class="icon">📋</span><span class="label">Duplicate</span></div>
+      <div class="ctx-separator"></div>
+      <div class="ctx-item"><span class="icon">📁</span><span class="label">Move to folder…</span></div>
+      <div class="ctx-item"><span class="icon">↗</span><span class="label">Lift to root</span></div>
+      <div class="ctx-separator"></div>
+      <div class="ctx-item danger"><span class="icon">🗑</span><span class="label">Delete</span><span class="kbd">Del</span></div>
+    </div>
+  </div>
+
+  <!-- FOLDER ROW -->
+  <div class="surface-block">
+    <div class="surface-label">Folder row (sidebar)</div>
+    <div class="trigger-row trigger-folder">📁 Research <span style="opacity:0.4;margin-left:auto;font-size:11px">right-click →</span></div>
+    <div class="arrow">↓</div>
+    <div class="ctx-menu">
+      <div class="ctx-item"><span class="icon">✏️</span><span class="label">Rename</span><span class="kbd">F2</span></div>
+      <div class="ctx-separator"></div>
+      <div class="ctx-item"><span class="icon">📄</span><span class="label">New note inside</span></div>
+      <div class="ctx-separator"></div>
+      <div class="ctx-item danger"><span class="icon">🗑</span><span class="label">Delete folder</span></div>
+    </div>
+  </div>
+
+  <!-- EDITOR TEXT -->
+  <div class="surface-block">
+    <div class="surface-label">Editor text (inside note)</div>
+    <div class="trigger-row trigger-editor" style="font-style:italic;">"…some selected text…" <span style="opacity:0.4;margin-left:auto;font-size:11px">right-click →</span></div>
+    <div class="arrow">↓</div>
+    <div class="ctx-menu">
+      <div class="ctx-item"><span class="icon">🔗</span><span class="label">Turn into wiki-link</span></div>
+      <div class="ctx-item"><span class="icon">📣</span><span class="label">Insert callout</span></div>
+      <div class="ctx-separator"></div>
+      <div class="ctx-item"><span class="icon"></span><span class="label">Cut</span><span class="kbd">Ctrl+X</span></div>
+      <div class="ctx-item"><span class="icon"></span><span class="label">Copy</span><span class="kbd">Ctrl+C</span></div>
+      <div class="ctx-item"><span class="icon"></span><span class="label">Paste</span><span class="kbd">Ctrl+V</span></div>
+    </div>
+  </div>
+
+  <!-- VAULT CARD -->
+  <div class="surface-block">
+    <div class="surface-label">Vault card (manager modal)</div>
+    <div class="trigger-row trigger-vault">🗄 My Vault <span style="opacity:0.35;font-size:11px;margin-left:4px">/Documents/my-vault</span><span style="opacity:0.4;margin-left:auto;font-size:11px">right-click →</span></div>
+    <div class="arrow">↓</div>
+    <div class="ctx-menu">
+      <div class="ctx-item"><span class="icon">↩</span><span class="label">Switch to this vault</span></div>
+      <div class="ctx-separator"></div>
+      <div class="ctx-item danger"><span class="icon">✕</span><span class="label">Remove from list</span></div>
+    </div>
+  </div>
+
+</div>

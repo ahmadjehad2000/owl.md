@@ -1,58 +1,84 @@
 /* src/renderer/components/layout/RightSidebar.module.css */
 
-.root { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+.root { display: flex; flex-direction: column; height: 100%; overflow: hidden; min-height: 0; }
 
-/* ── Tab bar ── */
-
+/* ── Tab bar — pill style matching TabBar ── */
 .tabs {
   display: flex;
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-  padding: 0 2px;
+  padding: 5px 6px 4px;
+  gap: 2px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
 .tab {
   flex: 1;
-  padding: 8px 4px;
+  padding: 5px 4px;
   font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  font-weight: 500;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.28);
   background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
+  border-radius: 6px;
   cursor: pointer;
   font-family: inherit;
-  transition: color 0.15s;
+  transition: color 0.12s, background 0.12s, transform 0.1s;
 }
 
-.tab:hover { color: rgba(255,255,255,0.55); }
+.tab:hover { color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.06); }
+.tab:active { transform: scale(0.96); }
 
+/* Pill active — filled, no underline */
 .tabActive {
-  color: rgba(56,182,220,0.9);
-  border-bottom-color: rgba(56,182,220,0.55);
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.85);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.07);
 }
+.tabActive:hover { background: rgba(255,255,255,0.12); }
 
 /* ── Tab body ── */
-
-.body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.body { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
 
 /* ── Backlinks ── */
-
-.list { flex: 1; overflow-y: auto; padding: 6px 8px; }
-.list::-webkit-scrollbar { width: 4px; }
-.list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+.list { flex: 1; overflow-y: auto; padding: 6px 6px; }
+.list::-webkit-scrollbar { width: 4px; background: transparent; }
+.list::-webkit-scrollbar-track { background: transparent; }
+.list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 2px; }
+.list::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
 
 .backlink {
-  display: block; padding: 6px 8px; border-radius: 6px; margin: 2px 0;
+  display: block; padding: 7px 10px; border-radius: 8px; margin: 2px 0;
   background: rgba(255,255,255,0.04); border: none;
-  cursor: pointer; transition: background 0.1s;
+  cursor: pointer; transition: background 0.12s, transform 0.1s;
   text-align: left; width: 100%;
 }
 .backlink:hover { background: rgba(56,182,220,0.1); }
+.backlink:active { transform: scale(0.98); }
 
 .blTitle { font-size: 11px; color: rgba(255,255,255,0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.blLink  { font-size: 10px; color: rgba(56,182,220,0.6); margin-top: 2px; }
+.blLink  { font-size: 10px; color: rgba(56,182,220,0.55); margin-top: 2px; }
 
-.empty { padding: 16px 12px; font-size: 11px; color: rgba(255,255,255,0.2); font-style: italic; }
+.sectionLabel { font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.2); padding: 6px 10px 3px; }
+
+.empty { padding: 20px 12px; font-size: 11px; color: rgba(255,255,255,0.2); text-align: center; line-height: 1.6; }
+
+/* ── Light theme overrides ── */
+[data-theme="modern-light"] .tabs { border-bottom-color: rgba(0,0,0,0.08); }
+[data-theme="modern-light"] .tab { color: rgba(0,0,0,0.38); }
+[data-theme="modern-light"] .tab:hover { color: rgba(0,0,0,0.65); background: rgba(0,0,0,0.06); }
+[data-theme="modern-light"] .tabActive {
+  background: rgba(0,0,0,0.08);
+  color: rgba(0,0,0,0.82);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+[data-theme="modern-light"] .tabActive:hover { background: rgba(0,0,0,0.1); }
+[data-theme="modern-light"] .list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); }
+[data-theme="modern-light"] .list::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.18); }
+[data-theme="modern-light"] .backlink { background: rgba(0,0,0,0.04); }
+[data-theme="modern-light"] .backlink:hover { background: rgba(2,132,199,0.09); }
+[data-theme="modern-light"] .blTitle { color: rgba(0,0,0,0.65); }
+[data-theme="modern-light"] .blLink { color: rgba(2,132,199,0.7); }
+[data-theme="modern-light"] .sectionLabel { color: rgba(0,0,0,0.3); }
+[data-theme="modern-light"] .empty { color: rgba(0,0,0,0.28); }

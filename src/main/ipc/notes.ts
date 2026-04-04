@@ -31,13 +31,13 @@ export function registerNotesHandlers(services: {
     const rawSave = note as unknown as Record<string, unknown>
     if ((rawSave.note_type ?? rawSave.noteType) === 'folder') throw new Error(`Cannot save folder note: ${id}`)
     services.vault().writeNote(note.path, markdown)
-    const titleMatch = markdown.match(/^#\s+(.+)$/m)
-    const title = titleMatch ? titleMatch[1] : basename(note.path, '.md')
     const folderPath = dirname(note.path) === '.' ? '' : dirname(note.path)
     const raw = note as unknown as Record<string, unknown>
     const noteType = (raw.note_type ?? raw.noteType ?? 'note') as Note['noteType']
-    services.index().indexNote({ id, path: note.path, title, markdown, folderPath, noteType })
-    services.index().syncFTS(id, title, markdown)
+    // Title is owned by the DB (set via notes:rename); never extract from file content
+    const dbTitle = (db().prepare('SELECT title FROM notes WHERE id = ?').get(id) as { title: string }).title
+    services.index().indexNote({ id, path: note.path, title: dbTitle, markdown, folderPath, noteType })
+    services.index().syncFTS(id, dbTitle, markdown)
     services.index().resolveLinks()
     return db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
   })
@@ -53,7 +53,7 @@ export function registerNotesHandlers(services: {
       notePath = folderPath ? `${folderPath}/${fileName}` : fileName
       counter++
     }
-    const markdown = `# ${title}\n\n`
+    const markdown = ''
     services.vault().writeNote(notePath, markdown)
     services.index().indexNote({ id, path: notePath, title, markdown, folderPath, noteType: 'note' })
     services.index().syncFTS(id, title, markdown)
@@ -102,22 +102,20 @@ export function registerNotesHandlers(services: {
   ipcMain.handle('notes:rename', (_e, id: string, newTitle: string): Note => {
     const note = db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note | undefined
     if (!note) throw new Error(`Note not found: ${id}`)
-    const raw = note as unknown as Record<string, unknown>
-    const noteType = (raw.note_type ?? raw.noteType ?? 'note') as Note['noteType']
-    if (noteType === 'folder') {
-      // Folders have no markdown file — just update the DB title
-      db().prepare('UPDATE notes SET title = ?, updated_at = ? WHERE id = ?')
-        .run(newTitle, Date.now(), id)
-      return db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
+    // Only update the DB title — never touch the markdown file.
+    // The persistent title bar owns the title; file content is separate.
+    db().prepare('UPDATE notes SET title = ?, updated_at = ? WHERE id = ?')
+      .run(newTitle, Date.now(), id)
+    // Sync FTS title without changing file content
+    const row = db().prepare('SELECT rowid FROM notes WHERE id = ?').get(id) as { rowid: number } | undefined
+    if (row) {
+      db().prepare('DELETE FROM notes_fts WHERE rowid = ?').run(row.rowid)
+      const raw = note as unknown as Record<string, unknown>
+      const content = (raw.note_type ?? raw.noteType) !== 'folder'
+        ? services.vault().readNote(note.path)
+        : ''
+      db().prepare('INSERT INTO notes_fts(rowid, title, content) VALUES (?, ?, ?)').run(row.rowid, newTitle, content)
     }
-    const markdown = services.vault().readNote(note.path)
-    const updated = markdown.match(/^#\s+.+$/m)
-      ? markdown.replace(/^#\s+.+$/m, `# ${newTitle}`)
-      : `# ${newTitle}\n\n${markdown}`
-    services.vault().writeNote(note.path, updated)
-    const folderPath = dirname(note.path) === '.' ? '' : dirname(note.path)
-    services.index().indexNote({ id, path: note.path, title: newTitle, markdown: updated, folderPath, noteType })
-    services.index().syncFTS(id, newTitle, updated)
     return db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
   })
 

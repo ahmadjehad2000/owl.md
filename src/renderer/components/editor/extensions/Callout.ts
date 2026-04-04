@@ -1,9 +1,25 @@
 // src/renderer/components/editor/extensions/Callout.ts
 import { Node, mergeAttributes } from '@tiptap/core'
-import { ReactNodeViewRenderer } from '@tiptap/react'
-import { CalloutView } from '../CalloutView'
+import type { NodeViewRendererProps } from '@tiptap/core'
+import styles from '../CalloutView.module.css'
 
 export type CalloutType = 'info' | 'warning' | 'tip' | 'danger'
+
+const VALID_TYPES: CalloutType[] = ['info', 'warning', 'tip', 'danger']
+
+const ICONS: Record<CalloutType, string> = {
+  info:    'ℹ',
+  warning: '⚠',
+  tip:     '💡',
+  danger:  '🚫',
+}
+
+const LABELS: Record<CalloutType, string> = {
+  info:    'Info',
+  warning: 'Warning',
+  tip:     'Tip',
+  danger:  'Danger',
+}
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -58,7 +74,50 @@ export const Callout = Node.create({
     }
   },
 
+  // Pure DOM node view — no ReactNodeViewRenderer, no flushSync
   addNodeView() {
-    return ReactNodeViewRenderer(CalloutView)
+    return ({ node }: NodeViewRendererProps) => {
+      const type: CalloutType = VALID_TYPES.includes(node.attrs.type as CalloutType)
+        ? (node.attrs.type as CalloutType)
+        : 'info'
+
+      let collapsed = false
+
+      const dom = document.createElement('div')
+      dom.className = `${styles.callout} ${styles[type]}`
+      dom.setAttribute('data-callout', type)
+
+      const header = document.createElement('div')
+      header.className = styles.header
+      header.contentEditable = 'false'
+
+      const icon = document.createElement('span')
+      icon.className = styles.icon
+      icon.textContent = ICONS[type]
+
+      const label = document.createElement('span')
+      label.className = styles.label
+      label.textContent = LABELS[type]
+
+      const toggle = document.createElement('span')
+      toggle.className = styles.toggle
+      toggle.textContent = '▼'
+
+      header.append(icon, label, toggle)
+
+      const contentDOM = document.createElement('div')
+      contentDOM.className = styles.content
+
+      header.addEventListener('click', () => {
+        collapsed = !collapsed
+        dom.classList.toggle(styles.collapsed, collapsed)
+        contentDOM.style.display = collapsed ? 'none' : ''
+        toggle.textContent = collapsed ? '▶' : '▼'
+      })
+
+      dom.append(header, contentDOM)
+
+      return { dom, contentDOM }
+    }
   },
 })

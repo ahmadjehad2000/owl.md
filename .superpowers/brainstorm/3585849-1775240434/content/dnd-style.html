@@ -1,0 +1,30 @@
+<h2>Drag-and-drop — what should it do?</h2>
+<p class="subtitle">The DB already has a <code>parent_id</code> column — how much of it do we use?</p>
+
+<div class="options">
+
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Reorder only</h3>
+      <p>Drag notes up/down to change their order in the list. No nesting — all notes stay flat. Simple to implement and use.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Nest into folders (full hierarchy)</h3>
+      <p>Drag a note onto another note or folder to make it a child. The sidebar becomes a tree. Uses <code>parent_id</code> fully. More powerful but more complex.</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Drag into named folders only</h3>
+      <p>Notes can be dragged into folder groups (like "Research", "Daily"). Folders exist as labels, not as notes themselves. Middle ground.</p>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,95 @@
+/* src/renderer/components/editor/WikiLinkMenu.module.css */
+
+.menu {
+  z-index: 200;
+  min-width: 280px;
+  max-height: 340px;
+  overflow-y: auto;
+  background: #0d1828;
+  border: 1px solid rgba(56, 182, 220, 0.18);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+  padding: 4px;
+  animation: dropIn 0.1s ease;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.section {
+  padding: 6px 10px 3px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 5px 8px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.1s;
+}
+
+.item.selected,
+.item:hover { background: rgba(56, 182, 220, 0.1); }
+
+.icon {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.icon.heading {
+  background: rgba(99, 179, 237, 0.12);
+  color: #63b3ed;
+}
+
+.icon.note {
+  background: rgba(104, 211, 145, 0.12);
+  color: #68d391;
+}
+
+.icon.url {
+  background: rgba(246, 173, 85, 0.12);
+  color: #f6ad55;
+  font-size: 13px;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+}

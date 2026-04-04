@@ -4,6 +4,7 @@ import { ipc } from '../lib/ipc'
 import { parseFrontmatter, serializeFrontmatter } from '../lib/markdown'
 import { useTabStore } from './tabStore'
 import { useRightPanelStore } from './rightPanelStore'
+import { normalizeNote, useVaultStore } from './vaultStore'
 import type { Frontmatter } from '../lib/markdown'
 import type { Note } from '@shared/types/Note'
 
@@ -32,12 +33,18 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   saveStatus:  'idle',
 
   loadNote: async (id) => {
-    const { note, markdown: raw } = await ipc.notes.read(id)
+    const { note: rawNote, markdown: raw } = await ipc.notes.read(id)
+    const note = normalizeNote(rawNote)
     const { frontmatter, body } = parseFrontmatter(raw)
-    set({ note, markdown: body, frontmatter, isDirty: false, saveStatus: 'idle' })
+    // Ensure content starts with `# Title` so it's visible in the editor.
+    // If the file already has an H1 as the first line, use it as-is.
+    // If not, prepend the DB title so the heading is shown.
+    const hasLeadingH1 = /^#[^\S\n]/.test(body.trimStart())
+    const body2 = hasLeadingH1 ? body : `# ${note.title}\n\n${body.trimStart()}`
+    set({ note, markdown: body2, frontmatter, isDirty: false, saveStatus: 'idle' })
     const { activeTabId } = useTabStore.getState()
     if (activeTabId) {
-      useTabStore.getState().updateTabContent(activeTabId, body, frontmatter, false)
+      useTabStore.getState().updateTabContent(activeTabId, body2, frontmatter, false)
     }
   },
 
@@ -70,8 +77,25 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     if (!note) return
     set({ saveStatus: 'saving' })
     try {
+      // Sync first H1 heading → note title
+      const h1 = markdown.match(/^#[^\S\n]+(.+?)$/m)?.[1]?.trim() ?? null
+      let activeNote = note
+      if (h1 && h1 !== note.title) {
+        const renamed = normalizeNote(await ipc.notes.rename(note.id, h1))
+        activeNote = renamed
+        set({ note: renamed })
+        // Update tab title bar
+        const { activeTabId } = useTabStore.getState()
+        if (activeTabId) {
+          useTabStore.setState(s => ({
+            tabs: s.tabs.map(t => t.noteId === renamed.id ? { ...t, title: renamed.title } : t),
+          }))
+        }
+        void useVaultStore.getState().loadNotes()
+      }
+
       const full = serializeFrontmatter(frontmatter, markdown)
-      const updated = await ipc.notes.save(note.id, full)
+      const updated = normalizeNote(await ipc.notes.save(activeNote.id, full))
       set({ note: updated, isDirty: false, saveStatus: 'saved' })
       const { activeTabId } = useTabStore.getState()
       if (activeTabId) useTabStore.getState().markTabClean(activeTabId)

@@ -58,8 +58,9 @@ export class IndexService {
     ).all() as Array<{ rowid: number; source_note_id: string; link_text: string }>
 
     for (const link of unresolved) {
-      const target = this.db.prepare('SELECT id FROM notes WHERE title = ?').get(link.link_text) as
-        | { id: string } | undefined
+      const target = this.db.prepare(
+        "SELECT id FROM notes WHERE title = ? AND note_type != 'folder'"
+      ).get(link.link_text) as { id: string } | undefined
       if (target) {
         this.db.prepare('UPDATE links SET target_note_id = ?, is_resolved = 1 WHERE rowid = ?')
           .run(target.id, link.rowid)

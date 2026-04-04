@@ -1,0 +1,140 @@
+/* src/renderer/styles/themes.css
+   Global CSS custom properties — theme switching via [data-theme] on <html>
+*/
+
+/* ─────────────────── DEFAULT (current blue-purple nebula) ─────────────────── */
+:root {
+  --owl-bg:
+    radial-gradient(ellipse 55% 55% at 15% 70%,  rgba(20,120,160,0.38) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 85% 25%,  rgba(80,40,160,0.32)  0%, transparent 65%),
+    radial-gradient(ellipse 65% 40% at 55% 100%, rgba(0,160,140,0.16)  0%, transparent 70%),
+    #080b12;
+
+  --owl-titlebar-bg:    rgba(8,11,18,0.7);
+  --owl-menubar-bg:     rgba(0,0,0,0.18);
+  --owl-sidebar-bg:     rgba(0,0,0,0.28);
+  --owl-sidebar-border: rgba(255,255,255,0.05);
+  --owl-editor-area-bg: rgba(255,255,255,0.04);
+
+  --owl-card-bg:        rgba(255,255,255,0.035);
+  --owl-card-border:    rgba(255,255,255,0.07);
+  --owl-card-shadow:    0 2px 8px rgba(0,0,0,0.2), 0 8px 32px rgba(0,0,0,0.18);
+
+  --owl-text:           rgba(255,255,255,0.82);
+  --owl-text-muted:     rgba(255,255,255,0.35);
+  --owl-text-faint:     rgba(255,255,255,0.2);
+  --owl-heading-1:      #edf2ff;
+  --owl-heading-2:      #dde6ff;
+  --owl-heading-3:      #ccd5f0;
+  --owl-heading-4:      #b8c8e8;
+
+  --owl-accent:         #38b6dc;
+  --owl-accent-bg:      rgba(56,182,220,0.1);
+  --owl-accent-border:  rgba(56,182,220,0.25);
+
+  --owl-code-bg:        rgba(255,255,255,0.08);
+  --owl-code-text:      #82cce0;
+  --owl-pre-bg:         rgba(0,0,0,0.35);
+  --owl-quote-border:   rgba(56,182,220,0.4);
+  --owl-hr:             rgba(255,255,255,0.08);
+  --owl-divider:        rgba(255,255,255,0.05);
+  --owl-scrollbar:      rgba(255,255,255,0.07);
+  --owl-scrollbar-hover:rgba(255,255,255,0.16);
+
+  --owl-input-bg:       rgba(255,255,255,0.06);
+  --owl-input-border:   rgba(255,255,255,0.12);
+  --owl-font:           -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+  --owl-font-heading:   -apple-system, 'SF Pro Display', BlinkMacSystemFont, sans-serif;
+  --owl-line-height:    1.8;
+  --owl-focus-ring:     rgba(56,182,220,0.7);
+}
+
+/* ─────────────────── GLOBAL FOCUS RINGS ────────────────────────────────────── */
+
+/* Show focus ring only for keyboard navigation, not mouse clicks */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid var(--owl-focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+[data-theme="modern-light"] { --owl-focus-ring: rgba(2,132,199,0.75); }
+
+/* ─────────────────── FULL MODERN DARK (pure black, high contrast) ─────────── */
+[data-theme="modern-dark"] {
+  --owl-bg: #080808;
+
+  --owl-titlebar-bg:    rgba(0,0,0,0.9);
+  --owl-menubar-bg:     rgba(0,0,0,0.5);
+  --owl-sidebar-bg:     #0e0e0e;
+  --owl-sidebar-border: rgba(255,255,255,0.06);
+  --owl-editor-area-bg: #111111;
+
+  --owl-card-bg:        #181818;
+  --owl-card-border:    rgba(255,255,255,0.09);
+  --owl-card-shadow:    0 2px 8px rgba(0,0,0,0.5), 0 8px 40px rgba(0,0,0,0.4);
+
+  --owl-text:           rgba(255,255,255,0.88);
+  --owl-text-muted:     rgba(255,255,255,0.4);
+  --owl-text-faint:     rgba(255,255,255,0.22);
+  --owl-heading-1:      #ffffff;
+  --owl-heading-2:      #e8eeff;
+  --owl-heading-3:      #d0dcf8;
+  --owl-heading-4:      #b8cce8;
+
+  --owl-accent:         #38b6dc;
+  --owl-accent-bg:      rgba(56,182,220,0.12);
+  --owl-accent-border:  rgba(56,182,220,0.3);
+
+  --owl-code-bg:        rgba(255,255,255,0.06);
+  --owl-code-text:      #7dd3fc;
+  --owl-pre-bg:         #0d0d0d;
+  --owl-quote-border:   rgba(56,182,220,0.5);
+  --owl-hr:             rgba(255,255,255,0.07);
+  --owl-divider:        rgba(255,255,255,0.06);
+  --owl-scrollbar:      rgba(255,255,255,0.08);
+  --owl-scrollbar-hover:rgba(255,255,255,0.18);
+
+  --owl-input-bg:       rgba(255,255,255,0.07);
+  --owl-input-border:   rgba(255,255,255,0.14);
+}
+
+/* ─────────────────── FULL MODERN LIGHT (clean white) ──────────────────────── */
+[data-theme="modern-light"] {
+  --owl-bg: #f0f2f7;
+
+  --owl-titlebar-bg:    rgba(240,242,247,0.95);
+  --owl-menubar-bg:     rgba(228,232,240,0.9);
+  --owl-sidebar-bg:     rgba(228,232,242,0.96);
+  --owl-sidebar-border: rgba(0,0,0,0.08);
+  --owl-editor-area-bg: #f0f2f7;
+
+  --owl-card-bg:        #ffffff;
+  --owl-card-border:    rgba(0,0,0,0.09);
+  --owl-card-shadow:    0 1px 4px rgba(0,0,0,0.08), 0 6px 24px rgba(0,0,0,0.07);
+
+  --owl-text:           #1e2433;
+  --owl-text-muted:     rgba(30,36,51,0.45);
+  --owl-text-faint:     rgba(30,36,51,0.28);
+  --owl-heading-1:      #0d1117;
+  --owl-heading-2:      #1a2235;
+  --owl-heading-3:      #2a3348;
+  --owl-heading-4:      #3a4560;
+
+  --owl-accent:         #0284c7;
+  --owl-accent-bg:      rgba(2,132,199,0.09);
+  --owl-accent-border:  rgba(2,132,199,0.28);
+
+  --owl-code-bg:        rgba(0,0,0,0.05);
+  --owl-code-text:      #0369a1;
+  --owl-pre-bg:         #f8f9fb;
+  --owl-quote-border:   rgba(2,132,199,0.4);
+  --owl-hr:             rgba(0,0,0,0.1);
+  --owl-divider:        rgba(0,0,0,0.07);
+  --owl-scrollbar:      rgba(0,0,0,0.1);
+  --owl-scrollbar-hover:rgba(0,0,0,0.2);
+
+  --owl-input-bg:       rgba(0,0,0,0.04);
+  --owl-input-border:   rgba(0,0,0,0.14);
+}

@@ -2,20 +2,23 @@
 
 .tabBar {
   display: flex;
-  align-items: stretch;
-  height: 32px;
-  background: rgba(4, 9, 18, 0.6);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  align-items: center;
+  height: 38px;
+  padding: 4px 6px;
+  background: rgba(0, 0, 0, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   flex-shrink: 0;
-  overflow: hidden;
+  gap: 2px;
 }
 
 .tabList {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   overflow-x: auto;
   flex: 1;
+  gap: 2px;
   scrollbar-width: none;
+  height: 100%;
 }
 .tabList::-webkit-scrollbar { display: none; }
 
@@ -24,50 +27,74 @@
   align-items: center;
   gap: 5px;
   padding: 0 10px;
+  height: 100%;
   font-size: 11px;
   font-family: inherit;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.35);
   background: transparent;
   border: none;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 7px;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: background 0.1s, color 0.1s;
+  transition: background 0.12s, color 0.12s, transform 0.1s;
 }
-.tab:hover { background: rgba(255, 255, 255, 0.05); color: rgba(255, 255, 255, 0.7); }
+.tab:hover { background: rgba(255, 255, 255, 0.07); color: rgba(255, 255, 255, 0.65); }
+.tab:active { transform: scale(0.96); }
+.tab[draggable] { cursor: grab; }
+.tab[draggable]:active { cursor: grabbing; }
+.tabDragOver { border-left: 2px solid rgba(56, 182, 220, 0.7) !important; background: rgba(56, 182, 220, 0.07) !important; }
 
+/* Pill active state — no underline, filled background */
 .tabActive {
-  background: rgba(56, 182, 220, 0.1);
-  color: rgba(56, 182, 220, 0.9);
-  border-bottom: 2px solid rgba(56, 182, 220, 0.6);
+  background: rgba(255, 255, 255, 0.11);
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
+.tabActive:hover { background: rgba(255, 255, 255, 0.13); }
 
 .tabTitle { max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
-.tabDirty { color: rgba(56, 182, 220, 0.7); font-size: 9px; flex-shrink: 0; }
+.tabDirty { color: rgba(56, 182, 220, 0.65); font-size: 8px; flex-shrink: 0; }
 
 .tabClose {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1;
   color: rgba(255, 255, 255, 0.2);
-  padding: 0 2px;
-  border-radius: 3px;
+  padding: 1px 3px;
+  border-radius: 4px;
   transition: background 0.1s, color 0.1s;
   flex-shrink: 0;
 }
-.tabClose:hover { background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.8); }
+.tabClose:hover { background: rgba(255, 255, 255, 0.12); color: rgba(255, 255, 255, 0.75); }
 
 .tabNew {
-  padding: 0 12px;
+  padding: 0 10px;
+  height: 100%;
   font-size: 16px;
   line-height: 1;
   font-family: inherit;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.25);
   background: transparent;
   border: none;
-  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 7px;
   cursor: pointer;
-  transition: color 0.1s, background 0.1s;
+  transition: color 0.1s, background 0.1s, transform 0.1s;
   flex-shrink: 0;
 }
-.tabNew:hover { color: rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.05); }
+.tabNew:hover { color: rgba(255, 255, 255, 0.65); background: rgba(255, 255, 255, 0.07); }
+.tabNew:active { transform: scale(0.94); }
+
+/* ── Light theme overrides ── */
+[data-theme="modern-light"] .tabBar { background: rgba(0,0,0,0.04); border-bottom-color: rgba(0,0,0,0.09); }
+[data-theme="modern-light"] .tab { color: rgba(0,0,0,0.42); }
+[data-theme="modern-light"] .tab:hover { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.7); }
+[data-theme="modern-light"] .tabActive {
+  background: rgba(0,0,0,0.1);
+  color: rgba(0,0,0,0.88);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+[data-theme="modern-light"] .tabActive:hover { background: rgba(0,0,0,0.12); }
+[data-theme="modern-light"] .tabClose { color: rgba(0,0,0,0.25); }
+[data-theme="modern-light"] .tabClose:hover { background: rgba(0,0,0,0.1); color: rgba(0,0,0,0.65); }
+[data-theme="modern-light"] .tabNew { color: rgba(0,0,0,0.3); }
+[data-theme="modern-light"] .tabNew:hover { color: rgba(0,0,0,0.65); background: rgba(0,0,0,0.06); }

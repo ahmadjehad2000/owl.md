@@ -1,0 +1,6 @@
+{"type":"server-started","port":52379,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:52379","screen_dir":"/home/device/Documents/owl.md/.superpowers/brainstorm/3585849-1775240434/content","state_dir":"/home/device/Documents/owl.md/.superpowers/brainstorm/3585849-1775240434/state"}
+{"type":"screen-added","file":"/home/device/Documents/owl.md/.superpowers/brainstorm/3585849-1775240434/content/tabs-style.html"}
+{"type":"screen-added","file":"/home/device/Documents/owl.md/.superpowers/brainstorm/3585849-1775240434/content/waiting-1.html"}
+{"type":"screen-added","file":"/home/device/Documents/owl.md/.superpowers/brainstorm/3585849-1775240434/content/dnd-style.html"}
+{"type":"screen-added","file":"/home/device/Documents/owl.md/.superpowers/brainstorm/3585849-1775240434/content/waiting-2.html"}
+{"type":"server-stopped","reason":"idle timeout"}

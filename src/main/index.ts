@@ -1,5 +1,5 @@
 // src/main/index.ts
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { join, relative, dirname, basename } from 'path'
 import { existsSync } from 'fs'
 import { DatabaseService } from './services/DatabaseService'
@@ -51,10 +51,12 @@ async function openVault(vaultPath: string): Promise<VaultConfig> {
 
   for (const notePath of vaultService.listNotes()) {
     const markdown   = vaultService.readNote(notePath)
-    const titleMatch = markdown.match(/^#\s+(.+)$/m)
-    const title      = titleMatch ? titleMatch[1] : basename(notePath, '.md')
     const id         = getOrCreateNoteId(dbService, notePath)
     const folderPath = dirname(notePath) === '.' ? '' : dirname(notePath)
+    // Preserve any title already stored in the DB (set by rename).
+    // Only extract from file content for notes that don't exist in the DB yet.
+    const stored = dbService.get().prepare('SELECT title FROM notes WHERE id = ?').get(id) as { title: string } | undefined
+    const title  = stored?.title ?? (markdown.match(/^#\s+(.+)$/m)?.[1] ?? basename(notePath, '.md'))
     indexService.indexNote({ id, path: notePath, title, markdown, folderPath, noteType: 'note' })
     indexService.syncFTS(id, title, markdown)
   }
@@ -64,10 +66,12 @@ async function openVault(vaultPath: string): Promise<VaultConfig> {
     onFileChanged: (absPath) => {
       const rel        = relative(join(vaultPath, 'notes'), absPath)
       const markdown   = vaultService.readNote(rel)
-      const titleMatch = markdown.match(/^#\s+(.+)$/m)
-      const title      = titleMatch ? titleMatch[1] : basename(rel, '.md')
       const id         = getOrCreateNoteId(dbService, rel)
       const folderPath = dirname(rel) === '.' ? '' : dirname(rel)
+      // Title is owned by the DB — never overwrite it from file content.
+      // If the note is brand new (not yet in DB), fall back to H1 or filename.
+      const stored = dbService.get().prepare('SELECT title FROM notes WHERE id = ?').get(id) as { title: string } | undefined
+      const title  = stored?.title ?? (markdown.match(/^#\s+(.+)$/m)?.[1] ?? basename(rel, '.md'))
       indexService.indexNote({ id, path: rel, title, markdown, folderPath, noteType: 'note' })
       indexService.syncFTS(id, title, markdown)
       indexService.resolveLinks()
@@ -122,6 +126,10 @@ function getOrCreateNoteId(dbService: DatabaseService, notePath: string): string
   return row?.id ?? crypto.randomUUID()
 }
 
+// Clear ELECTRON_RUN_AS_NODE so renderer/preload child processes get the
+// proper electron module, not the npm path-string shim.
+delete process.env['ELECTRON_RUN_AS_NODE']
+
 app.whenReady().then(() => {
   settingsService = new SettingsService(app.getPath('userData'))
 
@@ -149,6 +157,8 @@ app.whenReady().then(() => {
 
   registerSearchHandlers(() => activeSession().index)
 
+  ipcMain.handle('shell:open-external', (_e, url: string) => shell.openExternal(url))
+
   const win = new BrowserWindow({
     width: 1280,
     height: 820,
@@ -165,6 +175,14 @@ app.whenReady().then(() => {
   })
 
   win.removeMenu()
+  win.webContents.on('before-input-event', (_e, input) => {
+    if (input.type === 'keyDown' && input.key === 'F12') {
+      win.webContents.toggleDevTools()
+    }
+    if (input.type === 'keyDown' && input.control && input.shift && input.key === 'I') {
+      win.webContents.toggleDevTools()
+    }
+  })
   win.on('ready-to-show', () => win.show())
 
   if (process.env['ELECTRON_RENDERER_URL']) {

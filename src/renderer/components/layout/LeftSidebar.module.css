@@ -48,7 +48,7 @@
 
 .folderArrow { font-size: 8px; color: rgba(255,255,255,0.22); flex-shrink: 0; width: 10px; }
 .folderIcon  { font-size: 12px; flex-shrink: 0; }
-.folderChildren { padding-left: 8px; }
+.folderChildren { padding-left: 0; }
 
 /* ── Note rows ── */
 
@@ -123,4 +123,26 @@
   font-family: inherit;
   padding: 1px 5px;
   outline: none;
+}
+
+/* ── Light theme overrides ── */
+[data-theme="modern-light"] .section { color: rgba(0,0,0,0.38); }
+[data-theme="modern-light"] .addButton { color: rgba(0,0,0,0.35); }
+[data-theme="modern-light"] .addButton:hover { color: rgba(0,0,0,0.7); background: rgba(0,0,0,0.07); }
+[data-theme="modern-light"] .noteList::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); }
+[data-theme="modern-light"] .folderRow { color: rgba(0,0,0,0.5); }
+[data-theme="modern-light"] .folderRow:hover { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.82); }
+[data-theme="modern-light"] .folderArrow { color: rgba(0,0,0,0.25); }
+[data-theme="modern-light"] .noteItem { color: rgba(0,0,0,0.52); }
+[data-theme="modern-light"] .noteItem:hover { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.82); }
+[data-theme="modern-light"] .noteItem.active {
+  background: rgba(2,132,199,0.12);
+  color: rgba(0,0,0,0.9);
+}
+[data-theme="modern-light"] .noteItem.active:hover { background: rgba(2,132,199,0.16); }
+[data-theme="modern-light"] .divider { background: rgba(0,0,0,0.07); }
+[data-theme="modern-light"] .renameInput {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(2,132,199,0.45);
+  color: #1e2433;
 }

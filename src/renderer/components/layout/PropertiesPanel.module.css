@@ -7,25 +7,31 @@
   gap: 4px;
   overflow-y: auto;
   flex: 1;
+  min-height: 0;
 }
+.panel::-webkit-scrollbar { width: 0; }
+.panel:hover::-webkit-scrollbar { width: 4px; }
+.panel::-webkit-scrollbar-track { background: transparent; }
+.panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 
 .empty {
-  padding: 16px 12px;
+  padding: 20px 12px;
   font-size: 11px;
   color: rgba(255,255,255,0.2);
-  font-style: italic;
+  text-align: center;
+  line-height: 1.6;
 }
 
 .row {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
 }
 
 .key {
   font-size: 10px;
-  color: rgba(56,182,220,0.65);
+  color: rgba(56,182,220,0.6);
   font-weight: 600;
   letter-spacing: 0.03em;
   width: 58px;
@@ -35,71 +41,75 @@
   white-space: nowrap;
 }
 
+/* Apple inset input style */
 .value {
   flex: 1;
   font-size: 12px;
-  color: rgba(255,255,255,0.7);
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 4px;
-  padding: 3px 6px;
+  color: rgba(255,255,255,0.75);
+  background: rgba(255,255,255,0.08);
+  border: none;
+  border-radius: 8px;
+  padding: 4px 8px;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.15s;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.25);
+  transition: box-shadow 0.15s;
   min-width: 0;
 }
-
-.value:focus { border-color: rgba(56,182,220,0.35); }
+.value:focus {
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2), 0 0 0 2px rgba(56,182,220,0.32);
+}
 
 .removeBtn {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1;
   padding: 2px 5px;
   color: rgba(255,255,255,0.2);
   background: transparent;
   border: none;
   cursor: pointer;
-  border-radius: 3px;
+  border-radius: 5px;
   font-family: inherit;
   flex-shrink: 0;
-  transition: color 0.1s, background 0.1s;
+  transition: color 0.1s, background 0.1s, transform 0.1s;
 }
-
 .removeBtn:hover { color: rgba(220,80,80,0.7); background: rgba(220,80,80,0.08); }
+.removeBtn:active { transform: scale(0.9); }
 
 .addRow {
   display: flex;
-  gap: 4px;
-  margin-top: 4px;
-  padding-top: 6px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  gap: 6px;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.05);
 }
 
 .newKeyInput {
   flex: 1;
   font-size: 12px;
   color: rgba(255,255,255,0.5);
-  background: rgba(255,255,255,0.04);
-  border: 1px dashed rgba(255,255,255,0.1);
-  border-radius: 4px;
-  padding: 3px 6px;
+  background: rgba(255,255,255,0.06);
+  border: none;
+  border-radius: 8px;
+  padding: 4px 8px;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.15s, border-style 0.15s;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+  transition: box-shadow 0.15s;
 }
-
-.newKeyInput:focus { border-color: rgba(56,182,220,0.3); border-style: solid; }
+.newKeyInput::placeholder { color: rgba(255,255,255,0.22); }
+.newKeyInput:focus { box-shadow: inset 0 1px 3px rgba(0,0,0,0.18), 0 0 0 2px rgba(56,182,220,0.28); }
 
 .addBtn {
-  padding: 3px 8px;
-  font-size: 14px;
-  color: rgba(56,182,220,0.7);
-  background: rgba(56,182,220,0.08);
+  padding: 4px 10px;
+  font-size: 13px;
+  color: rgba(56,182,220,0.75);
+  background: rgba(56,182,220,0.1);
   border: 1px solid rgba(56,182,220,0.2);
-  border-radius: 4px;
+  border-radius: 7px;
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.1s;
+  transition: background 0.1s, transform 0.1s;
 }
-
-.addBtn:hover { background: rgba(56,182,220,0.15); }
+.addBtn:hover { background: rgba(56,182,220,0.18); }
+.addBtn:active { transform: scale(0.94); }
