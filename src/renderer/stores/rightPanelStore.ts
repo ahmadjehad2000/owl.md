@@ -4,7 +4,7 @@ import { ipc } from '../lib/ipc'
 import type { Heading } from '../lib/markdown'
 import type { BacklinkResult } from '@shared/types/Note'
 
-export type RightTab = 'backlinks' | 'outline' | 'properties'
+export type RightTab = 'backlinks' | 'outline' | 'toc' | 'properties'
 
 interface RightPanelState {
   activeTab:      RightTab

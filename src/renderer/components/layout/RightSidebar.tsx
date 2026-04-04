@@ -5,11 +5,13 @@ import { useTabStore } from '../../stores/tabStore'
 import { useRightPanelStore } from '../../stores/rightPanelStore'
 import { OutlinePanel } from './OutlinePanel'
 import { PropertiesPanel } from './PropertiesPanel'
+import { TocPanel } from './TocPanel'
 import styles from './RightSidebar.module.css'
 
-const TABS: { id: 'backlinks' | 'outline' | 'properties'; label: string }[] = [
+const TABS: { id: 'backlinks' | 'outline' | 'toc' | 'properties'; label: string }[] = [
   { id: 'backlinks',  label: 'Links'   },
   { id: 'outline',    label: 'Outline' },
+  { id: 'toc',        label: 'TOC'     },
   { id: 'properties', label: 'Props'   },
 ]
 
@@ -57,6 +59,8 @@ export function RightSidebar(): JSX.Element {
         )}
 
         {activeTab === 'outline' && <OutlinePanel />}
+
+        {activeTab === 'toc' && <TocPanel />}
 
         {activeTab === 'properties' && <PropertiesPanel />}
       </div>
