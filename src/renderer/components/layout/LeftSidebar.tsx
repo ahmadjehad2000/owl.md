@@ -1,5 +1,5 @@
 // src/renderer/components/layout/LeftSidebar.tsx
-import React, { useCallback, useState, useRef, useEffect } from 'react'
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react'
 import {
   DndContext, PointerSensor, useSensor, useSensors,
   closestCenter, DragOverlay,
@@ -359,10 +359,16 @@ export function LeftSidebar(): JSX.Element {
     return items
   }, [notes, loadNotes, openTab, createFolder])
 
-  const allFolders  = notes.filter(n => n.noteType === 'folder').sort((a, b) => a.orderIndex - b.orderIndex)
-  const rootFolders = allFolders.filter(f => !f.parentId)
-  const rootNotes   = notes.filter(n => n.noteType !== 'folder' && !n.parentId).sort((a, b) => a.orderIndex - b.orderIndex)
-  const pinnedNotes = notes.filter(n => n.pinned && n.noteType !== 'folder')
+  const allFolders  = useMemo(
+    () => notes.filter(n => n.noteType === 'folder').sort((a, b) => a.orderIndex - b.orderIndex),
+    [notes],
+  )
+  const rootFolders = useMemo(() => allFolders.filter(f => !f.parentId), [allFolders])
+  const rootNotes   = useMemo(
+    () => notes.filter(n => n.noteType !== 'folder' && !n.parentId).sort((a, b) => a.orderIndex - b.orderIndex),
+    [notes],
+  )
+  const pinnedNotes = useMemo(() => notes.filter(n => n.pinned && n.noteType !== 'folder'), [notes])
 
   function handleDragStart(event: DragStartEvent): void {
     setDragId(event.active.id as string)
