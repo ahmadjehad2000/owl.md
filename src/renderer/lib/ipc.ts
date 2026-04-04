@@ -1,5 +1,5 @@
 // src/renderer/lib/ipc.ts
-import type { Note, NoteContent, BacklinkResult, SearchResult, VaultConfig } from '@shared/types/Note'
+import type { Note, NoteContent, NoteSlim, BacklinkResult, SearchResult, VaultConfig } from '@shared/types/Note'
 
 export const ipc = {
   vault: {
@@ -15,6 +15,7 @@ export const ipc = {
   },
   notes: {
     list:         (): Promise<Note[]>                          => window.owl.notes.list(),
+    listSlim:     (): Promise<NoteSlim[]>                     => window.owl.notes.listSlim(),
     read:         (id: string): Promise<NoteContent>           => window.owl.notes.read(id),
     save:         (id: string, md: string): Promise<Note>      => window.owl.notes.save(id, md),
     create:       (title: string, folder: string): Promise<NoteContent> =>

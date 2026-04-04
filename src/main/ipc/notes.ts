@@ -3,7 +3,7 @@ import { ipcMain } from 'electron'
 import { mkdirSync, writeFileSync } from 'fs'
 import { join, dirname, basename } from 'path'
 import { randomUUID } from 'crypto'
-import type { Note, NoteContent } from '@shared/types/Note'
+import type { Note, NoteContent, NoteSlim } from '@shared/types/Note'
 import type { DatabaseService } from '../services/DatabaseService'
 import type { VaultService } from '../services/VaultService'
 import type { IndexService } from '../services/IndexService'
@@ -16,8 +16,15 @@ export function registerNotesHandlers(services: {
   const db = () => services.db().get()
 
   ipcMain.handle('notes:list', (): Note[] =>
-    db().prepare('SELECT * FROM notes ORDER BY updated_at DESC').all() as Note[]
+    db().prepare('SELECT * FROM notes WHERE deleted_at IS NULL ORDER BY updated_at DESC').all() as Note[]
   )
+
+  ipcMain.handle('notes:list-slim', (): NoteSlim[] => {
+    return db().prepare(
+      `SELECT id, path, title, parent_id, folder_path, note_type, order_index, pinned, deleted_at
+       FROM notes WHERE deleted_at IS NULL ORDER BY order_index ASC`
+    ).all() as NoteSlim[]
+  })
 
   ipcMain.handle('notes:read', (_e, id: string): NoteContent => {
     const note = db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note

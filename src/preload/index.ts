@@ -19,6 +19,7 @@ const owl: OwlAPI = {
   },
   notes: {
     list:         ()              => ipcRenderer.invoke('notes:list'),
+    listSlim:     ()              => ipcRenderer.invoke('notes:list-slim'),
     read:         (id)            => ipcRenderer.invoke('notes:read',          id),
     save:         (id, markdown)  => ipcRenderer.invoke('notes:save',          id, markdown),
     create:       (title, folder) => ipcRenderer.invoke('notes:create',        title, folder),

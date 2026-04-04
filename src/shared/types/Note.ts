@@ -12,6 +12,19 @@ export interface Note {
   noteType: 'note' | 'daily' | 'canvas' | 'mindmap' | 'folder'
   orderIndex: number
   pinned: boolean
+  deletedAt: number | null
+}
+
+export interface NoteSlim {
+  id: string
+  path: string
+  title: string
+  parentId: string | null
+  folderPath: string
+  noteType: 'note' | 'daily' | 'canvas' | 'mindmap' | 'folder'
+  orderIndex: number
+  pinned: boolean
+  deletedAt: number | null
 }
 
 export interface NoteContent {

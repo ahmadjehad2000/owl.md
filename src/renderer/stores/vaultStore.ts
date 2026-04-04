@@ -1,7 +1,7 @@
 // src/renderer/stores/vaultStore.ts
 import { create } from 'zustand'
 import { ipc } from '../lib/ipc'
-import type { Note, VaultConfig } from '@shared/types/Note'
+import type { Note, NoteSlim, VaultConfig } from '@shared/types/Note'
 
 export function normalizeNote(raw: unknown): Note {
   const r = raw as Record<string, unknown>
@@ -17,6 +17,7 @@ export function normalizeNote(raw: unknown): Note {
     noteType:    (r.note_type   ?? r.noteType   ?? 'note') as Note['noteType'],
     orderIndex:  (r.order_index ?? r.orderIndex ?? 0)    as number,
     pinned:      Boolean(r.pinned ?? 0),
+    deletedAt:   (r.deleted_at ?? r.deletedAt ?? null) as number | null,
   }
 }
 
@@ -24,6 +25,7 @@ interface VaultState {
   config:        VaultConfig | null
   openedConfigs: VaultConfig[]
   notes:         Note[]
+  slimNotes:     NoteSlim[]
   pinnedIds:     string[]
   recentIds:     string[]
   openNoteId:    string | null
@@ -32,6 +34,7 @@ interface VaultState {
   activateVault: (path: string) => Promise<void>
   closeVault:    (path: string) => Promise<void>
   loadNotes:     () => Promise<void>
+  loadNotesSlim: () => Promise<void>
   loadSessions:  () => Promise<void>
   setOpenNote:   (id: string) => void
   pinNote:       (id: string) => void
@@ -44,6 +47,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   config:        null,
   openedConfigs: [],
   notes:         [],
+  slimNotes:     [],
   pinnedIds:     [],
   recentIds:     [],
   openNoteId:    null,
@@ -52,6 +56,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
     const config = await ipc.vault.open(path)
     set({ config })
     await get().loadNotes()
+    await get().loadNotesSlim()
     await get().loadSessions()
   },
 
@@ -59,6 +64,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
     const config = await ipc.vault.create(name)
     set({ config })
     await get().loadNotes()
+    await get().loadNotesSlim()
     await get().loadSessions()
   },
 
@@ -66,6 +72,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
     const config = await ipc.vault.activate(path)
     set({ config })
     await get().loadNotes()
+    await get().loadNotesSlim()
     await get().loadSessions()
   },
 
@@ -73,12 +80,32 @@ export const useVaultStore = create<VaultState>((set, get) => ({
     const newConfig = await ipc.vault.close(path)
     set({ config: newConfig })
     await get().loadNotes()
+    await get().loadNotesSlim()
     await get().loadSessions()
   },
 
   loadNotes: async () => {
     const raw = await ipc.notes.list()
     set({ notes: raw.map(normalizeNote) })
+  },
+
+  loadNotesSlim: async () => {
+    const raw = await ipc.notes.listSlim()
+    const slimNotes = raw.map(r => {
+      const n = r as Record<string, unknown>
+      return {
+        id:         n.id as string,
+        path:       (n.path ?? '') as string,
+        title:      (n.title ?? '') as string,
+        parentId:   (n.parent_id ?? n.parentId ?? null) as string | null,
+        folderPath: (n.folder_path ?? n.folderPath ?? '') as string,
+        noteType:   (n.note_type ?? n.noteType ?? 'note') as NoteSlim['noteType'],
+        orderIndex: (n.order_index ?? n.orderIndex ?? 0) as number,
+        pinned:     Boolean(n.pinned ?? 0),
+        deletedAt:  (n.deleted_at ?? n.deletedAt ?? null) as number | null,
+      }
+    })
+    set({ slimNotes })
   },
 
   loadSessions: async () => {
@@ -94,6 +121,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   createFolder: async (name) => {
     await ipc.notes.createFolder(name)
     await get().loadNotes()
+    await get().loadNotesSlim()
   },
 
   pinNote:   (id) => set(s => ({ pinnedIds: s.pinnedIds.includes(id) ? s.pinnedIds : [...s.pinnedIds, id] })),

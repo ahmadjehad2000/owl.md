@@ -1,5 +1,5 @@
 // src/shared/types/IPC.ts
-import type { Note, NoteContent, BacklinkResult, SearchResult, VaultConfig } from './Note'
+import type { Note, NoteContent, NoteSlim, BacklinkResult, SearchResult, VaultConfig } from './Note'
 
 export interface OwlVaultAPI {
   open:        (vaultPath: string) => Promise<VaultConfig>
@@ -15,6 +15,7 @@ export interface OwlVaultAPI {
 
 export interface OwlNotesAPI {
   list:         () => Promise<Note[]>
+  listSlim:     () => Promise<NoteSlim[]>
   read:         (id: string) => Promise<NoteContent>
   save:         (id: string, markdown: string) => Promise<Note>
   create:       (title: string, folderPath: string) => Promise<NoteContent>
