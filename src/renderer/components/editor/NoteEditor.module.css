@@ -472,3 +472,12 @@
   color: rgba(255,255,255,0.7) !important;
   background: rgba(255,255,255,0.08) !important;
 }
+
+/* ── Reading View ────────────────────────────────────────────────────────── */
+.readingBadge {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  color: rgba(91,200,240,0.9); background: rgba(91,200,240,0.1);
+  border: 1px solid rgba(91,200,240,0.25); border-radius: 4px; padding: 2px 7px;
+}
+.readingView :global(.ProseMirror) { cursor: default; user-select: text; }
+.readingView :global(.ProseMirror .ProseMirror-selectednode) { outline: none; }

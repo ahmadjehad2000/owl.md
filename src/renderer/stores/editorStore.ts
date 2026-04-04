@@ -17,20 +17,23 @@ interface EditorState {
   frontmatter: Frontmatter
   isDirty:     boolean
   saveStatus:  SaveStatus
+  isReadingView:     boolean
   loadNote:       (id: string) => Promise<void>
   restoreTab:     (markdown: string, frontmatter: Frontmatter, isDirty: boolean, note: Note | null) => void
   unloadNote:     () => void
   setMarkdown:    (md: string) => void
   setFrontmatter: (fm: Frontmatter) => void
-  save:           () => Promise<void>
+  save:             () => Promise<void>
+  toggleReadingView: () => void
 }
 
 export const useEditorStore = create<EditorState>((set, get) => ({
   note:        null,
   markdown:    '',
   frontmatter: {},
-  isDirty:     false,
-  saveStatus:  'idle',
+  isDirty:       false,
+  saveStatus:    'idle',
+  isReadingView: false,
 
   loadNote: async (id) => {
     const { note: rawNote, markdown: raw } = await ipc.notes.read(id)
@@ -53,7 +56,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   },
 
   unloadNote: () => {
-    set({ note: null, markdown: '', frontmatter: {}, isDirty: false, saveStatus: 'idle' })
+    set({ note: null, markdown: '', frontmatter: {}, isDirty: false, saveStatus: 'idle', isReadingView: false })
   },
 
   setMarkdown: (md) => {
@@ -105,4 +108,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       set({ saveStatus: 'error' })
     }
   },
+
+  toggleReadingView: () => set(s => ({ isReadingView: !s.isReadingView })),
 }))

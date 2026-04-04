@@ -47,8 +47,10 @@ export function NoteEditor(): JSX.Element {
   const markdown    = useEditorStore(s => s.markdown)
   const isDirty     = useEditorStore(s => s.isDirty)
   const saveStatus  = useEditorStore(s => s.saveStatus)
-  const setMarkdown = useEditorStore(s => s.setMarkdown)
-  const save        = useEditorStore(s => s.save)
+  const setMarkdown       = useEditorStore(s => s.setMarkdown)
+  const save              = useEditorStore(s => s.save)
+  const isReadingView     = useEditorStore(s => s.isReadingView)
+  const toggleReadingView = useEditorStore(s => s.toggleReadingView)
   const restoreTab  = useEditorStore(s => s.restoreTab)
   const unloadNote  = useEditorStore(s => s.unloadNote)
   const loadNote    = useEditorStore(s => s.loadNote)
@@ -158,7 +160,9 @@ export function NoteEditor(): JSX.Element {
       ImageUpload,
     ],
     content: markdown,
+    editable: !isReadingView,
     onUpdate: ({ editor }) => {
+      if (isReadingView) return
       const md = editor.storage.markdown.getMarkdown() as string
       setMarkdown(md)
       setHeadings(extractHeadings(md))
@@ -200,9 +204,15 @@ export function NoteEditor(): JSX.Element {
   }, [note?.id])
 
   useEffect(() => {
+    if (!editor) return
+    editor.setEditable(!isReadingView)
+  }, [editor, isReadingView])
+
+  useEffect(() => {
     const onKeyDown = (e: KeyboardEvent): void => {
       if ((e.metaKey || e.ctrlKey) && e.key === 's') {
         e.preventDefault()
+        if (isReadingView) return
         if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
         save()
       }
@@ -373,6 +383,7 @@ useEffect(() => {
           {/* Toolbar */}
           <div className={styles.titleBar}>
             <div className={styles.titleActions}>
+              {isReadingView && <span className={styles.readingBadge}>Reading</span>}
               <div className={styles.zoomGroup}>
                 <button className={styles.zoomBtn} onClick={zoomOut} title="Zoom out (decrease font size)" disabled={fontSize <= 11}>−</button>
                 <button className={styles.zoomLabel} onClick={zoomReset} title="Reset font size">{fontSize}px</button>
@@ -396,6 +407,13 @@ useEffect(() => {
               )}
               <span className={styles.wordCount} title={`${charCount} characters`}>{wordCount} words</span>
               <span className={`${styles.saveStatus} ${statusClass}`}>{statusLabel}</span>
+              <button
+                className={`${styles.sourceToggle} ${isReadingView ? styles.sourceActive : ''}`}
+                onClick={toggleReadingView}
+                title={isReadingView ? 'Switch to edit mode' : 'Reading view'}
+              >
+                {isReadingView ? '✏️' : '📖'}
+              </button>
             </div>
           </div>
 
