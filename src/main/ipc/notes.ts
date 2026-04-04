@@ -113,4 +113,40 @@ export function registerNotesHandlers(services: {
     services.index().syncFTS(id, newTitle, updated)
     return db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
   })
+
+  ipcMain.handle('notes:duplicate', (_e, id: string): NoteContent => {
+    const note = db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note | undefined
+    if (!note) throw new Error(`Note not found: ${id}`)
+    const raw = note as unknown as Record<string, unknown>
+    const noteType = (raw.note_type ?? raw.noteType ?? 'note') as Note['noteType']
+    if (noteType === 'folder') throw new Error('Cannot duplicate a folder')
+
+    const srcMarkdown = services.vault().readNote(note.path)
+    const srcTitle    = (db().prepare('SELECT title FROM notes WHERE id = ?').get(id) as { title: string }).title
+    const newTitle    = `${srcTitle} (Copy)`
+    const newMarkdown = srcMarkdown.match(/^#\s+.+$/m)
+      ? srcMarkdown.replace(/^#\s+.+$/m, `# ${newTitle}`)
+      : `# ${newTitle}\n\n${srcMarkdown}`
+
+    const folderPath = (raw.folder_path ?? raw.folderPath ?? '') as string
+    const parentId   = (raw.parent_id   ?? raw.parentId   ?? null) as string | null
+
+    const newId      = crypto.randomUUID()
+    const fileName   = `${newTitle.replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '-')}.md`
+    const newPath    = folderPath ? `${folderPath}/${fileName}` : fileName
+
+    services.vault().writeNote(newPath, newMarkdown)
+    services.index().indexNote({ id: newId, path: newPath, title: newTitle, markdown: newMarkdown, folderPath, noteType })
+    services.index().syncFTS(newId, newTitle, newMarkdown)
+
+    // Place immediately after source note
+    const srcOrder = (db().prepare('SELECT order_index FROM notes WHERE id = ?').get(id) as { order_index: number }).order_index
+    db().prepare('UPDATE notes SET order_index = order_index + 1 WHERE parent_id IS ? AND order_index > ?')
+      .run(parentId, srcOrder)
+    db().prepare('UPDATE notes SET parent_id = ?, order_index = ?, updated_at = ? WHERE id = ?')
+      .run(parentId, srcOrder + 1, Date.now(), newId)
+
+    const newNote = db().prepare('SELECT * FROM notes WHERE id = ?').get(newId) as Note
+    return { note: newNote, markdown: newMarkdown }
+  })
 }
