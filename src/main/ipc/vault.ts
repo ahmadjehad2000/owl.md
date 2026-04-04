@@ -9,13 +9,14 @@ export function registerVaultHandlers(services: {
   listKnownVaults:  ()             => VaultConfig[]
   getLastVaultPath: ()             => string | null
   getOpenSessions:  ()             => VaultConfig[]
+  removeKnownVault: (path: string) => void
 }): void {
-  ipcMain.handle('vault:open',         (_e, path: string) => services.openVault(path))
-  ipcMain.handle('vault:create',       (_e, name: string) => services.createVault(name))
-  ipcMain.handle('vault:activate',     (_e, path: string) => services.activateVault(path))
-  ipcMain.handle('vault:list-known',   ()                  => services.listKnownVaults())
-  ipcMain.handle('vault:get-last',     ()                  => services.getLastVaultPath())
-  ipcMain.handle('vault:get-sessions', ()                  => services.getOpenSessions())
-  // Kept for backwards compatibility — returns active vault config
-  ipcMain.handle('vault:getConfig',    ()                  => services.getOpenSessions()[0] ?? null)
+  ipcMain.handle('vault:open',          (_e, path: string) => services.openVault(path))
+  ipcMain.handle('vault:create',        (_e, name: string) => services.createVault(name))
+  ipcMain.handle('vault:activate',      (_e, path: string) => services.activateVault(path))
+  ipcMain.handle('vault:list-known',    ()                  => services.listKnownVaults())
+  ipcMain.handle('vault:get-last',      ()                  => services.getLastVaultPath())
+  ipcMain.handle('vault:get-sessions',  ()                  => services.getOpenSessions())
+  ipcMain.handle('vault:getConfig',     ()                  => services.getOpenSessions()[0] ?? null)
+  ipcMain.handle('vault:remove-known',  (_e, path: string) => services.removeKnownVault(path))
 }

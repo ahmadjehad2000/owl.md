@@ -119,6 +119,7 @@ app.whenReady().then(() => {
     listKnownVaults:  () => settingsService.getKnownVaults(),
     getLastVaultPath: () => settingsService.getLastVaultPath(),
     getOpenSessions:  () => Array.from(sessions.values()).map(s => s.config),
+    removeKnownVault: (path: string) => settingsService.removeKnown(path),
   })
 
   registerNotesHandlers({
