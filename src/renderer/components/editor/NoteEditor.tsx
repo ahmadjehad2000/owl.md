@@ -7,6 +7,8 @@ import { Markdown } from 'tiptap-markdown'
 import { WikiLink } from './extensions/WikiLink'
 import { WikiLinkPicker } from './extensions/WikiLinkPicker'
 import { FoldHeadings } from './extensions/FoldHeadings'
+import { HoverPreview } from './HoverPreview'
+import { useHoverPreviewStore } from '../../stores/hoverPreviewStore'
 import { Callout } from './extensions/Callout'
 import { SlashCommand } from './extensions/SlashCommand'
 import { TaskList } from '@tiptap/extension-task-list'
@@ -34,6 +36,8 @@ import { ContextMenu, type ContextMenuEntry } from '../ui/ContextMenu'
 import styles from './NoteEditor.module.css'
 
 const AUTOSAVE_MS = 2000   // fires 2 s after last keystroke (idle debounce)
+const HOVER_SHOW_DELAY_MS = 400
+const HOVER_HIDE_DELAY_MS = 200
 const MIN_CARD_WIDTH = 400
 const MAX_CARD_WIDTH = 1400
 const DEFAULT_CARD_WIDTH = 740
@@ -51,6 +55,13 @@ export function NoteEditor(): JSX.Element {
   const setHeadings = useRightPanelStore(s => s.setHeadings)
   const activeTabId = useTabStore(s => s.activeTabId)
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const showPreview     = useHoverPreviewStore(s => s.showPreview)
+  const setHoverContent = useHoverPreviewStore(s => s.setContent)
+  const hidePreview     = useHoverPreviewStore(s => s.hidePreview)
+  const hoverShowTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hoverHideTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const activeHoverNote = useRef<string | null>(null)
 
   // Source mode toggle
   const [sourceMode, setSourceMode] = useState(false)
@@ -232,6 +243,44 @@ useEffect(() => {
     if (sourceMode && sourceRef.current) sourceRef.current.focus()
   }, [sourceMode])
 
+  const handleMouseOver = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const target = (e.target as HTMLElement).closest('.wiki-link') as HTMLElement | null
+    if (!target) return
+    const linkTitle = target.getAttribute('data-href')
+    if (!linkTitle) return
+    if (hoverHideTimer.current) { clearTimeout(hoverHideTimer.current); hoverHideTimer.current = null }
+    if (activeHoverNote.current === linkTitle && useHoverPreviewStore.getState().visible) return
+    if (hoverShowTimer.current) clearTimeout(hoverShowTimer.current)
+    hoverShowTimer.current = setTimeout(async () => {
+      const rect = target.getBoundingClientRect()
+      showPreview(linkTitle, rect.left, rect.bottom)
+      activeHoverNote.current = linkTitle
+      const notes = useVaultStore.getState().notes
+      const found = notes.find(n => n.title.toLowerCase() === linkTitle.toLowerCase())
+      if (!found) { setHoverContent(''); return }
+      try {
+        const { markdown: raw } = await ipc.notes.read(found.id)
+        if (activeHoverNote.current === linkTitle) setHoverContent(raw)
+      } catch {
+        if (activeHoverNote.current === linkTitle) setHoverContent('')
+      }
+    }, HOVER_SHOW_DELAY_MS)
+  }, [showPreview, setHoverContent])
+
+  const handleMouseLeave = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!(e.target as HTMLElement).closest('.wiki-link')) return
+    if (hoverShowTimer.current) { clearTimeout(hoverShowTimer.current); hoverShowTimer.current = null }
+    hoverHideTimer.current = setTimeout(() => {
+      hidePreview()
+      activeHoverNote.current = null
+    }, HOVER_HIDE_DELAY_MS)
+  }, [hidePreview])
+
+  useEffect(() => () => {
+    if (hoverShowTimer.current) clearTimeout(hoverShowTimer.current)
+    if (hoverHideTimer.current) clearTimeout(hoverHideTimer.current)
+  }, [])
+
   const statusLabel =
     saveStatus === 'saving' ? 'Saving…' :
     saveStatus === 'saved'  ? '✓ Saved' :
@@ -351,7 +400,7 @@ useEffect(() => {
           </div>
 
           {/* Editor / source pane */}
-          <div className={styles.editorWrap} onContextMenu={handleEditorContextMenu} style={{ position: 'relative' }}>
+          <div className={styles.editorWrap} onContextMenu={handleEditorContextMenu} onMouseOver={handleMouseOver} onMouseOut={handleMouseLeave} style={{ position: 'relative' }}>
             {findBarOpen && !sourceMode && (
               <FindBar editor={editor} onClose={() => setFindBarOpen(false)} />
             )}
@@ -386,6 +435,7 @@ useEffect(() => {
               />
             </div>
           </div>
+          <HoverPreview />
         </>
       ) : (
         <div className={styles.empty}>
