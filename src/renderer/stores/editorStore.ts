@@ -3,6 +3,7 @@ import { create } from 'zustand'
 import { ipc } from '../lib/ipc'
 import { parseFrontmatter, serializeFrontmatter } from '../lib/markdown'
 import { useTabStore } from './tabStore'
+import { useRightPanelStore } from './rightPanelStore'
 import type { Frontmatter } from '../lib/markdown'
 import type { Note } from '@shared/types/Note'
 
@@ -75,6 +76,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       const { activeTabId } = useTabStore.getState()
       if (activeTabId) useTabStore.getState().markTabClean(activeTabId)
       setTimeout(() => set(s => s.saveStatus === 'saved' ? { saveStatus: 'idle' } : s), 1500)
+      void useRightPanelStore.getState().fetchBacklinks(updated.id)
     } catch {
       set({ saveStatus: 'error' })
     }
