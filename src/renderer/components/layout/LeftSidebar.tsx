@@ -147,6 +147,12 @@ export function LeftSidebar(): JSX.Element {
   const notes        = useVaultStore(s => s.notes)
   const loadNotes    = useVaultStore(s => s.loadNotes)
   const createFolder = useVaultStore(s => s.createFolder)
+  const loadNotesSlim = useVaultStore(s => s.loadNotesSlim)
+  const trashedNotes = useVaultStore(s => s.trashedNotes)
+  const loadTrashed  = useVaultStore(s => s.loadTrashed)
+  const restoreNote  = useVaultStore(s => s.restoreNote)
+  const emptyTrash   = useVaultStore(s => s.emptyTrash)
+  const [trashExpanded, setTrashExpanded] = useState(false)
   const openTab      = useTabStore(s => s.openTab)
   const tabs         = useTabStore(s => s.tabs)
   const activeTabId  = useTabStore(s => s.activeTabId)
@@ -167,6 +173,8 @@ export function LeftSidebar(): JSX.Element {
   useEffect(() => {
     ipc.notes.listTags().then(setTags).catch(() => setTags([]))
   }, [notes])
+
+  useEffect(() => { void loadTrashed() }, [notes, loadTrashed])
 
   const activeNoteId = tabs.find(t => t.id === activeTabId)?.noteId ?? null
 
@@ -210,9 +218,10 @@ export function LeftSidebar(): JSX.Element {
   const handleConfirmDelete = useCallback(async () => {
     if (!confirmTarget) return
     setConfirmTarget(null)
-    await ipc.notes.delete(confirmTarget.id)
+    await ipc.notes.trash(confirmTarget.id)
     await loadNotes()
-  }, [confirmTarget, loadNotes])
+    await loadTrashed()
+  }, [confirmTarget, loadNotes, loadTrashed])
 
   const handleDelete = useCallback((note: Note) => {
     setConfirmTarget({ id: note.id, label: note.title, isFolder: false })
@@ -494,7 +503,7 @@ export function LeftSidebar(): JSX.Element {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className={styles.root}>
+      <div className={styles.root} data-sidebar>
         <button
           className={styles.todayBtn}
           onClick={async () => {
@@ -600,6 +609,34 @@ export function LeftSidebar(): JSX.Element {
                   <span className={styles.title}>{note.title}</span>
                 </button>
               ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {trashedNotes.length > 0 && (
+        <div className={styles.trashSection}>
+          <button className={styles.tagsHeader} onClick={() => setTrashExpanded(e => !e)}>
+            <span className={styles.sectionLabel} style={{ padding: 0 }}>
+              Trash ({trashedNotes.length})
+            </span>
+            <span className={styles.tagsArrow}>{trashExpanded ? '▾' : '▸'}</span>
+          </button>
+          {trashExpanded && (
+            <div className={styles.tagsList}>
+              {trashedNotes.map(note => (
+                <div key={note.id} className={styles.tagItem}>
+                  <span className={styles.tagName}>{note.title}</span>
+                  <button
+                    className={styles.tagCount}
+                    onClick={() => void restoreNote(note.id)}
+                    title="Restore"
+                  >↩</button>
+                </div>
+              ))}
+              <button className={styles.emptyTrashBtn} onClick={() => void emptyTrash()}>
+                Empty Trash
+              </button>
             </div>
           )}
         </div>

@@ -8,6 +8,8 @@ import { SearchModal } from './components/search/SearchModal'
 import { useVaultStore } from './stores/vaultStore'
 import { useTabStore } from './stores/tabStore'
 import { useEditorStore } from './stores/editorStore'
+import { useSearchStore } from './stores/searchStore'
+import { useCommandPaletteStore } from './stores/commandPaletteStore'
 import { ipc } from './lib/ipc'
 import styles from './App.module.css'
 import type { VaultConfig } from '@shared/types/Note'
@@ -143,6 +145,76 @@ export default function App(): JSX.Element {
     window.addEventListener('owl:open-wiki-link', handler)
     return () => window.removeEventListener('owl:open-wiki-link', handler)
   }, [notes])
+
+  // Global keyboard shortcuts (only active when vault is open)
+  useEffect(() => {
+    if (screen !== 'ready') return
+
+    const onKeyDown = (e: KeyboardEvent): void => {
+      const mod = e.metaKey || e.ctrlKey
+
+      // Cmd+Shift+N — New note
+      if (mod && e.shiftKey && (e.key === 'N' || e.key === 'n')) {
+        e.preventDefault()
+        const title = `Untitled ${new Date().toLocaleDateString()}`
+        ipc.notes.create(title, '').then(async ({ note }) => {
+          useVaultStore.getState().loadNotesSlim()
+          useTabStore.getState().openTab(note.id, note.title)
+        })
+        return
+      }
+
+      // Cmd+Shift+F — Global search
+      if (mod && e.shiftKey && (e.key === 'F' || e.key === 'f')) {
+        e.preventDefault()
+        useSearchStore.getState().open()
+        return
+      }
+
+      // Cmd+W — Close current tab
+      if (mod && (e.key === 'w' || e.key === 'W')) {
+        e.preventDefault()
+        const { activeTabId } = useTabStore.getState()
+        if (activeTabId) useTabStore.getState().closeTab(activeTabId)
+        return
+      }
+
+      // Cmd+K — Command palette toggle
+      if (mod && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault()
+        const { isOpen, open, close } = useCommandPaletteStore.getState()
+        isOpen ? close() : open()
+        return
+      }
+
+      // Ctrl+Tab — Next tab
+      if (e.ctrlKey && e.key === 'Tab' && !e.shiftKey) {
+        e.preventDefault()
+        useTabStore.getState().nextTab()
+        return
+      }
+
+      // Ctrl+Shift+Tab — Previous tab
+      if (e.ctrlKey && e.shiftKey && e.key === 'Tab') {
+        e.preventDefault()
+        useTabStore.getState().prevTab()
+        return
+      }
+
+      // Cmd+\ — Toggle left sidebar
+      if (mod && e.key === '\\') {
+        e.preventDefault()
+        const sidebar = document.querySelector('[data-sidebar]') as HTMLElement | null
+        if (sidebar) {
+          sidebar.style.display = sidebar.style.display === 'none' ? '' : 'none'
+        }
+        return
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [screen])
 
   const handleCreate = async (): Promise<void> => {
     const name = vaultName.trim()
