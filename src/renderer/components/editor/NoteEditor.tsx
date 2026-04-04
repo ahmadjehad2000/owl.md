@@ -14,6 +14,10 @@ import { Table } from '@tiptap/extension-table'
 import { TableRow } from '@tiptap/extension-table-row'
 import { TableCell } from '@tiptap/extension-table-cell'
 import { TableHeader } from '@tiptap/extension-table-header'
+import { MathInline } from './extensions/MathInline'
+import { MathBlock } from './extensions/MathBlock'
+import { injectMathTags } from '../../lib/math'
+import 'katex/dist/katex.min.css'
 import { TabBar } from './TabBar'
 import { useEditorStore } from '../../stores/editorStore'
 import { useTabStore } from '../../stores/tabStore'
@@ -126,6 +130,8 @@ export function NoteEditor(): JSX.Element {
       TableRow,
       TableCell,
       TableHeader,
+      MathInline,
+      MathBlock,
     ],
     content: markdown,
     onUpdate: ({ editor }) => {
@@ -159,7 +165,7 @@ export function NoteEditor(): JSX.Element {
     // while React is still in a lifecycle, producing a console warning.
     if (needsUpdate) {
       queueMicrotask(() => {
-        if (!editor.isDestroyed) editor.commands.setContent(markdown)
+        if (!editor.isDestroyed) editor.commands.setContent(injectMathTags(markdown))
       })
     }
     setHeadings(extractHeadings(markdown))

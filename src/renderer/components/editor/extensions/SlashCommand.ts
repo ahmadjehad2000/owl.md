@@ -87,6 +87,21 @@ export function getSlashItems(query: string): SlashItem[] {
       command: ({ editor, range }) =>
         editor.chain().focus().deleteRange(range).toggleTaskList().run(),
     },
+    {
+      title: 'Math Inline', description: 'Inline LaTeX formula', icon: '∑',
+      command: ({ editor, range }) => {
+        const formula = prompt('Enter inline formula (e.g. x^2):') ?? ''
+        editor.chain().focus().deleteRange(range)
+          .insertContent({ type: 'mathInline', attrs: { formula } }).run()
+      },
+    },
+    {
+      title: 'Math Block', description: 'Display LaTeX equation', icon: '∫',
+      command: ({ editor, range }) => {
+        const formula = prompt('Enter formula (e.g. \\int_0^\\infty f(x)dx):') ?? ''
+        editor.chain().focus().deleteRange(range).insertMathBlock(formula).run()
+      },
+    },
   ]
 
   if (!query) return all
