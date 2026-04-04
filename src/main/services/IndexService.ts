@@ -19,15 +19,17 @@ export class IndexService {
     const { id, path, title, markdown, folderPath, noteType } = params
     const hash = createHash('sha256').update(markdown).digest('hex')
     const now = Date.now()
+    const aliases = IndexService.extractAliasesFromFrontmatter(markdown).join(', ')
 
     this.db.prepare(`
-      INSERT INTO notes (id, path, title, content_hash, created_at, updated_at, folder_path, note_type)
-      VALUES (@id, @path, @title, @hash, @now, @now, @folderPath, @noteType)
+      INSERT INTO notes (id, path, title, content_hash, created_at, updated_at, folder_path, note_type, aliases)
+      VALUES (@id, @path, @title, @hash, @now, @now, @folderPath, @noteType, @aliases)
       ON CONFLICT(id) DO UPDATE SET
         path = excluded.path, title = excluded.title,
         content_hash = excluded.content_hash, updated_at = excluded.updated_at,
-        folder_path = excluded.folder_path, note_type = excluded.note_type
-    `).run({ id, path, title, hash, now, folderPath, noteType })
+        folder_path = excluded.folder_path, note_type = excluded.note_type,
+        aliases = excluded.aliases
+    `).run({ id, path, title, hash, now, folderPath, noteType, aliases })
 
     this.db.prepare('DELETE FROM tags WHERE note_id = ?').run(id)
     for (const tag of IndexService.extractTags(markdown)) {
@@ -58,9 +60,21 @@ export class IndexService {
     ).all() as Array<{ rowid: number; source_note_id: string; link_text: string }>
 
     for (const link of unresolved) {
-      const target = this.db.prepare(
+      let target = this.db.prepare(
         "SELECT id FROM notes WHERE title = ? AND note_type != 'folder'"
       ).get(link.link_text) as { id: string } | undefined
+
+      // Alias fallback
+      if (!target) {
+        const aliasRows = this.db.prepare(
+          "SELECT id, aliases FROM notes WHERE aliases != ''"
+        ).all() as Array<{ id: string; aliases: string }>
+        for (const row of aliasRows) {
+          const aliases = row.aliases.split(',').map((a: string) => a.trim()).filter(Boolean)
+          if (aliases.includes(link.link_text)) { target = { id: row.id }; break }
+        }
+      }
+
       if (target) {
         this.db.prepare('UPDATE links SET target_note_id = ?, is_resolved = 1 WHERE rowid = ?')
           .run(target.id, link.rowid)
@@ -106,5 +120,23 @@ export class IndexService {
   static extractTags(markdown: string): string[] {
     const matches = [...markdown.matchAll(/(?:^|\s)#([a-zA-Z0-9_-]+)/g)]
     return [...new Set(matches.map(m => m[1]))]
+  }
+
+  static extractAliasesFromFrontmatter(markdown: string): string[] {
+    const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---/)
+    if (!match) return []
+    const yaml = match[1]
+    for (const line of yaml.split('\n')) {
+      const colon = line.indexOf(':')
+      if (colon < 0) continue
+      const key = line.slice(0, colon).trim()
+      if (key !== 'aliases') continue
+      const raw = line.slice(colon + 1).trim()
+      if (raw.startsWith('[') && raw.endsWith(']')) {
+        return raw.slice(1, -1).split(',').map(s => s.trim()).filter(Boolean)
+      }
+      return raw.split(',').map(s => s.trim()).filter(Boolean)
+    }
+    return []
   }
 }
