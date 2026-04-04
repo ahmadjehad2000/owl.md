@@ -144,10 +144,10 @@ function SortableFolderRow({ folder, isOver, depth, onContextMenu, isRenaming, o
 // ─── Main sidebar ─────────────────────────────────────────────────────────────
 
 export function LeftSidebar(): JSX.Element {
-  const notes        = useVaultStore(s => s.notes)
-  const loadNotes    = useVaultStore(s => s.loadNotes)
-  const createFolder = useVaultStore(s => s.createFolder)
+  const slimNotes    = useVaultStore(s => s.slimNotes)
+  const notes        = slimNotes as unknown as Note[]
   const loadNotesSlim = useVaultStore(s => s.loadNotesSlim)
+  const createFolder = useVaultStore(s => s.createFolder)
   const trashedNotes = useVaultStore(s => s.trashedNotes)
   const loadTrashed  = useVaultStore(s => s.loadTrashed)
   const restoreNote  = useVaultStore(s => s.restoreNote)
@@ -196,10 +196,10 @@ export function LeftSidebar(): JSX.Element {
     try {
       const title = `Untitled ${new Date().toLocaleDateString()}`
       const { note } = await ipc.notes.create(title, '')
-      await loadNotes()
+      await loadNotesSlim()
       openTab(note.id, note.title)
     } catch (e) { console.error('Failed to create note:', e) }
-  }, [loadNotes, openTab])
+  }, [loadNotesSlim, openTab])
 
   const handleNewFolder = useCallback(async () => {
     try {
@@ -212,16 +212,16 @@ export function LeftSidebar(): JSX.Element {
     setRenamingId(null)
     if (!newTitle) return
     await ipc.notes.rename(id, newTitle)
-    await loadNotes()
-  }, [loadNotes])
+    await loadNotesSlim()
+  }, [loadNotesSlim])
 
   const handleConfirmDelete = useCallback(async () => {
     if (!confirmTarget) return
     setConfirmTarget(null)
     await ipc.notes.trash(confirmTarget.id)
-    await loadNotes()
+    await loadNotesSlim()
     await loadTrashed()
-  }, [confirmTarget, loadNotes, loadTrashed])
+  }, [confirmTarget, loadNotesSlim, loadTrashed])
 
   const handleDelete = useCallback((note: Note) => {
     setConfirmTarget({ id: note.id, label: note.title, isFolder: false })
@@ -236,9 +236,9 @@ export function LeftSidebar(): JSX.Element {
 
   const handleDuplicate = useCallback(async (note: Note) => {
     const { note: newNote } = await ipc.notes.duplicate(note.id)
-    await loadNotes()
+    await loadNotesSlim()
     openTab(newNote.id, newNote.title)
-  }, [loadNotes, openTab])
+  }, [loadNotesSlim, openTab])
 
   const noteContextItems = useCallback((note: Note): ContextMenuEntry[] => {
     const folders = notes.filter(n => n.noteType === 'folder')
@@ -251,7 +251,7 @@ export function LeftSidebar(): JSX.Element {
         icon: '📌',
         onClick: async () => {
           await ipc.notes.pin(note.id, !note.pinned)
-          await loadNotes()
+          await loadNotesSlim()
         },
       },
       { label: 'Duplicate', icon: '📋', onClick: () => handleDuplicate(note) },
@@ -272,7 +272,7 @@ export function LeftSidebar(): JSX.Element {
         onClick: async () => {
           const siblings = notes.filter(n => n.noteType !== 'folder' && n.parentId === f.id)
           await ipc.notes.move(note.id, f.id, siblings.length)
-          await loadNotes()
+          await loadNotesSlim()
         },
       }))
       items.push({ label: 'Move to folder', icon: '📁', submenu: moveSubmenu })
@@ -285,7 +285,7 @@ export function LeftSidebar(): JSX.Element {
         onClick: async () => {
           const rootNotes = notes.filter(n => n.noteType !== 'folder' && !n.parentId)
           await ipc.notes.move(note.id, null, rootNotes.length)
-          await loadNotes()
+          await loadNotesSlim()
         },
       })
     }
@@ -294,7 +294,7 @@ export function LeftSidebar(): JSX.Element {
     items.push({ label: 'Export as PDF', icon: '📄', onClick: () => void ipc.export.pdf(note.title) })
     items.push({ label: 'Delete', icon: '🗑', danger: true, onClick: () => handleDelete(note) })
     return items
-  }, [notes, loadNotes, handleDuplicate, handleDelete])
+  }, [notes, loadNotesSlim, handleDuplicate, handleDelete])
 
   const folderContextItems = useCallback((folder: Note): ContextMenuEntry[] => {
     const otherFolders = notes.filter(n => n.noteType === 'folder' && n.id !== folder.id && !isDescendant(n.id, folder.id, notes))
@@ -309,7 +309,7 @@ export function LeftSidebar(): JSX.Element {
           const { note } = await ipc.notes.create(title, '')
           const childCount = notes.filter(n => n.parentId === folder.id).length
           await ipc.notes.move(note.id, folder.id, childCount)
-          await loadNotes()
+          await loadNotesSlim()
           openTab(note.id, note.title)
         },
       },
@@ -319,11 +319,11 @@ export function LeftSidebar(): JSX.Element {
         onClick: async () => {
           const name = `Subfolder ${Date.now().toString().slice(-4)}`
           await createFolder(name)
-          const newFolder = useVaultStore.getState().notes.find(n => n.noteType === 'folder' && n.title === name)
+          const newFolder = useVaultStore.getState().slimNotes.find(n => n.noteType === 'folder' && n.title === name)
           if (newFolder) {
             const siblings = notes.filter(n => n.noteType === 'folder' && n.parentId === folder.id)
             await ipc.notes.move(newFolder.id, folder.id, siblings.length)
-            await loadNotes()
+            await loadNotesSlim()
           }
         },
       },
@@ -340,7 +340,7 @@ export function LeftSidebar(): JSX.Element {
           onClick: async () => {
             const siblings = notes.filter(n => n.noteType === 'folder' && n.parentId === f.id)
             await ipc.notes.move(folder.id, f.id, siblings.length)
-            await loadNotes()
+            await loadNotesSlim()
           },
         })),
       })
@@ -353,7 +353,7 @@ export function LeftSidebar(): JSX.Element {
         onClick: async () => {
           const rootFolders = notes.filter(n => n.noteType === 'folder' && !n.parentId)
           await ipc.notes.move(folder.id, null, rootFolders.length)
-          await loadNotes()
+          await loadNotesSlim()
         },
       })
     }
@@ -366,7 +366,7 @@ export function LeftSidebar(): JSX.Element {
       onClick: () => setConfirmTarget({ id: folder.id, label: folder.title, isFolder: true }),
     })
     return items
-  }, [notes, loadNotes, openTab, createFolder])
+  }, [notes, loadNotesSlim, openTab, createFolder])
 
   const allFolders  = useMemo(
     () => notes.filter(n => n.noteType === 'folder').sort((a, b) => a.orderIndex - b.orderIndex),
@@ -424,7 +424,7 @@ export function LeftSidebar(): JSX.Element {
           await Promise.all(reordered.map((id, idx) => ipc.notes.move(id, parentId, idx)))
         }
       }
-      await loadNotes()
+      await loadNotesSlim()
       return
     }
 
@@ -451,7 +451,7 @@ export function LeftSidebar(): JSX.Element {
           await Promise.all(reordered.map((id, idx) => ipc.notes.move(id, currentParentId, idx)))
         }
       }
-      await loadNotes()
+      await loadNotesSlim()
     }
   }
 
@@ -508,7 +508,7 @@ export function LeftSidebar(): JSX.Element {
           className={styles.todayBtn}
           onClick={async () => {
             const raw = await ipc.notes.createDaily()
-            await loadNotes()
+            await loadNotesSlim()
             const note = normalizeNote(raw.note)
             openTab(note.id, note.title)
           }}

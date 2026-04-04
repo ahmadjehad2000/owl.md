@@ -16,8 +16,8 @@ interface PaletteItem {
 export function CommandPalette(): JSX.Element | null {
   const isOpen = useCommandPaletteStore(s => s.isOpen)
   const close  = useCommandPaletteStore(s => s.close)
-  const notes  = useVaultStore(s => s.notes)
-  const loadNotes   = useVaultStore(s => s.loadNotes)
+  const notes  = useVaultStore(s => s.slimNotes as any[])
+  const loadNotesSlim   = useVaultStore(s => s.loadNotesSlim)
 
   const [query, setQuery]       = useState('')
   const [selected, setSelected] = useState(0)
@@ -50,7 +50,7 @@ export function CommandPalette(): JSX.Element | null {
         description: 'Create a blank note',
         action: async () => {
           const { note } = await ipc.notes.create('Untitled', '')
-          await loadNotes()
+          await loadNotesSlim()
           useTabStore.getState().openTab(note.id, note.title)
           close()
         },
