@@ -6,6 +6,7 @@ import type { Editor, Range } from '@tiptap/core'
 import type { CalloutType } from './Callout'
 import { SlashMenu } from '../SlashMenu'
 import type { SlashMenuHandle } from '../SlashMenu'
+import { ipc } from '../../../lib/ipc'
 
 export interface SlashItem {
   title: string
@@ -101,8 +102,7 @@ export function getSlashItems(query: string): SlashItem[] {
           reader.onload = async () => {
             const base64 = (reader.result as string).split(',')[1] ?? ''
             const ext    = file.type.split('/')[1]?.split('+')[0] ?? 'png'
-            const { ipc: ipcLib } = await import('../../../lib/ipc')
-            const rel = await ipcLib.notes.saveImage(base64, ext)
+            const rel = await ipc.notes.saveImage(base64, ext)
             editor.chain().focus().setImage({ src: `owl://${rel}`, alt: file.name }).run()
           }
           reader.readAsDataURL(file)
