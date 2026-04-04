@@ -1,0 +1,80 @@
+/* src/renderer/components/editor/FindBar.module.css */
+.bar {
+  position: absolute;
+  top: 8px; right: 16px;
+  z-index: 100;
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(14, 20, 34, 0.96);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 6px 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  backdrop-filter: blur(20px);
+  animation: slideIn 0.12s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.input {
+  width: 200px;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  color: rgba(255,255,255,0.85);
+  font-family: inherit;
+}
+.input::placeholder { color: rgba(255,255,255,0.25); }
+.count {
+  font-size: 11px;
+  color: rgba(255,255,255,0.28);
+  white-space: nowrap;
+  min-width: 64px;
+}
+.navBtn {
+  width: 24px; height: 24px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 5px;
+  color: rgba(255,255,255,0.55);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.1s, color 0.1s;
+}
+.navBtn:hover { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85); }
+.closeBtn {
+  width: 22px; height: 22px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: rgba(255,255,255,0.35);
+  font-size: 16px;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex; align-items: center; justify-content: center;
+  transition: color 0.1s;
+  line-height: 1;
+  padding: 0;
+}
+.closeBtn:hover { color: rgba(255,255,255,0.7); }
+
+/* Light theme */
+[data-theme="modern-light"] .bar {
+  background: rgba(248, 250, 255, 0.97);
+  border-color: rgba(0,0,0,0.12);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+[data-theme="modern-light"] .input { color: rgba(0,0,0,0.8); }
+[data-theme="modern-light"] .input::placeholder { color: rgba(0,0,0,0.3); }
+[data-theme="modern-light"] .count { color: rgba(0,0,0,0.35); }
+[data-theme="modern-light"] .navBtn {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.12);
+  color: rgba(0,0,0,0.5);
+}
+[data-theme="modern-light"] .navBtn:hover { background: rgba(0,0,0,0.1); color: rgba(0,0,0,0.8); }
+[data-theme="modern-light"] .closeBtn { color: rgba(0,0,0,0.3); }
+[data-theme="modern-light"] .closeBtn:hover { color: rgba(0,0,0,0.6); }

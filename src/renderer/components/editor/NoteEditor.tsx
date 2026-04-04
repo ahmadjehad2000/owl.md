@@ -16,8 +16,10 @@ import { TableCell } from '@tiptap/extension-table-cell'
 import { TableHeader } from '@tiptap/extension-table-header'
 import { MathInline } from './extensions/MathInline'
 import { MathBlock } from './extensions/MathBlock'
+import { SearchHighlight } from './extensions/SearchHighlight'
 import { injectMathTags } from '../../lib/math'
 import 'katex/dist/katex.min.css'
+import { FindBar } from './FindBar'
 import { TabBar } from './TabBar'
 import { useEditorStore } from '../../stores/editorStore'
 import { useTabStore } from '../../stores/tabStore'
@@ -49,6 +51,9 @@ export function NoteEditor(): JSX.Element {
   // Source mode toggle
   const [sourceMode, setSourceMode] = useState(false)
   const sourceRef = useRef<HTMLTextAreaElement>(null)
+
+  // Find bar
+  const [findBarOpen, setFindBarOpen] = useState(false)
 
   // Font zoom (base font size for the editor card)
   const [fontSize, setFontSize] = useState<number>(() => {
@@ -132,6 +137,7 @@ export function NoteEditor(): JSX.Element {
       TableHeader,
       MathInline,
       MathBlock,
+      SearchHighlight,
     ],
     content: markdown,
     onUpdate: ({ editor }) => {
@@ -181,6 +187,10 @@ export function NoteEditor(): JSX.Element {
         e.preventDefault()
         if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
         save()
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
+        e.preventDefault()
+        setFindBarOpen(open => !open)
       }
     }
     window.addEventListener('keydown', onKeyDown)
@@ -314,7 +324,10 @@ useEffect(() => {
           </div>
 
           {/* Editor / source pane */}
-          <div className={styles.editorWrap} onContextMenu={handleEditorContextMenu}>
+          <div className={styles.editorWrap} onContextMenu={handleEditorContextMenu} style={{ position: 'relative' }}>
+            {findBarOpen && !sourceMode && (
+              <FindBar editor={editor} onClose={() => setFindBarOpen(false)} />
+            )}
             <div className={styles.cardRow} style={{ maxWidth: cardWidth }}>
               <div
                 className={styles.resizeHandle}

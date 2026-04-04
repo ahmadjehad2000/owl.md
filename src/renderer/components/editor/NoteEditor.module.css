@@ -366,6 +366,19 @@
 .emptyTitle { font-size: 15px; font-weight: 500; color: rgba(255,255,255,0.35); letter-spacing: -0.01em; }
 .emptyDesc  { font-size: 12px; color: rgba(255,255,255,0.2); text-align: center; max-width: 260px; line-height: 1.6; }
 
+/* Search highlight */
+.editorWrap :global(.search-highlight) {
+  background: rgba(250, 200, 60, 0.35);
+  border-radius: 2px;
+}
+.editorWrap :global(.search-highlight-current) {
+  background: rgba(250, 200, 60, 0.75);
+  border-radius: 2px;
+  outline: 1px solid rgba(250, 180, 20, 0.8);
+}
+[data-theme="modern-light"] .editorWrap :global(.search-highlight) { background: rgba(250, 200, 20, 0.4); }
+[data-theme="modern-light"] .editorWrap :global(.search-highlight-current) { background: rgba(250, 180, 0, 0.65); }
+
 /* Math (KaTeX) */
 .editorWrap :global(.math-inline) {
   display: inline-block;
