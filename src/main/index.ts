@@ -1,6 +1,7 @@
 // src/main/index.ts
-import { app, BrowserWindow, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, shell, protocol, net } from 'electron'
 import { join, relative, dirname, basename } from 'path'
+import { pathToFileURL } from 'url'
 import { existsSync } from 'fs'
 import { DatabaseService } from './services/DatabaseService'
 import { VaultService } from './services/VaultService'
@@ -10,6 +11,7 @@ import { SettingsService } from './services/SettingsService'
 import { registerVaultHandlers } from './ipc/vault'
 import { registerNotesHandlers } from './ipc/notes'
 import { registerSearchHandlers } from './ipc/search'
+import { registerExportHandlers } from './ipc/export'
 import type { VaultConfig } from '@shared/types/Note'
 
 type VaultSession = {
@@ -130,8 +132,19 @@ function getOrCreateNoteId(dbService: DatabaseService, notePath: string): string
 // proper electron module, not the npm path-string shim.
 delete process.env['ELECTRON_RUN_AS_NODE']
 
+protocol.registerSchemesAsPrivileged([
+  { scheme: 'owl', privileges: { secure: true, standard: true, supportFetchAPI: true } },
+])
+
 app.whenReady().then(() => {
   settingsService = new SettingsService(app.getPath('userData'))
+
+  protocol.handle('owl', (request) => {
+    const resourcePath = request.url.slice('owl://'.length)
+    if (!activePath) return new Response('No active vault', { status: 404 })
+    const filePath = join(activePath, resourcePath)
+    return net.fetch(pathToFileURL(filePath).toString())
+  })
 
   registerVaultHandlers({
     openVault,
@@ -173,6 +186,8 @@ app.whenReady().then(() => {
     backgroundColor: '#060b12',
     show: false,
   })
+
+  registerExportHandlers(() => win)
 
   win.removeMenu()
   win.webContents.on('before-input-event', (_e, input) => {

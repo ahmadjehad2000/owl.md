@@ -17,9 +17,12 @@ import { TableHeader } from '@tiptap/extension-table-header'
 import { MathInline } from './extensions/MathInline'
 import { MathBlock } from './extensions/MathBlock'
 import { SearchHighlight } from './extensions/SearchHighlight'
+import Image from '@tiptap/extension-image'
+import { ImageUpload } from './extensions/ImageUpload'
 import { injectMathTags } from '../../lib/math'
 import 'katex/dist/katex.min.css'
 import { FindBar } from './FindBar'
+import { ipc } from '../../lib/ipc'
 import { TabBar } from './TabBar'
 import { useEditorStore } from '../../stores/editorStore'
 import { useTabStore } from '../../stores/tabStore'
@@ -138,6 +141,8 @@ export function NoteEditor(): JSX.Element {
       MathInline,
       MathBlock,
       SearchHighlight,
+      Image.configure({ inline: false, allowBase64: false }),
+      ImageUpload,
     ],
     content: markdown,
     onUpdate: ({ editor }) => {
@@ -208,6 +213,17 @@ useEffect(() => {
   }, [editor])
 
   useEffect(() => () => { if (autosaveTimer.current) clearTimeout(autosaveTimer.current) }, [])
+
+  useEffect(() => {
+    const onBefore = (): void => document.body.classList.add('printing')
+    const onAfter  = (): void => document.body.classList.remove('printing')
+    window.addEventListener('owl:before-print', onBefore)
+    window.addEventListener('owl:after-print',  onAfter)
+    return () => {
+      window.removeEventListener('owl:before-print', onBefore)
+      window.removeEventListener('owl:after-print',  onAfter)
+    }
+  }, [])
 
   // When switching to source mode, focus the textarea
   useEffect(() => {
@@ -318,6 +334,15 @@ useEffect(() => {
               >
                 {sourceMode ? '◉ Source' : '◎ Source'}
               </button>
+              {note && (
+                <button
+                  className={styles.sourceToggle}
+                  onClick={() => void ipc.export.pdf(note.title)}
+                  title="Export note as PDF"
+                >
+                  ↓ PDF
+                </button>
+              )}
               <span className={styles.wordCount} title={`${charCount} characters`}>{wordCount} words</span>
               <span className={`${styles.saveStatus} ${statusClass}`}>{statusLabel}</span>
             </div>

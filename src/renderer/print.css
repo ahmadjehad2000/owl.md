@@ -1,0 +1,22 @@
+/* src/renderer/print.css — applied via body.printing class during PDF export */
+body.printing [class*="TabBar"],
+body.printing [class*="titleBar"],
+body.printing [class*="menuBar"],
+body.printing [class*="LeftSidebar"],
+body.printing [class*="RightSidebar"],
+body.printing [class*="resizeHandle"],
+body.printing [class*="ContextMenu"],
+body.printing [class*="FindBar"] {
+  display: none !important;
+}
+body.printing [class*="editorWrap"] {
+  overflow: visible !important;
+  padding: 0 !important;
+}
+body.printing [class*="ProseMirror"] {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  min-height: unset !important;
+}

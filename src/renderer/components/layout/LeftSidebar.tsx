@@ -1,5 +1,5 @@
 // src/renderer/components/layout/LeftSidebar.tsx
-import React, { useCallback, useState, useRef } from 'react'
+import React, { useCallback, useState, useRef, useEffect } from 'react'
 import {
   DndContext, PointerSensor, useSensor, useSensors,
   closestCenter, DragOverlay,
@@ -10,7 +10,7 @@ import {
   SortableContext, useSortable, verticalListSortingStrategy, arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useVaultStore } from '../../stores/vaultStore'
+import { useVaultStore, normalizeNote } from '../../stores/vaultStore'
 import { useTabStore } from '../../stores/tabStore'
 import { ipc } from '../../lib/ipc'
 import { ContextMenu, type ContextMenuEntry } from '../ui/ContextMenu'
@@ -159,6 +159,15 @@ export function LeftSidebar(): JSX.Element {
   const [menuPos,   setMenuPos]   = useState({ x: 0, y: 0 })
   const [menuItems, setMenuItems] = useState<ContextMenuEntry[]>([])
 
+  const [tags, setTags]               = useState<Array<{ tag: string; count: number }>>([])
+  const [activeTag, setActiveTag]     = useState<string | null>(null)
+  const [tagNotes, setTagNotes]       = useState<Note[]>([])
+  const [tagsExpanded, setTagsExpanded] = useState(true)
+
+  useEffect(() => {
+    ipc.notes.listTags().then(setTags).catch(() => setTags([]))
+  }, [notes])
+
   const activeNoteId = tabs.find(t => t.id === activeTabId)?.noteId ?? null
 
   const openContextMenu = useCallback((e: React.MouseEvent, items: ContextMenuEntry[]) => {
@@ -208,6 +217,13 @@ export function LeftSidebar(): JSX.Element {
   const handleDelete = useCallback((note: Note) => {
     setConfirmTarget({ id: note.id, label: note.title, isFolder: false })
   }, [])
+
+  const handleTagClick = useCallback(async (tag: string) => {
+    if (activeTag === tag) { setActiveTag(null); setTagNotes([]); return }
+    setActiveTag(tag)
+    const ns = await ipc.notes.notesByTag(tag)
+    setTagNotes(ns.map(normalizeNote))
+  }, [activeTag])
 
   const handleDuplicate = useCallback(async (note: Note) => {
     const { note: newNote } = await ipc.notes.duplicate(note.id)
@@ -266,6 +282,7 @@ export function LeftSidebar(): JSX.Element {
     }
 
     items.push({ separator: true })
+    items.push({ label: 'Export as PDF', icon: '📄', onClick: () => void ipc.export.pdf(note.title) })
     items.push({ label: 'Delete', icon: '🗑', danger: true, onClick: () => handleDelete(note) })
     return items
   }, [notes, loadNotes, handleDuplicate, handleDelete])
@@ -472,6 +489,18 @@ export function LeftSidebar(): JSX.Element {
       onDragEnd={handleDragEnd}
     >
       <div className={styles.root}>
+        <button
+          className={styles.todayBtn}
+          onClick={async () => {
+            const raw = await ipc.notes.createDaily()
+            await loadNotes()
+            const note = normalizeNote(raw.note)
+            openTab(note.id, note.title)
+          }}
+          title="Open or create today's daily note"
+        >
+          📅 Today
+        </button>
         {pinnedNotes.length > 0 && (
           <div className={styles.pinnedSection}>
             <div className={styles.sectionLabel}>Pinned</div>
@@ -529,6 +558,46 @@ export function LeftSidebar(): JSX.Element {
           : null
         }
       </DragOverlay>
+
+      {tags.length > 0 && (
+        <div className={styles.tagsSection}>
+          <button className={styles.tagsHeader} onClick={() => setTagsExpanded(e => !e)}>
+            <span className={styles.sectionLabel} style={{ padding: 0 }}>Tags</span>
+            <span className={styles.tagsArrow}>{tagsExpanded ? '▾' : '▸'}</span>
+          </button>
+          {tagsExpanded && (
+            <div className={styles.tagsList}>
+              {tags.map(({ tag, count }) => (
+                <button
+                  key={tag}
+                  className={`${styles.tagItem} ${activeTag === tag ? styles.tagActive : ''}`}
+                  onClick={() => handleTagClick(tag)}
+                >
+                  <span className={styles.tagHash}>#</span>
+                  <span className={styles.tagName}>{tag}</span>
+                  <span className={styles.tagCount}>{count}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          {activeTag && tagNotes.length > 0 && (
+            <div className={styles.tagNoteList}>
+              <div className={styles.sectionLabel}>Notes tagged #{activeTag}</div>
+              {tagNotes.map(note => (
+                <button
+                  key={note.id}
+                  className={`${styles.noteItem} ${activeNoteId === note.id ? styles.active : ''}`}
+                  style={{ paddingLeft: 14 }}
+                  onClick={() => openTab(note.id, note.title)}
+                >
+                  <span className={styles.icon}>📄</span>
+                  <span className={styles.title}>{note.title}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <ContextMenu
         isOpen={menuOpen}

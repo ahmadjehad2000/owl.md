@@ -88,6 +88,29 @@ export function getSlashItems(query: string): SlashItem[] {
         editor.chain().focus().deleteRange(range).toggleTaskList().run(),
     },
     {
+      title: 'Image', description: 'Upload image from file', icon: '🖼',
+      command: ({ editor, range }) => {
+        editor.chain().focus().deleteRange(range).run()
+        const input = document.createElement('input')
+        input.type = 'file'
+        input.accept = 'image/*'
+        input.onchange = async () => {
+          const file = input.files?.[0]
+          if (!file) return
+          const reader = new FileReader()
+          reader.onload = async () => {
+            const base64 = (reader.result as string).split(',')[1] ?? ''
+            const ext    = file.type.split('/')[1]?.split('+')[0] ?? 'png'
+            const { ipc: ipcLib } = await import('../../../lib/ipc')
+            const rel = await ipcLib.notes.saveImage(base64, ext)
+            editor.chain().focus().setImage({ src: `owl://${rel}`, alt: file.name }).run()
+          }
+          reader.readAsDataURL(file)
+        }
+        input.click()
+      },
+    },
+    {
       title: 'Math Inline', description: 'Inline LaTeX formula', icon: '∑',
       command: ({ editor, range }) => {
         const formula = prompt('Enter inline formula (e.g. x^2):') ?? ''

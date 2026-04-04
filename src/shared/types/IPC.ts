@@ -25,6 +25,10 @@ export interface OwlNotesAPI {
   rename:       (id: string, newTitle: string) => Promise<Note>
   duplicate:    (id: string) => Promise<NoteContent>
   pin:          (id: string, pinned: boolean) => Promise<Note>
+  listTags:     () => Promise<Array<{ tag: string; count: number }>>
+  notesByTag:   (tag: string) => Promise<Note[]>
+  createDaily:  () => Promise<NoteContent>
+  saveImage:    (base64Data: string, ext: string) => Promise<string>
 }
 
 export interface OwlSearchAPI {
@@ -35,11 +39,16 @@ export interface OwlShellAPI {
   openExternal: (url: string) => Promise<void>
 }
 
+export interface OwlExportAPI {
+  pdf: (noteTitle: string) => Promise<void>
+}
+
 export interface OwlAPI {
   vault:  OwlVaultAPI
   notes:  OwlNotesAPI
   search: OwlSearchAPI
   shell:  OwlShellAPI
+  export: OwlExportAPI
 }
 
 declare global {

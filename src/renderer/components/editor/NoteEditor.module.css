@@ -379,6 +379,24 @@
 [data-theme="modern-light"] .editorWrap :global(.search-highlight) { background: rgba(250, 200, 20, 0.4); }
 [data-theme="modern-light"] .editorWrap :global(.search-highlight-current) { background: rgba(250, 180, 0, 0.65); }
 
+/* Images */
+.editorWrap :global(.ProseMirror img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+  margin: 16px 0;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+}
+.editorWrap :global(.ProseMirror img.ProseMirror-selectednode) {
+  outline: 2px solid rgba(56,182,220,0.6);
+  border-radius: 8px;
+}
+[data-theme="modern-light"] .editorWrap :global(.ProseMirror img) {
+  border-color: rgba(0,0,0,0.1); box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+
 /* Math (KaTeX) */
 .editorWrap :global(.math-inline) {
   display: inline-block;

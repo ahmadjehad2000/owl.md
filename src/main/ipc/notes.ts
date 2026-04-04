@@ -1,6 +1,8 @@
 // src/main/ipc/notes.ts
 import { ipcMain } from 'electron'
-import { dirname, basename } from 'path'
+import { mkdirSync, writeFileSync } from 'fs'
+import { join, dirname, basename } from 'path'
+import { randomUUID } from 'crypto'
 import type { Note, NoteContent } from '@shared/types/Note'
 import type { DatabaseService } from '../services/DatabaseService'
 import type { VaultService } from '../services/VaultService'
@@ -159,5 +161,63 @@ export function registerNotesHandlers(services: {
     db().prepare('UPDATE notes SET pinned = ?, updated_at = ? WHERE id = ?')
       .run(pinned ? 1 : 0, Date.now(), id)
     return db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
+  })
+
+  ipcMain.handle('notes:list-tags', (): Array<{ tag: string; count: number }> =>
+    db().prepare(
+      `SELECT tag, COUNT(*) as count FROM tags GROUP BY tag ORDER BY count DESC`
+    ).all() as Array<{ tag: string; count: number }>
+  )
+
+  ipcMain.handle('notes:notes-by-tag', (_e, tag: string): Note[] => {
+    const ids = (db().prepare('SELECT note_id FROM tags WHERE tag = ?').all(tag) as Array<{ note_id: string }>)
+      .map(r => r.note_id)
+    if (ids.length === 0) return []
+    const placeholders = ids.map(() => '?').join(',')
+    return db().prepare(`SELECT * FROM notes WHERE id IN (${placeholders})`).all(...ids) as Note[]
+  })
+
+  const todayKey = (): string => {
+    const d = new Date()
+    const pad = (n: number): string => String(n).padStart(2, '0')
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  }
+
+  ipcMain.handle('notes:create-daily', (): NoteContent => {
+    const title      = todayKey()
+    const folderPath = 'Daily Notes'
+
+    const existing = db().prepare(
+      `SELECT * FROM notes WHERE title = ? AND folder_path = ? AND note_type = 'daily'`
+    ).get(title, folderPath) as Note | undefined
+
+    if (existing) {
+      return { note: existing, markdown: services.vault().readNote(existing.path) }
+    }
+
+    const id       = randomUUID()
+    const notePath = `${folderPath}/${title}.md`
+    const markdown = `# ${title}\n\n`
+
+    services.vault().writeNote(notePath, markdown)
+    services.index().indexNote({ id, path: notePath, title, markdown, folderPath, noteType: 'daily' })
+    services.index().syncFTS(id, title, markdown)
+
+    const maxRow = db().prepare(
+      `SELECT COALESCE(MAX(order_index), -1) as m FROM notes WHERE folder_path = ?`
+    ).get(folderPath) as { m: number }
+    db().prepare('UPDATE notes SET order_index = ? WHERE id = ?').run(maxRow.m + 1, id)
+
+    return { note: db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note, markdown }
+  })
+
+  ipcMain.handle('notes:save-image', (_e, base64Data: string, ext: string): string => {
+    const root    = services.vault().getRoot()
+    const imgDir  = join(root, 'attachments', 'images')
+    mkdirSync(imgDir, { recursive: true })
+    const safeExt  = ext.replace(/[^a-z0-9]/gi, '').slice(0, 10) || 'png'
+    const filename = `${randomUUID()}.${safeExt}`
+    writeFileSync(join(imgDir, filename), Buffer.from(base64Data, 'base64'))
+    return `attachments/images/${filename}`
   })
 }

@@ -27,9 +27,16 @@ const owl: OwlAPI = {
     createFolder: (name)          => ipcRenderer.invoke('notes:create-folder', name),
     move: (noteId, newParentId, orderIndex) =>
             ipcRenderer.invoke('notes:move',      noteId, newParentId, orderIndex),
-    rename:    (id, newTitle)   => ipcRenderer.invoke('notes:rename',    id, newTitle),
-    duplicate: (id)             => ipcRenderer.invoke('notes:duplicate', id),
-    pin:       (id, pinned)     => ipcRenderer.invoke('notes:pin',       id, pinned),
+    rename:      (id, newTitle)      => ipcRenderer.invoke('notes:rename',       id, newTitle),
+    duplicate:   (id)                => ipcRenderer.invoke('notes:duplicate',    id),
+    pin:         (id, pinned)        => ipcRenderer.invoke('notes:pin',          id, pinned),
+    listTags:    ()                  => ipcRenderer.invoke('notes:list-tags'),
+    notesByTag:  (tag)               => ipcRenderer.invoke('notes:notes-by-tag', tag),
+    createDaily: ()                  => ipcRenderer.invoke('notes:create-daily'),
+    saveImage:   (base64Data, ext)   => ipcRenderer.invoke('notes:save-image',   base64Data, ext),
+  },
+  export: {
+    pdf: (noteTitle) => ipcRenderer.invoke('export:pdf', noteTitle),
   },
   search: {
     query: (q) => ipcRenderer.invoke('search:query', q),
@@ -37,3 +44,8 @@ const owl: OwlAPI = {
 }
 
 contextBridge.exposeInMainWorld('owl', owl)
+
+ipcRenderer.on('export:before-print', () =>
+  window.dispatchEvent(new CustomEvent('owl:before-print')))
+ipcRenderer.on('export:after-print', () =>
+  window.dispatchEvent(new CustomEvent('owl:after-print')))

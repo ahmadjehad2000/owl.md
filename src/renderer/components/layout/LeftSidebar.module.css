@@ -147,6 +147,24 @@
   color: #1e2433;
 }
 
+.todayBtn {
+  display: flex; align-items: center; gap: 6px;
+  width: calc(100% - 16px); margin: 4px 8px 2px;
+  padding: 6px 10px;
+  background: rgba(56,182,220,0.07);
+  border: 1px solid rgba(56,182,220,0.18);
+  border-radius: 7px;
+  color: rgba(56,182,220,0.8);
+  font-size: 12px; font-weight: 500;
+  font-family: inherit; cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.todayBtn:hover { background: rgba(56,182,220,0.13); color: rgba(56,182,220,1); }
+[data-theme="modern-light"] .todayBtn {
+  background: rgba(2,132,199,0.06); border-color: rgba(2,132,199,0.2); color: #0284c7;
+}
+[data-theme="modern-light"] .todayBtn:hover { background: rgba(2,132,199,0.12); }
+
 .pinnedSection { padding: 6px 0 0; }
 .sectionLabel {
   font-size: 9px;
@@ -157,3 +175,35 @@
   padding: 4px 14px;
 }
 [data-theme="modern-light"] .sectionLabel { color: rgba(0,0,0,0.3); }
+
+.tagsSection { border-top: 1px solid rgba(255,255,255,0.04); margin-top: 4px; padding-top: 4px; }
+.tagsHeader {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; background: none; border: none; cursor: pointer;
+  padding: 4px 14px; font-family: inherit;
+}
+.tagsArrow { font-size: 10px; color: rgba(255,255,255,0.2); }
+.tagsList { padding: 2px 0; }
+.tagItem {
+  display: flex; align-items: center; gap: 4px;
+  width: 100%; background: none; border: none; cursor: pointer;
+  padding: 4px 14px; font-family: inherit; border-radius: 0;
+  transition: background 0.1s;
+}
+.tagItem:hover { background: rgba(255,255,255,0.05); }
+.tagActive { background: rgba(56,182,220,0.1) !important; }
+.tagHash { font-size: 11px; color: rgba(56,182,220,0.55); flex-shrink: 0; }
+.tagName { font-size: 12px; color: rgba(200,218,245,0.65); flex: 1; text-align: left; }
+.tagCount {
+  font-size: 10px; color: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.06); border-radius: 8px; padding: 1px 6px;
+}
+.tagNoteList { border-top: 1px solid rgba(255,255,255,0.04); }
+[data-theme="modern-light"] .tagsSection { border-top-color: rgba(0,0,0,0.06); }
+[data-theme="modern-light"] .tagsArrow { color: rgba(0,0,0,0.25); }
+[data-theme="modern-light"] .tagItem:hover { background: rgba(0,0,0,0.04); }
+[data-theme="modern-light"] .tagActive { background: rgba(2,132,199,0.08) !important; }
+[data-theme="modern-light"] .tagHash { color: rgba(2,132,199,0.7); }
+[data-theme="modern-light"] .tagName { color: rgba(0,0,0,0.65); }
+[data-theme="modern-light"] .tagCount { color: rgba(0,0,0,0.3); background: rgba(0,0,0,0.05); }
+[data-theme="modern-light"] .tagNoteList { border-top-color: rgba(0,0,0,0.06); }

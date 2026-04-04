@@ -63,6 +63,8 @@ export class VaultService {
     return join(this.vaultPath, 'notes', notePath)
   }
 
+  getRoot(): string { return this.vaultPath }
+
   private walkDir(dir: string): string[] {
     const entries = readdirSync(dir, { withFileTypes: true })
     const files: string[] = []
