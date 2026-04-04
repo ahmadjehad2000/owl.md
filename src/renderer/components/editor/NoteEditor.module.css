@@ -299,6 +299,36 @@
 [data-theme="modern-light"] .editorWrap :global(.ProseMirror ul[data-type="taskList"] li > label input[type="checkbox"]) {
   accent-color: #0284c7;
 }
+
+/* Tables */
+.editorWrap :global(.ProseMirror table) {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  font-size: 13px;
+}
+.editorWrap :global(.ProseMirror th),
+.editorWrap :global(.ProseMirror td) {
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 8px 12px;
+  text-align: left;
+  vertical-align: top;
+  min-width: 80px;
+}
+.editorWrap :global(.ProseMirror th) {
+  background: rgba(56,182,220,0.07);
+  font-weight: 600;
+  color: rgba(200,218,245,0.9);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+.editorWrap :global(.ProseMirror td) { color: var(--owl-text); }
+.editorWrap :global(.ProseMirror tr:hover td) { background: rgba(255,255,255,0.02); }
+.editorWrap :global(.ProseMirror .selectedCell) { background: rgba(56,182,220,0.12); }
+[data-theme="modern-light"] .editorWrap :global(.ProseMirror th),
+[data-theme="modern-light"] .editorWrap :global(.ProseMirror td) { border-color: rgba(0,0,0,0.12); }
+[data-theme="modern-light"] .editorWrap :global(.ProseMirror th) { background: rgba(2,132,199,0.06); color: #1a2a4a; }
+[data-theme="modern-light"] .editorWrap :global(.ProseMirror .selectedCell) { background: rgba(2,132,199,0.1); }
 .editorWrap :global(.ProseMirror hr) { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 28px 0; }
 
 /* Wiki links — click to follow */

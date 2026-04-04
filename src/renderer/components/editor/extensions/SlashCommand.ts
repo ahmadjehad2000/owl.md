@@ -77,6 +77,12 @@ export function getSlashItems(query: string): SlashItem[] {
         editor.chain().focus().deleteRange(range).insertCallout('danger' as CalloutType).run(),
     },
     {
+      title: 'Table', description: 'Insert a 3×3 table', icon: '⊞',
+      command: ({ editor, range }) =>
+        editor.chain().focus().deleteRange(range)
+          .insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
+    },
+    {
       title: 'Task List', description: 'Checklist with checkboxes', icon: '☑',
       command: ({ editor, range }) =>
         editor.chain().focus().deleteRange(range).toggleTaskList().run(),
