@@ -29,6 +29,7 @@ interface VaultState {
   openVault:     (path: string) => Promise<void>
   createVault:   (name: string) => Promise<void>
   activateVault: (path: string) => Promise<void>
+  closeVault:    (path: string) => Promise<void>
   loadNotes:     () => Promise<void>
   loadSessions:  () => Promise<void>
   setOpenNote:   (id: string) => void
@@ -63,6 +64,13 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   activateVault: async (path) => {
     const config = await ipc.vault.activate(path)
     set({ config })
+    await get().loadNotes()
+    await get().loadSessions()
+  },
+
+  closeVault: async (path) => {
+    const newConfig = await ipc.vault.close(path)
+    set({ config: newConfig })
     await get().loadNotes()
     await get().loadSessions()
   },

@@ -21,6 +21,7 @@ export function AppShell({ sidebar, children, rightPanel }: AppShellProps): JSX.
   const openPalette   = useCommandPaletteStore(s => s.open)
   const openedConfigs = useVaultStore(s => s.openedConfigs)
   const activateVault = useVaultStore(s => s.activateVault)
+  const closeVault    = useVaultStore(s => s.closeVault)
   const activeConfig  = useVaultStore(s => s.config)
 
   const handleKeyDown = useCallback(async (e: KeyboardEvent) => {
@@ -60,13 +61,24 @@ export function AppShell({ sidebar, children, rightPanel }: AppShellProps): JSX.
             ? (
               <div className={styles.vaultSwitcher}>
                 {openedConfigs.map(v => (
-                  <button
+                  <div
                     key={v.path}
                     className={`${styles.vaultTab} ${v.path === activeConfig?.path ? styles.vaultTabActive : ''}`}
-                    onClick={() => activateVault(v.path)}
                   >
-                    {v.name}
-                  </button>
+                    <button
+                      className={styles.vaultTabName}
+                      onClick={() => activateVault(v.path)}
+                    >
+                      {v.name}
+                    </button>
+                    <button
+                      className={styles.vaultTabClose}
+                      onClick={e => { e.stopPropagation(); void closeVault(v.path) }}
+                      title="Close vault"
+                    >
+                      ×
+                    </button>
+                  </div>
                 ))}
               </div>
             )
