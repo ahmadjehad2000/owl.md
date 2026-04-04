@@ -1,8 +1,9 @@
 // src/renderer/components/vault/VaultManagerModal.tsx
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useVaultManagerStore } from '../../stores/vaultManagerStore'
 import { useVaultStore } from '../../stores/vaultStore'
 import { ipc } from '../../lib/ipc'
+import { ContextMenu, type ContextMenuEntry } from '../ui/ContextMenu'
 import type { VaultConfig } from '@shared/types/Note'
 import styles from './VaultManagerModal.module.css'
 
@@ -34,6 +35,10 @@ export function VaultManagerModal(): JSX.Element | null {
   const [msgIndex,    setMsgIndex]    = useState(0)
   const [error,       setError]       = useState<string | null>(null)
   const nameInputRef = useRef<HTMLInputElement>(null)
+
+  const [vaultMenuOpen,  setVaultMenuOpen]  = useState(false)
+  const [vaultMenuPos,   setVaultMenuPos]   = useState({ x: 0, y: 0 })
+  const [vaultMenuItems, setVaultMenuItems] = useState<ContextMenuEntry[]>([])
 
   // Reset on close
   useEffect(() => {
@@ -110,6 +115,28 @@ export function VaultManagerModal(): JSX.Element | null {
     }
   }
 
+  const handleVaultCardContextMenu = useCallback((e: React.MouseEvent, v: VaultConfig) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const items: ContextMenuEntry[] = [
+      { label: 'Switch to this vault', icon: '↩', onClick: () => handleOpenExisting(v.path) },
+      { separator: true },
+      {
+        label: 'Remove from list',
+        icon: '✕',
+        danger: true,
+        onClick: async () => {
+          await ipc.vault.removeKnown(v.path)
+          const updated = await ipc.vault.listKnown()
+          setKnownVaults(updated)
+        },
+      },
+    ]
+    setVaultMenuPos({ x: e.clientX, y: e.clientY })
+    setVaultMenuItems(items)
+    setVaultMenuOpen(true)
+  }, [handleOpenExisting])
+
   if (!isOpen) return null
 
   const safeFolder  = vaultName.trim().replace(/[<>:"/\\|?*]/g, '-') || 'my-vault'
@@ -152,7 +179,12 @@ export function VaultManagerModal(): JSX.Element | null {
               ? <div className={styles.empty}>No saved vaults. Create one first.</div>
               : <div className={styles.vaultList}>
                   {knownVaults.map(v => (
-                    <button key={v.path} className={styles.vaultCard} onClick={() => handleOpenExisting(v.path)}>
+                    <button
+                      key={v.path}
+                      className={styles.vaultCard}
+                      onClick={() => handleOpenExisting(v.path)}
+                      onContextMenu={e => handleVaultCardContextMenu(e, v)}
+                    >
                       <div className={styles.vaultCardName}>{v.name}</div>
                       <div className={styles.vaultCardPath}>{v.path}</div>
                     </button>
@@ -194,6 +226,13 @@ export function VaultManagerModal(): JSX.Element | null {
           </div>
         )}
       </div>
+
+      <ContextMenu
+        isOpen={vaultMenuOpen}
+        position={vaultMenuPos}
+        items={vaultMenuItems}
+        onClose={() => setVaultMenuOpen(false)}
+      />
     </div>
   )
 }
