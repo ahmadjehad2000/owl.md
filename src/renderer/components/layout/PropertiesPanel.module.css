@@ -113,3 +113,10 @@
 }
 .addBtn:hover { background: rgba(56,182,220,0.18); }
 .addBtn:active { transform: scale(0.94); }
+
+.inlineNotice {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  padding: 6px 8px 0;
+  font-style: italic;
+}

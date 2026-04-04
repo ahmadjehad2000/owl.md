@@ -58,6 +58,9 @@ export function PropertiesPanel(): JSX.Element {
 
   return (
     <div className={styles.panel}>
+      <div className={styles.inlineNotice}>
+        Properties are also shown inline above the editor.
+      </div>
       {Object.entries(frontmatter).map(([key, value]) => (
         <div key={key} className={styles.row}>
           <span className={styles.key} title={key}>{key}</span>

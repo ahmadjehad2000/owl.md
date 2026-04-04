@@ -9,6 +9,7 @@ import { WikiLinkPicker } from './extensions/WikiLinkPicker'
 import { FoldHeadings } from './extensions/FoldHeadings'
 import { NoteEmbed } from './extensions/NoteEmbed'
 import { HoverPreview } from './HoverPreview'
+import { InlineProperties } from './InlineProperties'
 import { useHoverPreviewStore } from '../../stores/hoverPreviewStore'
 import { Callout } from './extensions/Callout'
 import { SlashCommand } from './extensions/SlashCommand'
@@ -52,6 +53,8 @@ export function NoteEditor(): JSX.Element {
   const save              = useEditorStore(s => s.save)
   const isReadingView     = useEditorStore(s => s.isReadingView)
   const toggleReadingView = useEditorStore(s => s.toggleReadingView)
+  const frontmatter       = useEditorStore(s => s.frontmatter)
+  const setFrontmatter    = useEditorStore(s => s.setFrontmatter)
   const restoreTab  = useEditorStore(s => s.restoreTab)
   const unloadNote  = useEditorStore(s => s.unloadNote)
   const loadNote    = useEditorStore(s => s.loadNote)
@@ -418,6 +421,8 @@ useEffect(() => {
               </button>
             </div>
           </div>
+
+          <InlineProperties frontmatter={frontmatter} onChange={setFrontmatter} />
 
           {/* Editor / source pane */}
           <div className={styles.editorWrap} onContextMenu={handleEditorContextMenu} onMouseOver={handleMouseOver} onMouseOut={handleMouseLeave} style={{ position: 'relative' }}>
