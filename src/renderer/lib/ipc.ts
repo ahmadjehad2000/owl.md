@@ -24,8 +24,9 @@ export const ipc = {
     createFolder: (name: string): Promise<Note>                => window.owl.notes.createFolder(name),
     move: (noteId: string, newParentId: string | null, orderIndex: number): Promise<void> =>
             window.owl.notes.move(noteId, newParentId, orderIndex),
-    rename:    (id: string, newTitle: string): Promise<Note>   => window.owl.notes.rename(id, newTitle),
-    duplicate: (id: string): Promise<NoteContent>              => window.owl.notes.duplicate(id),
+    rename:    (id: string, newTitle: string): Promise<Note>           => window.owl.notes.rename(id, newTitle),
+    duplicate: (id: string): Promise<NoteContent>                      => window.owl.notes.duplicate(id),
+    pin:       (id: string, pinned: boolean): Promise<Note>            => window.owl.notes.pin(id, pinned),
   },
   search: {
     query: (q: string): Promise<SearchResult[]> => window.owl.search.query(q),

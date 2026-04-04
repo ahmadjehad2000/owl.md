@@ -24,6 +24,7 @@ export interface OwlNotesAPI {
   move:         (noteId: string, newParentId: string | null, orderIndex: number) => Promise<void>
   rename:       (id: string, newTitle: string) => Promise<Note>
   duplicate:    (id: string) => Promise<NoteContent>
+  pin:          (id: string, pinned: boolean) => Promise<Note>
 }
 
 export interface OwlSearchAPI {

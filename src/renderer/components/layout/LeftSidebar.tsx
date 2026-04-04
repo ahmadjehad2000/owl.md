@@ -221,6 +221,14 @@ export function LeftSidebar(): JSX.Element {
       { label: 'Open in new tab', icon: '🗂', onClick: () => openTab(note.id, note.title) },
       { separator: true },
       { label: 'Rename', icon: '✏️', shortcut: 'F2', onClick: () => setRenamingId(note.id) },
+      {
+        label: note.pinned ? 'Unpin' : 'Pin to top',
+        icon: '📌',
+        onClick: async () => {
+          await ipc.notes.pin(note.id, !note.pinned)
+          await loadNotes()
+        },
+      },
       { label: 'Duplicate', icon: '📋', onClick: () => handleDuplicate(note) },
       {
         label: 'Insert link in current note',
@@ -334,9 +342,10 @@ export function LeftSidebar(): JSX.Element {
     return items
   }, [notes, loadNotes, openTab, createFolder])
 
-  const allFolders = notes.filter(n => n.noteType === 'folder').sort((a, b) => a.orderIndex - b.orderIndex)
+  const allFolders  = notes.filter(n => n.noteType === 'folder').sort((a, b) => a.orderIndex - b.orderIndex)
   const rootFolders = allFolders.filter(f => !f.parentId)
   const rootNotes   = notes.filter(n => n.noteType !== 'folder' && !n.parentId).sort((a, b) => a.orderIndex - b.orderIndex)
+  const pinnedNotes = notes.filter(n => n.pinned && n.noteType !== 'folder')
 
   function handleDragStart(event: DragStartEvent): void {
     setDragId(event.active.id as string)
@@ -463,6 +472,23 @@ export function LeftSidebar(): JSX.Element {
       onDragEnd={handleDragEnd}
     >
       <div className={styles.root}>
+        {pinnedNotes.length > 0 && (
+          <div className={styles.pinnedSection}>
+            <div className={styles.sectionLabel}>Pinned</div>
+            {pinnedNotes.map(note => (
+              <button
+                key={note.id}
+                className={`${styles.noteItem} ${activeNoteId === note.id ? styles.active : ''}`}
+                onClick={() => openTab(note.id, note.title)}
+                onContextMenu={e => openContextMenu(e, noteContextItems(note))}
+              >
+                <span className={styles.icon}>📌</span>
+                <span className={styles.title}>{note.title}</span>
+              </button>
+            ))}
+            <div className={styles.divider} />
+          </div>
+        )}
         <div className={styles.section}>
           <span>All Notes</span>
           <div className={styles.headerActions}>

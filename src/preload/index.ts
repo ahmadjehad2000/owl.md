@@ -27,8 +27,9 @@ const owl: OwlAPI = {
     createFolder: (name)          => ipcRenderer.invoke('notes:create-folder', name),
     move: (noteId, newParentId, orderIndex) =>
             ipcRenderer.invoke('notes:move',      noteId, newParentId, orderIndex),
-    rename:    (id, newTitle) => ipcRenderer.invoke('notes:rename',    id, newTitle),
-    duplicate: (id)           => ipcRenderer.invoke('notes:duplicate', id),
+    rename:    (id, newTitle)   => ipcRenderer.invoke('notes:rename',    id, newTitle),
+    duplicate: (id)             => ipcRenderer.invoke('notes:duplicate', id),
+    pin:       (id, pinned)     => ipcRenderer.invoke('notes:pin',       id, pinned),
   },
   search: {
     query: (q) => ipcRenderer.invoke('search:query', q),

@@ -154,4 +154,10 @@ export function registerNotesHandlers(services: {
     const newNote = db().prepare('SELECT * FROM notes WHERE id = ?').get(newId) as Note
     return { note: newNote, markdown: newMarkdown }
   })
+
+  ipcMain.handle('notes:pin', (_e, id: string, pinned: boolean): Note => {
+    db().prepare('UPDATE notes SET pinned = ?, updated_at = ? WHERE id = ?')
+      .run(pinned ? 1 : 0, Date.now(), id)
+    return db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
+  })
 }

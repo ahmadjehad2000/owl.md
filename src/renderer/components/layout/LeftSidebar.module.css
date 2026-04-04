@@ -146,3 +146,14 @@
   border-color: rgba(2,132,199,0.45);
   color: #1e2433;
 }
+
+.pinnedSection { padding: 6px 0 0; }
+.sectionLabel {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.2);
+  padding: 4px 14px;
+}
+[data-theme="modern-light"] .sectionLabel { color: rgba(0,0,0,0.3); }
