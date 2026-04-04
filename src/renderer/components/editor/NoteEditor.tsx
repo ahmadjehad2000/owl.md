@@ -7,6 +7,7 @@ import { Markdown } from 'tiptap-markdown'
 import { WikiLink } from './extensions/WikiLink'
 import { WikiLinkPicker } from './extensions/WikiLinkPicker'
 import { FoldHeadings } from './extensions/FoldHeadings'
+import { NoteEmbed } from './extensions/NoteEmbed'
 import { HoverPreview } from './HoverPreview'
 import { useHoverPreviewStore } from '../../stores/hoverPreviewStore'
 import { Callout } from './extensions/Callout'
@@ -143,6 +144,7 @@ export function NoteEditor(): JSX.Element {
       WikiLink,
       WikiLinkPicker,
       FoldHeadings,
+      NoteEmbed,
       Placeholder.configure({ placeholder: 'Start writing…' }),
       Markdown.configure({ transformPastedText: true, transformCopiedText: true }),
       Callout,

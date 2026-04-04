@@ -481,3 +481,15 @@
 }
 .readingView :global(.ProseMirror) { cursor: default; user-select: text; }
 .readingView :global(.ProseMirror .ProseMirror-selectednode) { outline: none; }
+
+/* ── Note Embeds (![[...]]) ──────────────────────────────────────────────── */
+.editorWrap :global(.note-embed-syntax) { color: rgba(160,130,220,0.7); font-size: 12px; opacity: 0.6; }
+.editorWrap :global(.note-embed-card) {
+  display: block; background: rgba(130,100,200,0.08);
+  border: 1px solid rgba(130,100,200,0.2); border-left: 3px solid rgba(130,100,200,0.5);
+  border-radius: 6px; padding: 10px 14px; margin: 4px 0; max-width: 680px; cursor: default;
+}
+.editorWrap :global(.note-embed-title) { font-size: 12px; font-weight: 600; color: rgba(180,150,240,0.9); margin-bottom: 6px; }
+.editorWrap :global(.note-embed-body)  { font-size: 12px; line-height: 1.6; color: rgba(255,255,255,0.45); white-space: pre-wrap; word-break: break-word; max-height: 120px; overflow: hidden; }
+.editorWrap :global(.note-embed-loading),
+.editorWrap :global(.note-embed-empty) { font-style: italic; color: rgba(255,255,255,0.25); }
