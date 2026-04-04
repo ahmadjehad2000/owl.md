@@ -55,4 +55,12 @@ export class SettingsService {
     this.settings.lastVaultPath = path
     this.save()
   }
+
+  removeKnown(path: string): void {
+    this.settings.knownVaults = this.settings.knownVaults.filter(v => v.path !== path)
+    if (this.settings.lastVaultPath === path) {
+      this.settings.lastVaultPath = null
+    }
+    this.save()
+  }
 }

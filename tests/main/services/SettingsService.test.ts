@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { mkdirSync, rmSync } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
+import { mkdtempSync } from 'fs'
 import { randomUUID } from 'crypto'
 import { SettingsService } from '../../../src/main/services/SettingsService'
 
@@ -56,5 +57,38 @@ describe('SettingsService', () => {
     const service2 = new SettingsService(testDir)
     expect(service2.getKnownVaults()).toHaveLength(1)
     expect(service2.getLastVaultPath()).toBe('/tmp/test')
+  })
+})
+
+describe('removeKnown', () => {
+  it('removes vault from known list', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'owl-settings-'))
+    const svc = new SettingsService(dir)
+    svc.addKnownVault({ name: 'A', path: '/a', createdAt: 1, schemaVersion: 1 })
+    svc.addKnownVault({ name: 'B', path: '/b', createdAt: 2, schemaVersion: 1 })
+    svc.removeKnown('/a')
+    expect(svc.getKnownVaults().map(v => v.path)).toEqual(['/b'])
+    rmSync(dir, { recursive: true, force: true })
+  })
+
+  it('clears lastVaultPath when removed vault was last', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'owl-settings-'))
+    const svc = new SettingsService(dir)
+    svc.addKnownVault({ name: 'A', path: '/a', createdAt: 1, schemaVersion: 1 })
+    svc.setLastVaultPath('/a')
+    svc.removeKnown('/a')
+    expect(svc.getLastVaultPath()).toBeNull()
+    rmSync(dir, { recursive: true, force: true })
+  })
+
+  it('leaves lastVaultPath when a different vault is removed', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'owl-settings-'))
+    const svc = new SettingsService(dir)
+    svc.addKnownVault({ name: 'A', path: '/a', createdAt: 1, schemaVersion: 1 })
+    svc.addKnownVault({ name: 'B', path: '/b', createdAt: 2, schemaVersion: 1 })
+    svc.setLastVaultPath('/b')
+    svc.removeKnown('/a')
+    expect(svc.getLastVaultPath()).toBe('/b')
+    rmSync(dir, { recursive: true, force: true })
   })
 })
