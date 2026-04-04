@@ -7,8 +7,11 @@ interface WatcherCallbacks {
   onFileDeleted: (absolutePath: string) => void
 }
 
+const DEBOUNCE_MS = 300
+
 export class WatcherService {
   private watcher: FSWatcher | null = null
+  private readonly pendingChanges = new Map<string, ReturnType<typeof setTimeout>>()
 
   constructor(private readonly vaultPath: string) {}
 
@@ -21,18 +24,28 @@ export class WatcherService {
       ignoreInitial: false,
     })
 
-    const handle = (path: string): void => {
-      if (path.endsWith('.md')) callbacks.onFileChanged(path)
-    }
-
-    const handleDelete = (path: string): void => {
+    this.watcher.on('add', (path) => this.debouncedChange(path, callbacks))
+    this.watcher.on('change', (path) => this.debouncedChange(path, callbacks))
+    this.watcher.on('unlink', (path) => {
+      const timer = this.pendingChanges.get(path)
+      if (timer) { clearTimeout(timer); this.pendingChanges.delete(path) }
       if (path.endsWith('.md')) callbacks.onFileDeleted(path)
-    }
+    })
+  }
 
-    this.watcher.on('add', handle).on('change', handle).on('unlink', handleDelete)
+  private debouncedChange(path: string, callbacks: WatcherCallbacks): void {
+    if (!path.endsWith('.md')) return
+    const existing = this.pendingChanges.get(path)
+    if (existing) clearTimeout(existing)
+    this.pendingChanges.set(path, setTimeout(() => {
+      this.pendingChanges.delete(path)
+      callbacks.onFileChanged(path)
+    }, DEBOUNCE_MS))
   }
 
   async stop(): Promise<void> {
+    for (const timer of this.pendingChanges.values()) clearTimeout(timer)
+    this.pendingChanges.clear()
     if (this.watcher) {
       await this.watcher.close()
       this.watcher = null
