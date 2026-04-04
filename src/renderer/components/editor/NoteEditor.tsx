@@ -142,6 +142,9 @@ export function NoteEditor(): JSX.Element {
       autosaveTimer.current = setTimeout(() => save(), AUTOSAVE_MS)
     },
     editorProps: {
+      attributes: {
+        spellcheck: 'true',
+      },
       handleClick: (_view, _pos, event) => {
         const el = (event.target as HTMLElement).closest('[data-href]')
         if (el) {
@@ -330,7 +333,7 @@ useEffect(() => {
                       if (autosaveTimer.current) clearTimeout(autosaveTimer.current)
                       autosaveTimer.current = setTimeout(() => save(), AUTOSAVE_MS)
                     }}
-                    spellCheck={false}
+                    spellCheck={true}
                   />
                 ) : (
                   <EditorContent editor={editor} />
