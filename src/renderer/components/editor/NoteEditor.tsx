@@ -1,5 +1,5 @@
 // src/renderer/components/editor/NoteEditor.tsx
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Placeholder } from '@tiptap/extension-placeholder'
@@ -13,6 +13,7 @@ import { useTabStore } from '../../stores/tabStore'
 import { useVaultStore } from '../../stores/vaultStore'
 import { useRightPanelStore } from '../../stores/rightPanelStore'
 import { extractHeadings } from '../../lib/markdown'
+import { ContextMenu, type ContextMenuEntry } from '../ui/ContextMenu'
 import styles from './NoteEditor.module.css'
 
 const AUTOSAVE_MS = 1500
@@ -29,7 +30,12 @@ export function NoteEditor(): JSX.Element {
   const loadNote    = useEditorStore(s => s.loadNote)
   const setHeadings = useRightPanelStore(s => s.setHeadings)
   const activeTabId = useTabStore(s => s.activeTabId)
+  const notes       = useVaultStore(s => s.notes)
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const parentFolder = note?.parentId
+    ? notes.find(n => n.id === note.parentId) ?? null
+    : null
 
   // When the active tab changes: restore from cache or load from disk
   useEffect(() => {
@@ -108,21 +114,88 @@ export function NoteEditor(): JSX.Element {
 
   const statusClass = saveStatus !== 'idle' ? styles[saveStatus] : isDirty ? styles.dirty : ''
 
+  // Editor context menu
+  const [editorMenuOpen,  setEditorMenuOpen]  = useState(false)
+  const [editorMenuPos,   setEditorMenuPos]   = useState({ x: 0, y: 0 })
+  const [editorMenuItems, setEditorMenuItems] = useState<ContextMenuEntry[]>([])
+
+  const handleEditorContextMenu = useCallback((e: React.MouseEvent) => {
+    if (!editor) return
+    e.preventDefault()
+    const { from, to } = editor.state.selection
+    const hasSelection = from !== to
+    const selectedText = hasSelection
+      ? editor.state.doc.textBetween(from, to, ' ')
+      : ''
+
+    const items: ContextMenuEntry[] = []
+
+    if (hasSelection) {
+      items.push({
+        label: 'Turn into wiki-link',
+        icon: '🔗',
+        onClick: () => {
+          editor.chain().focus().deleteSelection()
+            .insertContent(`[[${selectedText}]]`).run()
+        },
+      })
+    }
+
+    items.push({
+      label: 'Insert callout',
+      icon: '📣',
+      submenu: [
+        { label: 'Info',    icon: 'ℹ️',  onClick: () => editor.chain().focus().insertCallout('info').run() },
+        { label: 'Warning', icon: '⚠️',  onClick: () => editor.chain().focus().insertCallout('warning').run() },
+        { label: 'Tip',     icon: '💡',  onClick: () => editor.chain().focus().insertCallout('tip').run() },
+        { label: 'Danger',  icon: '🚨',  onClick: () => editor.chain().focus().insertCallout('danger').run() },
+      ],
+    })
+
+    if (items.length > 0) items.push({ separator: true })
+
+    items.push(
+      { label: 'Cut',   shortcut: 'Ctrl+X', onClick: () => document.execCommand('cut') },
+      { label: 'Copy',  shortcut: 'Ctrl+C', onClick: () => document.execCommand('copy') },
+      { label: 'Paste', shortcut: 'Ctrl+V', onClick: () => document.execCommand('paste') },
+    )
+
+    setEditorMenuPos({ x: e.clientX, y: e.clientY })
+    setEditorMenuItems(items)
+    setEditorMenuOpen(true)
+  }, [editor])
+
   return (
     <div className={styles.root}>
       <TabBar />
       {note ? (
         <>
           <div className={styles.toolbar}>
+            <span className={styles.breadcrumb}>
+              {parentFolder
+                ? <><span className={styles.breadcrumbFolder}>{parentFolder.title}</span><span className={styles.breadcrumbSep}>/</span><span className={styles.breadcrumbNote}>{note.title}</span></>
+                : <span className={styles.breadcrumbNote}>{note.title}</span>
+              }
+            </span>
             <span className={`${styles.saveStatus} ${statusClass}`}>{statusLabel}</span>
           </div>
-          <div className={styles.editorWrap}>
+          <div className={styles.editorWrap} onContextMenu={handleEditorContextMenu}>
             <EditorContent editor={editor} />
           </div>
         </>
       ) : (
-        <div className={styles.empty}>Open a note or create a new one</div>
+        <div className={styles.empty}>
+          <div className={styles.emptyIcon}>🦉</div>
+          <div className={styles.emptyTitle}>No note open</div>
+          <div className={styles.emptyDesc}>Select a note from the sidebar or press ⌘K to create one</div>
+        </div>
       )}
+      <ContextMenu
+        isOpen={editorMenuOpen}
+        position={editorMenuPos}
+        items={editorMenuItems}
+        onClose={() => setEditorMenuOpen(false)}
+      />
     </div>
   )
 }
