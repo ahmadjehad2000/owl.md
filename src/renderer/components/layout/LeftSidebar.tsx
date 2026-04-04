@@ -1,9 +1,10 @@
 // src/renderer/components/layout/LeftSidebar.tsx
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useRef } from 'react'
 import {
   DndContext, PointerSensor, useSensor, useSensors,
   closestCenter, DragOverlay,
   type DragStartEvent, type DragEndEvent, type DragOverEvent,
+  type DropAnimation,
 } from '@dnd-kit/core'
 import {
   SortableContext, useSortable, verticalListSortingStrategy, arrayMove,
@@ -12,63 +13,120 @@ import { CSS } from '@dnd-kit/utilities'
 import { useVaultStore } from '../../stores/vaultStore'
 import { useTabStore } from '../../stores/tabStore'
 import { ipc } from '../../lib/ipc'
+import { ContextMenu, type ContextMenuEntry } from '../ui/ContextMenu'
 import styles from './LeftSidebar.module.css'
 import type { Note } from '@shared/types/Note'
 
+const dropAnimation: DropAnimation = {
+  duration: 180,
+  easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+}
+
 // ─── Sortable note row ───────────────────────────────────────────────────────
 
-function SortableNoteRow({ note, active, indent, onClick }: {
-  note: Note; active: boolean; indent: boolean; onClick: () => void
+function SortableNoteRow({ note, active, indent, onClick, onContextMenu, isRenaming, onRenameCommit, onRenameCancel }: {
+  note: Note
+  active: boolean
+  indent: boolean
+  onClick: () => void
+  onContextMenu: (e: React.MouseEvent) => void
+  isRenaming: boolean
+  onRenameCommit: (newTitle: string) => void
+  onRenameCancel: () => void
 }): JSX.Element {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: note.id, data: { type: 'note', parentId: note.parentId ?? null } })
+  const inputRef = useRef<HTMLInputElement>(null)
 
   return (
     <button
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.35 : 1 }}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }}
       className={`${styles.noteItem} ${active ? styles.active : ''} ${indent ? styles.indented : ''}`}
-      onClick={onClick}
+      onClick={isRenaming ? undefined : onClick}
+      onContextMenu={onContextMenu}
       {...attributes}
-      {...listeners}
+      {...(isRenaming ? {} : listeners)}
     >
       <span className={styles.icon}>📄</span>
-      <span className={styles.title}>{note.title}</span>
+      {isRenaming ? (
+        <input
+          ref={inputRef}
+          autoFocus
+          className={styles.renameInput}
+          defaultValue={note.title}
+          onClick={e => e.stopPropagation()}
+          onMouseDown={e => e.stopPropagation()}
+          onKeyDown={e => {
+            e.stopPropagation()
+            if (e.key === 'Enter')  { onRenameCommit(inputRef.current?.value.trim() || note.title); return }
+            if (e.key === 'Escape') { onRenameCancel(); return }
+          }}
+          onBlur={() => onRenameCommit(inputRef.current?.value.trim() || note.title)}
+        />
+      ) : (
+        <span className={styles.title}>{note.title}</span>
+      )}
     </button>
   )
 }
 
-// ─── Sortable folder row ─────────────────────────────────────────────────────
+// ─── Sortable folder row ────────────────────────��────────────────────────────
 
-function SortableFolderRow({ folder, isOver, children }: {
-  folder: Note; isOver: boolean; children: React.ReactNode
+function SortableFolderRow({ folder, isOver, onContextMenu, isRenaming, onRenameCommit, onRenameCancel, children }: {
+  folder: Note
+  isOver: boolean
+  onContextMenu: (e: React.MouseEvent) => void
+  isRenaming: boolean
+  onRenameCommit: (newTitle: string) => void
+  onRenameCancel: () => void
+  children: React.ReactNode
 }): JSX.Element {
   const [expanded, setExpanded] = useState(true)
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: folder.id, data: { type: 'folder' } })
+  const inputRef = useRef<HTMLInputElement>(null)
 
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.35 : 1 }}
+      style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }}
       className={`${styles.folderGroup} ${isOver ? styles.dropTarget : ''}`}
     >
       <button
         className={styles.folderRow}
-        onClick={() => setExpanded(e => !e)}
+        onClick={() => { if (!isRenaming) setExpanded(e => !e) }}
+        onContextMenu={onContextMenu}
         {...attributes}
-        {...listeners}
+        {...(isRenaming ? {} : listeners)}
       >
         <span className={styles.folderArrow}>{expanded ? '▼' : '▶'}</span>
         <span className={styles.folderIcon}>📁</span>
-        <span className={styles.title}>{folder.title}</span>
+        {isRenaming ? (
+          <input
+            ref={inputRef}
+            autoFocus
+            className={styles.renameInput}
+            defaultValue={folder.title}
+            onClick={e => e.stopPropagation()}
+            onMouseDown={e => e.stopPropagation()}
+            onKeyDown={e => {
+              e.stopPropagation()
+              if (e.key === 'Enter')  { onRenameCommit(inputRef.current?.value.trim() || folder.title); return }
+              if (e.key === 'Escape') { onRenameCancel(); return }
+            }}
+            onBlur={() => onRenameCommit(inputRef.current?.value.trim() || folder.title)}
+          />
+        ) : (
+          <span className={styles.title}>{folder.title}</span>
+        )}
       </button>
       {expanded && <div className={styles.folderChildren}>{children}</div>}
     </div>
   )
 }
 
-// ─── Main sidebar ────────────────────────────────────────────────────────────
+// ─── Main sidebar ─────────────────────���──────────────────────────────��───────
 
 export function LeftSidebar(): JSX.Element {
   const notes        = useVaultStore(s => s.notes)
@@ -79,8 +137,22 @@ export function LeftSidebar(): JSX.Element {
   const activeTabId  = useTabStore(s => s.activeTabId)
   const [overFolderId, setOverFolderId] = useState<string | null>(null)
   const [dragId, setDragId]             = useState<string | null>(null)
+  const [renamingId, setRenamingId]     = useState<string | null>(null)
+
+  // Context menu state
+  const [menuOpen,  setMenuOpen]  = useState(false)
+  const [menuPos,   setMenuPos]   = useState({ x: 0, y: 0 })
+  const [menuItems, setMenuItems] = useState<ContextMenuEntry[]>([])
 
   const activeNoteId = tabs.find(t => t.id === activeTabId)?.noteId ?? null
+
+  const openContextMenu = useCallback((e: React.MouseEvent, items: ContextMenuEntry[]) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setMenuPos({ x: e.clientX, y: e.clientY })
+    setMenuItems(items)
+    setMenuOpen(true)
+  }, [])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -101,6 +173,89 @@ export function LeftSidebar(): JSX.Element {
     const name = `New Parent Knowledge Base ${Date.now().toString().slice(-4)}`
     await createFolder(name)
   }, [createFolder])
+
+  const handleRenameCommit = useCallback(async (id: string, newTitle: string) => {
+    setRenamingId(null)
+    if (!newTitle) return
+    await ipc.notes.rename(id, newTitle)
+    await loadNotes()
+  }, [loadNotes])
+
+  const handleDelete = useCallback(async (note: Note) => {
+    await ipc.notes.delete(note.id)
+    await loadNotes()
+  }, [loadNotes])
+
+  const handleDuplicate = useCallback(async (note: Note) => {
+    const { note: newNote } = await ipc.notes.duplicate(note.id)
+    await loadNotes()
+    openTab(newNote.id, newNote.title)
+  }, [loadNotes, openTab])
+
+  const noteContextItems = useCallback((note: Note): ContextMenuEntry[] => {
+    const folders = notes.filter(n => n.noteType === 'folder')
+    const items: ContextMenuEntry[] = [
+      { label: 'Rename', icon: '✏️', shortcut: 'F2', onClick: () => setRenamingId(note.id) },
+      { label: 'Duplicate', icon: '📋', onClick: () => handleDuplicate(note) },
+      { separator: true },
+    ]
+
+    if (folders.length > 0) {
+      const moveSubmenu: ContextMenuEntry[] = folders.map(f => ({
+        label: f.title,
+        icon: '📁',
+        onClick: async () => {
+          const siblings = notes.filter(n => n.noteType !== 'folder' && n.parentId === f.id)
+          await ipc.notes.move(note.id, f.id, siblings.length)
+          await loadNotes()
+        },
+      }))
+      items.push({ label: 'Move to folder', icon: '📁', submenu: moveSubmenu })
+    }
+
+    if (note.parentId) {
+      items.push({
+        label: 'Lift to root',
+        icon: '↗',
+        onClick: async () => {
+          const rootNotes = notes.filter(n => n.noteType !== 'folder' && !n.parentId)
+          await ipc.notes.move(note.id, null, rootNotes.length)
+          await loadNotes()
+        },
+      })
+    }
+
+    items.push({ separator: true })
+    items.push({ label: 'Delete', icon: '🗑', danger: true, onClick: () => handleDelete(note) })
+    return items
+  }, [notes, loadNotes, handleDuplicate, handleDelete])
+
+  const folderContextItems = useCallback((folder: Note): ContextMenuEntry[] => [
+    { label: 'Rename', icon: '✏️', shortcut: 'F2', onClick: () => setRenamingId(folder.id) },
+    { separator: true },
+    {
+      label: 'New note inside',
+      icon: '📄',
+      onClick: async () => {
+        const title = `Untitled ${new Date().toLocaleDateString()}`
+        const { note } = await ipc.notes.create(title, '')
+        const childCount = notes.filter(n => n.parentId === folder.id).length
+        await ipc.notes.move(note.id, folder.id, childCount)
+        await loadNotes()
+        openTab(note.id, note.title)
+      },
+    },
+    { separator: true },
+    {
+      label: 'Delete folder',
+      icon: '🗑',
+      danger: true,
+      onClick: async () => {
+        await ipc.notes.delete(folder.id)
+        await loadNotes()
+      },
+    },
+  ], [notes, loadNotes, openTab])
 
   const folders   = notes.filter(n => n.noteType === 'folder').sort((a, b) => a.orderIndex - b.orderIndex)
   const rootNotes = notes.filter(n => n.noteType !== 'folder' && !n.parentId).sort((a, b) => a.orderIndex - b.orderIndex)
@@ -124,7 +279,6 @@ export function LeftSidebar(): JSX.Element {
     const overData   = over.data.current   as { type: string; parentId?: string | null } | undefined
 
     if (activeData.type === 'folder') {
-      // Reorder folders among themselves
       const ids = folders.map(f => f.id)
       const oldIdx = ids.indexOf(active.id as string)
       const newIdx = ids.indexOf(over.id as string)
@@ -144,13 +298,11 @@ export function LeftSidebar(): JSX.Element {
       const currentParentId = activeData.parentId
 
       if (currentParentId !== newParentId) {
-        // Move note to a different parent (nest into folder or lift to root)
         const siblings = notes
           .filter(n => n.noteType !== 'folder' && n.parentId === newParentId)
           .sort((a, b) => a.orderIndex - b.orderIndex)
         await ipc.notes.move(active.id as string, newParentId, siblings.length)
       } else {
-        // Reorder within the same parent
         const container = notes
           .filter(n => n.noteType !== 'folder' && n.parentId === currentParentId)
           .sort((a, b) => a.orderIndex - b.orderIndex)
@@ -195,6 +347,10 @@ export function LeftSidebar(): JSX.Element {
                   key={folder.id}
                   folder={folder}
                   isOver={overFolderId === folder.id}
+                  onContextMenu={e => openContextMenu(e, folderContextItems(folder))}
+                  isRenaming={renamingId === folder.id}
+                  onRenameCommit={t => handleRenameCommit(folder.id, t)}
+                  onRenameCancel={() => setRenamingId(null)}
                 >
                   <SortableContext items={children.map(n => n.id)} strategy={verticalListSortingStrategy}>
                     {children.map(n => (
@@ -204,6 +360,10 @@ export function LeftSidebar(): JSX.Element {
                         active={n.id === activeNoteId}
                         indent
                         onClick={() => openNote(n)}
+                        onContextMenu={e => openContextMenu(e, noteContextItems(n))}
+                        isRenaming={renamingId === n.id}
+                        onRenameCommit={t => handleRenameCommit(n.id, t)}
+                        onRenameCancel={() => setRenamingId(null)}
                       />
                     ))}
                   </SortableContext>
@@ -220,18 +380,32 @@ export function LeftSidebar(): JSX.Element {
                 active={n.id === activeNoteId}
                 indent={false}
                 onClick={() => openNote(n)}
+                onContextMenu={e => openContextMenu(e, noteContextItems(n))}
+                isRenaming={renamingId === n.id}
+                onRenameCommit={t => handleRenameCommit(n.id, t)}
+                onRenameCancel={() => setRenamingId(null)}
               />
             ))}
           </SortableContext>
         </div>
       </div>
 
-      <DragOverlay dropAnimation={null}>
+      <DragOverlay dropAnimation={dropAnimation}>
         {dragItem
-          ? <div style={{ padding: '4px 10px', background: 'rgba(56,182,220,0.15)', borderRadius: 6, fontSize: 12, color: 'rgba(56,182,220,0.9)', pointerEvents: 'none' }}>{dragItem.title}</div>
+          ? <div className={styles.dragGhost}>
+              <span className={styles.dragGhostIcon}>{dragItem.noteType === 'folder' ? '📁' : '📄'}</span>
+              <span className={styles.dragGhostTitle}>{dragItem.title}</span>
+            </div>
           : null
         }
       </DragOverlay>
+
+      <ContextMenu
+        isOpen={menuOpen}
+        position={menuPos}
+        items={menuItems}
+        onClose={() => setMenuOpen(false)}
+      />
     </DndContext>
   )
 }
