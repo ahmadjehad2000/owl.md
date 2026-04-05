@@ -46,6 +46,22 @@ export interface SearchResult {
   excerpt: string
 }
 
+export interface GraphNode {
+  id: string
+  title: string
+  noteType: string
+}
+
+export interface GraphEdge {
+  source: string
+  target: string
+}
+
+export interface GraphData {
+  nodes: GraphNode[]
+  edges: GraphEdge[]
+}
+
 export interface VaultConfig {
   name: string
   path: string

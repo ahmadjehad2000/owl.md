@@ -4,6 +4,8 @@ import { useSearchStore } from '../../stores/searchStore'
 import { useCommandPaletteStore } from '../../stores/commandPaletteStore'
 import { useVaultManagerStore } from '../../stores/vaultManagerStore'
 import { useSettingsStore } from '../../stores/settingsStore'
+import { useGraphStore } from '../../stores/graphStore'
+import { useTabStore } from '../../stores/tabStore'
 import styles from './MenuBar.module.css'
 
 type MenuAction = { label: string; shortcut?: string; action: () => void }
@@ -20,6 +22,7 @@ export function MenuBar(): JSX.Element {
   const openPalette       = useCommandPaletteStore(s => s.open)
   const showVaultManager  = useVaultManagerStore(s => s.show)
   const openSettings      = useSettingsStore(s => s.open)
+  const openGraph         = useGraphStore(s => s.open)
   const barRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -69,6 +72,17 @@ export function MenuBar(): JSX.Element {
         { label: 'Select All', shortcut: 'Ctrl+A', action: () => document.execCommand('selectAll') },
         { separator: true },
         { label: 'Find', shortcut: 'Ctrl+F', action: () => openSearch() },
+      ],
+    },
+    {
+      label: 'View',
+      items: [
+        { label: 'Graph View', shortcut: 'Ctrl+G', action: () => {
+          const activeTab = useTabStore.getState().tabs.find(
+            t => t.id === useTabStore.getState().activeTabId
+          )
+          openGraph(activeTab?.noteId ?? null)
+        }},
       ],
     },
     {

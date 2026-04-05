@@ -93,6 +93,10 @@ export function registerNotesHandlers(services: {
     services.index().getBacklinks(id)
   )
 
+  ipcMain.handle('notes:getGraphData', () =>
+    services.index().getGraphData()
+  )
+
   ipcMain.handle('notes:create-folder', (_e, name: string): Note => {
     const id = crypto.randomUUID()
     const now = Date.now()

@@ -35,6 +35,7 @@ const owl: OwlAPI = {
     notesByTag:  (tag)               => ipcRenderer.invoke('notes:notes-by-tag', tag),
     createDaily: ()                  => ipcRenderer.invoke('notes:create-daily'),
     saveImage:   (base64Data, ext)   => ipcRenderer.invoke('notes:save-image',   base64Data, ext),
+    getGraphData: ()                 => ipcRenderer.invoke('notes:getGraphData'),
   },
   export: {
     pdf: (noteTitle) => ipcRenderer.invoke('export:pdf', noteTitle),

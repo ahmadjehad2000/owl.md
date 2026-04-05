@@ -1,5 +1,5 @@
 // src/shared/types/IPC.ts
-import type { Note, NoteContent, NoteSlim, BacklinkResult, SearchResult, VaultConfig } from './Note'
+import type { Note, NoteContent, NoteSlim, BacklinkResult, SearchResult, VaultConfig, GraphData } from './Note'
 
 export interface OwlVaultAPI {
   open:        (vaultPath: string) => Promise<VaultConfig>
@@ -30,6 +30,7 @@ export interface OwlNotesAPI {
   notesByTag:   (tag: string) => Promise<Note[]>
   createDaily:  () => Promise<NoteContent>
   saveImage:    (base64Data: string, ext: string) => Promise<string>
+  getGraphData: () => Promise<GraphData>
 }
 
 export interface OwlSearchAPI {

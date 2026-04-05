@@ -1,7 +1,7 @@
 // src/main/services/IndexService.ts
 import type Database from 'better-sqlite3'
 import { createHash } from 'crypto'
-import type { BacklinkResult, SearchResult } from '@shared/types/Note'
+import type { BacklinkResult, SearchResult, GraphData } from '@shared/types/Note'
 
 interface IndexNoteParams {
   id: string
@@ -147,6 +147,20 @@ export class IndexService {
     } catch {
       return []
     }
+  }
+
+  getGraphData(): GraphData {
+    const nodes = this.db.prepare(
+      `SELECT id, title, note_type as noteType FROM notes
+       WHERE deleted_at IS NULL AND note_type != 'folder'`
+    ).all() as GraphData['nodes']
+
+    const edges = this.db.prepare(
+      `SELECT source_note_id as source, target_note_id as target
+       FROM links WHERE is_resolved = 1`
+    ).all() as GraphData['edges']
+
+    return { nodes, edges }
   }
 
   removeNote(id: string): void {
