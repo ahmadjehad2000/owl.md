@@ -22,7 +22,7 @@ const owl: OwlAPI = {
     listSlim:     ()              => ipcRenderer.invoke('notes:list-slim'),
     read:         (id)            => ipcRenderer.invoke('notes:read',          id),
     save:         (id, markdown)  => ipcRenderer.invoke('notes:save',          id, markdown),
-    create:       (title, folder) => ipcRenderer.invoke('notes:create',        title, folder),
+    create:       (title, folder, noteType) => ipcRenderer.invoke('notes:create', title, folder, noteType),
     delete:       (id)            => ipcRenderer.invoke('notes:delete',        id),
     getBacklinks: (id)            => ipcRenderer.invoke('notes:getBacklinks',  id),
     createFolder: (name)          => ipcRenderer.invoke('notes:create-folder', name),
@@ -35,9 +35,14 @@ const owl: OwlAPI = {
     notesByTag:  (tag)               => ipcRenderer.invoke('notes:notes-by-tag', tag),
     createDaily: ()                  => ipcRenderer.invoke('notes:create-daily'),
     saveImage:   (base64Data, ext)   => ipcRenderer.invoke('notes:save-image',   base64Data, ext),
+    getGraphData:   ()               => ipcRenderer.invoke('notes:getGraphData'),
+    appendToDaily:  (text)           => ipcRenderer.invoke('notes:appendToDaily', text),
   },
   export: {
     pdf: (noteTitle) => ipcRenderer.invoke('export:pdf', noteTitle),
+  },
+  capture: {
+    hide: () => ipcRenderer.invoke('capture:hide'),
   },
   search: {
     query: (q) => ipcRenderer.invoke('search:query', q),

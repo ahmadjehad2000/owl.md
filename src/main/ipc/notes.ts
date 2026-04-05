@@ -51,7 +51,7 @@ export function registerNotesHandlers(services: {
     return db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
   })
 
-  ipcMain.handle('notes:create', (_e, title: string, folderPath: string): NoteContent => {
+  ipcMain.handle('notes:create', (_e, title: string, folderPath: string, noteType?: string): NoteContent => {
     if (folderPath) {
       const notesRoot = join(services.vault().getRoot(), 'notes')
       const resolved = resolve(join(notesRoot, folderPath))
@@ -69,9 +69,10 @@ export function registerNotesHandlers(services: {
       notePath = folderPath ? `${folderPath}/${fileName}` : fileName
       counter++
     }
-    const markdown = ''
+    const type = noteType ?? 'note'
+    const markdown = type === 'canvas' ? '{"cards":[],"connections":[]}' : ''
     services.vault().writeNote(notePath, markdown)
-    services.index().indexNote({ id, path: notePath, title, markdown, folderPath, noteType: 'note' })
+    services.index().indexNote({ id, path: notePath, title, markdown, folderPath, noteType: type })
     services.index().syncFTS(id, title, markdown)
     const note = db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
     return { note, markdown }
@@ -85,12 +86,22 @@ export function registerNotesHandlers(services: {
       services.index().removeNote(id)
       return
     }
-    services.vault().deleteNote(note.path)
+    // Remove DB record first so the note disappears from the UI immediately.
+    // Then attempt file deletion — if the file is already gone that's fine.
     services.index().removeNote(id)
+    try {
+      services.vault().deleteNote(note.path)
+    } catch {
+      // File may already be missing (external deletion, rename, etc.) — not fatal.
+    }
   })
 
   ipcMain.handle('notes:getBacklinks', (_e, id: string) =>
     services.index().getBacklinks(id)
+  )
+
+  ipcMain.handle('notes:getGraphData', () =>
+    services.index().getGraphData()
   )
 
   ipcMain.handle('notes:create-folder', (_e, name: string): Note => {
@@ -225,13 +236,68 @@ export function registerNotesHandlers(services: {
     return { note: db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note, markdown }
   })
 
+  ipcMain.handle('notes:appendToDaily', (_e, text: string): void => {
+    const title      = todayKey()
+    const folderPath = 'Daily Notes'
+
+    // Get or create the daily note
+    let existing = db().prepare(
+      `SELECT * FROM notes WHERE title = ? AND folder_path = ? AND note_type = 'daily'`
+    ).get(title, folderPath) as Note | undefined
+
+    if (!existing) {
+      const id       = randomUUID()
+      const notePath = `${folderPath}/${title}.md`
+      const markdown = `# ${title}\n\n`
+      try {
+        services.vault().writeNote(notePath, markdown)
+      } catch (err) {
+        throw new Error(`Failed to create daily note: ${(err as Error).message}`)
+      }
+      services.index().indexNote({ id, path: notePath, title, markdown, folderPath, noteType: 'daily' })
+      services.index().syncFTS(id, title, markdown)
+      const maxRow = db().prepare(
+        `SELECT COALESCE(MAX(order_index), -1) as m FROM notes WHERE folder_path = ?`
+      ).get(folderPath) as { m: number }
+      db().prepare('UPDATE notes SET order_index = ? WHERE id = ?').run(maxRow.m + 1, id)
+      existing = db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
+    }
+
+    // Append the captured text as a new section
+    let current: string
+    try {
+      current = services.vault().readNote(existing.path)
+    } catch (err) {
+      throw new Error(`Failed to read daily note: ${(err as Error).message}`)
+    }
+    const now = new Date()
+    const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
+    const appended = current.trimEnd() + `\n\n---\n**${time}**\n\n${text.trim()}\n`
+    try {
+      services.vault().writeNote(existing.path, appended)
+    } catch (err) {
+      throw new Error(`Failed to write daily note: ${(err as Error).message}`)
+    }
+    services.index().indexNote({
+      id: existing.id, path: existing.path, title,
+      markdown: appended, folderPath, noteType: 'daily',
+    })
+    services.index().syncFTS(existing.id, title, appended)
+  })
+
   ipcMain.handle('notes:save-image', (_e, base64Data: string, ext: string): string => {
     const root    = services.vault().getRoot()
     const imgDir  = join(root, 'attachments', 'images')
     mkdirSync(imgDir, { recursive: true })
     const safeExt  = ext.replace(/[^a-z0-9]/gi, '').slice(0, 10) || 'png'
     const filename = `${randomUUID()}.${safeExt}`
-    writeFileSync(join(imgDir, filename), Buffer.from(base64Data, 'base64'))
+    let buf: Buffer
+    try {
+      buf = Buffer.from(base64Data, 'base64')
+    } catch {
+      throw new Error('Invalid image data: could not decode base64')
+    }
+    writeFileSync(join(imgDir, filename), buf)
     return `attachments/images/${filename}`
   })
 }

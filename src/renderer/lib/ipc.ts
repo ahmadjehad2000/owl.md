@@ -1,5 +1,5 @@
 // src/renderer/lib/ipc.ts
-import type { Note, NoteContent, NoteSlim, BacklinkResult, SearchResult, VaultConfig } from '@shared/types/Note'
+import type { Note, NoteContent, NoteSlim, BacklinkResult, SearchResult, VaultConfig, GraphData } from '@shared/types/Note'
 
 export const ipc = {
   vault: {
@@ -18,8 +18,8 @@ export const ipc = {
     listSlim:     (): Promise<NoteSlim[]>                     => window.owl.notes.listSlim(),
     read:         (id: string): Promise<NoteContent>           => window.owl.notes.read(id),
     save:         (id: string, md: string): Promise<Note>      => window.owl.notes.save(id, md),
-    create:       (title: string, folder: string): Promise<NoteContent> =>
-                    window.owl.notes.create(title, folder),
+    create:       (title: string, folder: string, noteType?: string): Promise<NoteContent> =>
+                    window.owl.notes.create(title, folder, noteType),
     delete:       (id: string): Promise<void>                  => window.owl.notes.delete(id),
     getBacklinks: (id: string): Promise<BacklinkResult[]>      => window.owl.notes.getBacklinks(id),
     createFolder: (name: string): Promise<Note>                => window.owl.notes.createFolder(name),
@@ -32,6 +32,8 @@ export const ipc = {
     notesByTag:  (tag: string): Promise<Note[]>                                   => window.owl.notes.notesByTag(tag),
     createDaily: (): Promise<NoteContent>                                         => window.owl.notes.createDaily(),
     saveImage:   (base64Data: string, ext: string): Promise<string>               => window.owl.notes.saveImage(base64Data, ext),
+    getGraphData:   (): Promise<GraphData>  => window.owl.notes.getGraphData(),
+    appendToDaily:  (text: string): Promise<void> => window.owl.notes.appendToDaily(text),
   },
   export: {
     pdf: (noteTitle: string): Promise<void> => window.owl.export.pdf(noteTitle),

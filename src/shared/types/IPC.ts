@@ -1,5 +1,5 @@
 // src/shared/types/IPC.ts
-import type { Note, NoteContent, NoteSlim, BacklinkResult, SearchResult, VaultConfig } from './Note'
+import type { Note, NoteContent, NoteSlim, BacklinkResult, SearchResult, VaultConfig, GraphData } from './Note'
 
 export interface OwlVaultAPI {
   open:        (vaultPath: string) => Promise<VaultConfig>
@@ -18,7 +18,7 @@ export interface OwlNotesAPI {
   listSlim:     () => Promise<NoteSlim[]>
   read:         (id: string) => Promise<NoteContent>
   save:         (id: string, markdown: string) => Promise<Note>
-  create:       (title: string, folderPath: string) => Promise<NoteContent>
+  create:       (title: string, folderPath: string, noteType?: string) => Promise<NoteContent>
   delete:       (id: string) => Promise<void>
   getBacklinks: (id: string) => Promise<BacklinkResult[]>
   createFolder: (name: string) => Promise<Note>
@@ -29,7 +29,13 @@ export interface OwlNotesAPI {
   listTags:     () => Promise<Array<{ tag: string; count: number }>>
   notesByTag:   (tag: string) => Promise<Note[]>
   createDaily:  () => Promise<NoteContent>
-  saveImage:    (base64Data: string, ext: string) => Promise<string>
+  saveImage:      (base64Data: string, ext: string) => Promise<string>
+  getGraphData:   () => Promise<GraphData>
+  appendToDaily:  (text: string) => Promise<void>
+}
+
+export interface OwlCaptureAPI {
+  hide: () => void
 }
 
 export interface OwlSearchAPI {
@@ -45,11 +51,12 @@ export interface OwlExportAPI {
 }
 
 export interface OwlAPI {
-  vault:  OwlVaultAPI
-  notes:  OwlNotesAPI
-  search: OwlSearchAPI
-  shell:  OwlShellAPI
-  export: OwlExportAPI
+  vault:   OwlVaultAPI
+  notes:   OwlNotesAPI
+  search:  OwlSearchAPI
+  shell:   OwlShellAPI
+  export:  OwlExportAPI
+  capture: OwlCaptureAPI
 }
 
 declare global {

@@ -28,9 +28,18 @@ export class VaultService {
   }
 
   getConfig(): VaultConfig {
-    return JSON.parse(
-      readFileSync(join(this.vaultPath, '.owl', 'config.json'), 'utf-8')
-    ) as VaultConfig
+    const configPath = join(this.vaultPath, '.owl', 'config.json')
+    let raw: string
+    try {
+      raw = readFileSync(configPath, 'utf-8')
+    } catch (err) {
+      throw new Error(`Cannot read vault config at ${configPath}: ${(err as Error).message}`)
+    }
+    try {
+      return JSON.parse(raw) as VaultConfig
+    } catch {
+      throw new Error(`Vault config is corrupted (invalid JSON) at ${configPath}`)
+    }
   }
 
   readNote(notePath: string): string {

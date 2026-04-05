@@ -12,6 +12,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { useVaultStore, normalizeNote } from '../../stores/vaultStore'
 import { useTabStore } from '../../stores/tabStore'
+import { useSplitStore } from '../../stores/splitStore'
 import { ipc } from '../../lib/ipc'
 import { ContextMenu, type ContextMenuEntry } from '../ui/ContextMenu'
 import { ConfirmModal } from '../ui/ConfirmModal'
@@ -39,7 +40,7 @@ function SortableNoteRow({ note, active, depth, onClick, onAuxClick, onContextMe
   note: Note
   active: boolean
   depth: number
-  onClick: () => void
+  onClick: (e: React.MouseEvent) => void
   onAuxClick: () => void
   onContextMenu: (e: React.MouseEvent) => void
   isRenaming: boolean
@@ -61,7 +62,7 @@ function SortableNoteRow({ note, active, depth, onClick, onAuxClick, onContextMe
       {...attributes}
       {...(isRenaming ? {} : listeners)}
     >
-      <span className={styles.icon}>📄</span>
+      <span className={styles.icon}>{note.noteType === 'canvas' ? '🎨' : note.noteType === 'daily' ? '📅' : '📄'}</span>
       {isRenaming ? (
         <input
           ref={inputRef}
@@ -156,6 +157,7 @@ export function LeftSidebar(): JSX.Element {
   const openTab      = useTabStore(s => s.openTab)
   const tabs         = useTabStore(s => s.tabs)
   const activeTabId  = useTabStore(s => s.activeTabId)
+  const openRight    = useSplitStore(s => s.openRight)
   const [overFolderId, setOverFolderId] = useState<string | null>(null)
   const [dragId, setDragId]             = useState<string | null>(null)
   const [renamingId, setRenamingId]     = useState<string | null>(null)
@@ -190,7 +192,10 @@ export function LeftSidebar(): JSX.Element {
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
   )
 
-  const openNote = useCallback((note: Note) => { openTab(note.id, note.title) }, [openTab])
+  const openNote = useCallback((note: Note, e?: React.MouseEvent) => {
+    if (e?.altKey) { openRight(note.id, note.title); return }
+    openTab(note.id, note.title)
+  }, [openTab, openRight])
 
   const createNote = useCallback(async () => {
     try {
@@ -480,7 +485,7 @@ export function LeftSidebar(): JSX.Element {
               note={n}
               active={n.id === activeNoteId}
               depth={depth + 1}
-              onClick={() => openNote(n)}
+              onClick={e => openNote(n, e)}
               onAuxClick={() => openTab(n.id, n.title)}
               onContextMenu={e => openContextMenu(e, noteContextItems(n))}
               isRenaming={renamingId === n.id}
@@ -552,7 +557,7 @@ export function LeftSidebar(): JSX.Element {
                 note={n}
                 active={n.id === activeNoteId}
                 depth={0}
-                onClick={() => openNote(n)}
+                onClick={e => openNote(n, e)}
                 onAuxClick={() => openTab(n.id, n.title)}
                 onContextMenu={e => openContextMenu(e, noteContextItems(n))}
                 isRenaming={renamingId === n.id}
@@ -567,7 +572,7 @@ export function LeftSidebar(): JSX.Element {
       <DragOverlay dropAnimation={dropAnimation}>
         {dragItem
           ? <div className={styles.dragGhost}>
-              <span className={styles.dragGhostIcon}>{dragItem.noteType === 'folder' ? '📁' : '📄'}</span>
+              <span className={styles.dragGhostIcon}>{dragItem.noteType === 'folder' ? '📁' : dragItem.noteType === 'canvas' ? '🎨' : '📄'}</span>
               <span className={styles.dragGhostTitle}>{dragItem.title}</span>
             </div>
           : null
@@ -605,7 +610,7 @@ export function LeftSidebar(): JSX.Element {
                   style={{ paddingLeft: 14 }}
                   onClick={() => openTab(note.id, note.title)}
                 >
-                  <span className={styles.icon}>📄</span>
+                  <span className={styles.icon}>{note.noteType === 'canvas' ? '🎨' : note.noteType === 'daily' ? '📅' : '📄'}</span>
                   <span className={styles.title}>{note.title}</span>
                 </button>
               ))}

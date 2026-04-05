@@ -46,6 +46,45 @@ export interface SearchResult {
   excerpt: string
 }
 
+export interface GraphNode {
+  id: string
+  title: string
+  noteType: string
+}
+
+export interface GraphEdge {
+  source: string
+  target: string
+}
+
+export interface GraphData {
+  nodes: GraphNode[]
+  edges: GraphEdge[]
+}
+
+export interface CanvasCardData {
+  id: string
+  type: 'text' | 'note'
+  x: number
+  y: number
+  w: number
+  h: number
+  text?: string        // for type='text'
+  noteId?: string      // for type='note'
+  noteTitle?: string   // cached title for type='note'
+}
+
+export interface CanvasConnection {
+  id: string
+  from: string
+  to: string
+}
+
+export interface CanvasData {
+  cards: CanvasCardData[]
+  connections: CanvasConnection[]
+}
+
 export interface VaultConfig {
   name: string
   path: string

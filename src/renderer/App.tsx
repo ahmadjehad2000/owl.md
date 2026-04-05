@@ -5,11 +5,14 @@ import { LeftSidebar } from './components/layout/LeftSidebar'
 import { RightSidebar } from './components/layout/RightSidebar'
 import { NoteEditor } from './components/editor/NoteEditor'
 import { SearchModal } from './components/search/SearchModal'
+import { GraphView } from './components/graph/GraphView'
 import { useVaultStore } from './stores/vaultStore'
 import { useTabStore } from './stores/tabStore'
 import { useEditorStore } from './stores/editorStore'
 import { useSearchStore } from './stores/searchStore'
 import { useCommandPaletteStore } from './stores/commandPaletteStore'
+import { useGraphStore } from './stores/graphStore'
+import { useSplitStore } from './stores/splitStore'
 import { ipc } from './lib/ipc'
 import styles from './App.module.css'
 import type { VaultConfig } from '@shared/types/Note'
@@ -201,6 +204,30 @@ export default function App(): JSX.Element {
         return
       }
 
+      // Cmd+Shift+\ — Toggle split pane
+      if (mod && e.shiftKey && e.key === '|') {
+        e.preventDefault()
+        const { isSplit, toggle } = useSplitStore.getState()
+        const activeTab = useTabStore.getState().tabs.find(
+          t => t.id === useTabStore.getState().activeTabId
+        )
+        toggle(activeTab?.noteId, activeTab?.title)
+        return
+      }
+
+      // Cmd+G — Graph view
+      if (mod && (e.key === 'g' || e.key === 'G') && !e.shiftKey) {
+        e.preventDefault()
+        const gs = useGraphStore.getState()
+        if (gs.isOpen) { gs.close() } else {
+          const activeTab = useTabStore.getState().tabs.find(
+            t => t.id === useTabStore.getState().activeTabId
+          )
+          gs.open(activeTab?.noteId ?? null)
+        }
+        return
+      }
+
       // Cmd+\ — Toggle left sidebar
       if (mod && e.key === '\\') {
         e.preventDefault()
@@ -370,6 +397,7 @@ export default function App(): JSX.Element {
         <NoteEditor />
       </AppShell>
       <SearchModal />
+      <GraphView />
     </>
   )
 }
