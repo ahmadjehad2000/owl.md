@@ -1,7 +1,7 @@
 // src/main/ipc/notes.ts
 import { ipcMain } from 'electron'
 import { mkdirSync, writeFileSync } from 'fs'
-import { join, dirname, basename } from 'path'
+import { join, dirname, basename, resolve, relative } from 'path'
 import { randomUUID } from 'crypto'
 import type { Note, NoteContent, NoteSlim } from '@shared/types/Note'
 import type { DatabaseService } from '../services/DatabaseService'
@@ -52,6 +52,13 @@ export function registerNotesHandlers(services: {
   })
 
   ipcMain.handle('notes:create', (_e, title: string, folderPath: string): NoteContent => {
+    if (folderPath) {
+      const notesRoot = join(services.vault().getRoot(), 'notes')
+      const resolved = resolve(join(notesRoot, folderPath))
+      if (relative(notesRoot, resolved).startsWith('..')) {
+        throw new Error('Invalid folder path')
+      }
+    }
     const id = crypto.randomUUID()
     const base = title.replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '-') || 'untitled'
     let fileName = `${base}.md`
