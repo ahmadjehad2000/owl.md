@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 // Strips ELECTRON_RUN_AS_NODE from the process environment before electron-vite
 // starts so that Electron's renderer/preload child processes never inherit it.
-// (Claude Code sets this flag globally; without stripping it here, the preload's
 //  require("electron") resolves to the npm path-string shim instead of the real
 //  Electron API, leaving window.owl undefined in the renderer.)
 delete process.env.ELECTRON_RUN_AS_NODE
