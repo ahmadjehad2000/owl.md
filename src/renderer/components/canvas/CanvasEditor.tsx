@@ -13,15 +13,22 @@ const DEFAULT_CARD_W = 240
 const DEFAULT_CARD_H = 140
 const AUTOSAVE_MS = 2000
 
-function parseCanvasData(json: string): CanvasData {
+type ParseResult =
+  | { ok: true; data: CanvasData }
+  | { ok: false }
+
+function tryParseCanvasData(json: string): ParseResult {
   try {
     const d = JSON.parse(json)
     return {
-      cards: Array.isArray(d.cards) ? d.cards : [],
-      connections: Array.isArray(d.connections) ? d.connections : [],
+      ok: true,
+      data: {
+        cards: Array.isArray(d.cards) ? d.cards : [],
+        connections: Array.isArray(d.connections) ? d.connections : [],
+      },
     }
   } catch {
-    return { cards: [], connections: [] }
+    return { ok: false }
   }
 }
 
@@ -31,12 +38,17 @@ function cardCenter(c: CanvasCardData): { x: number; y: number } {
 
 export function CanvasEditor(): JSX.Element {
   const markdown    = useEditorStore(s => s.markdown)
+  const noteId      = useEditorStore(s => s.note?.id)
   const setMarkdown = useEditorStore(s => s.setMarkdown)
   const save        = useEditorStore(s => s.save)
   const saveStatus  = useEditorStore(s => s.saveStatus)
   const notes       = useVaultStore(s => s.slimNotes)
 
-  const [data, setData] = useState<CanvasData>(() => parseCanvasData(markdown))
+  const parseResult = tryParseCanvasData(markdown)
+  const [parseError, setParseError] = useState(!parseResult.ok)
+  const [data, setData] = useState<CanvasData>(() =>
+    parseResult.ok ? parseResult.data : { cards: [], connections: [] }
+  )
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [connectFrom, setConnectFrom] = useState<string | null>(null)
   const [connectMouse, setConnectMouse] = useState<{ x: number; y: number } | null>(null)
@@ -52,19 +64,34 @@ export function CanvasEditor(): JSX.Element {
   // Autosave timer
   const autosaveRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Sync data → markdown (triggers autosave)
+  // Clear autosave timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autosaveRef.current) clearTimeout(autosaveRef.current)
+    }
+  }, [])
+
+  // Sync data → markdown (triggers autosave); blocked while in error state
   const commitData = useCallback((next: CanvasData) => {
+    if (parseError) return
     setData(next)
     const json = JSON.stringify(next)
     setMarkdown(json)
     if (autosaveRef.current) clearTimeout(autosaveRef.current)
     autosaveRef.current = setTimeout(() => save(), AUTOSAVE_MS)
-  }, [setMarkdown, save])
+  }, [setMarkdown, save, parseError])
 
   // Reload data from markdown when tab switches
   useEffect(() => {
-    setData(parseCanvasData(markdown))
-  }, [useEditorStore.getState().note?.id])
+    const result = tryParseCanvasData(markdown)
+    if (result.ok) {
+      setData(result.data)
+      setParseError(false)
+    } else {
+      setParseError(true)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [noteId])
 
   // ── Card CRUD ──
   const addTextCard = useCallback((wx: number, wy: number) => {
@@ -231,6 +258,21 @@ export function CanvasEditor(): JSX.Element {
     .filter(n => n.noteType !== 'folder' && n.noteType !== 'canvas')
     .filter(n => !q || n.title.toLowerCase().includes(q))
     .slice(0, 12)
+
+  if (parseError) {
+    return (
+      <div className={styles.root}>
+        <div className={styles.toolbar}>
+          <span className={styles.toolbarLabel}>Canvas</span>
+        </div>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12, color: 'var(--color-text-muted)' }}>
+          <span style={{ fontSize: 32 }}>⚠️</span>
+          <span>Canvas data is corrupted and cannot be displayed.</span>
+          <span style={{ fontSize: 12 }}>The raw file content has been preserved. Edit it manually to recover your data.</span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={styles.root}>

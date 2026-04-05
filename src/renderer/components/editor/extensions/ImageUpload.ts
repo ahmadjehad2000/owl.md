@@ -19,9 +19,17 @@ async function fileToBase64(file: File): Promise<{ base64: string; ext: string }
 
 async function insertImage(file: File, editor: import('@tiptap/core').Editor): Promise<void> {
   if (!file.type.startsWith('image/')) return
-  const { base64, ext } = await fileToBase64(file)
-  const relativePath    = await ipc.notes.saveImage(base64, ext)
-  editor.chain().focus().setImage({ src: `owl://${relativePath}`, alt: file.name }).run()
+  try {
+    const { base64, ext } = await fileToBase64(file)
+    const relativePath    = await ipc.notes.saveImage(base64, ext)
+    editor.chain().focus().setImage({ src: `owl://${relativePath}`, alt: file.name }).run()
+  } catch (err) {
+    console.error('[ImageUpload] Failed to save image:', err)
+    // Surface the error in the editor as a visible inline message
+    editor.chain().focus().insertContent(
+      `<p><em>⚠ Image could not be saved: ${(err as Error).message ?? 'unknown error'}</em></p>`
+    ).run()
+  }
 }
 
 export const ImageUpload = Extension.create({

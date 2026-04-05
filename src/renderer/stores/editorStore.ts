@@ -107,7 +107,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         }
       }
 
-      const full = isCanvas ? markdown : serializeFrontmatter(frontmatter, markdown)
+      // Re-read markdown/frontmatter AFTER the async rename gap — user may have
+      // continued typing while we awaited, so the original snapshot could be stale.
+      const { markdown: freshMarkdown, frontmatter: freshFrontmatter } = get()
+      const full = isCanvas ? freshMarkdown : serializeFrontmatter(freshFrontmatter, freshMarkdown)
       const updated = normalizeNote(await ipc.notes.save(activeNote.id, full))
       set({ note: updated, isDirty: false, saveStatus: 'saved' })
       const { activeTabId } = useTabStore.getState()
