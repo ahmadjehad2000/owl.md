@@ -4,6 +4,7 @@
   "description": "Local-first knowledge workspace",
   "main": "./out/main/index.js",
   "scripts": {
+    "postinstall": "electron-rebuild -f -w better-sqlite3",
     "dev": "node scripts/dev.mjs",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
@@ -49,6 +50,7 @@
     "@vitest/ui": "^1.6.0",
     "electron": "^30.5.1",
     "electron-builder": "^24.13.3",
+    "electron-rebuild": "^3.2.9",
     "electron-vite": "^2.3.0",
     "jsdom": "^24.1.0",
     "typescript": "^5.5.2",
