@@ -523,7 +523,7 @@ useEffect(() => {
               </div>
             </>
           )}
-        </div>{/* end splitRow / singlePane */}
+        </div>
       ) : (
         <div className={styles.empty}>
           <div className={styles.emptyIcon}>🦉</div>
