@@ -230,6 +230,42 @@ export function registerNotesHandlers(services: {
     return { note: db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note, markdown }
   })
 
+  ipcMain.handle('notes:appendToDaily', (_e, text: string): void => {
+    const title      = todayKey()
+    const folderPath = 'Daily Notes'
+
+    // Get or create the daily note
+    let existing = db().prepare(
+      `SELECT * FROM notes WHERE title = ? AND folder_path = ? AND note_type = 'daily'`
+    ).get(title, folderPath) as Note | undefined
+
+    if (!existing) {
+      const id       = randomUUID()
+      const notePath = `${folderPath}/${title}.md`
+      const markdown = `# ${title}\n\n`
+      services.vault().writeNote(notePath, markdown)
+      services.index().indexNote({ id, path: notePath, title, markdown, folderPath, noteType: 'daily' })
+      services.index().syncFTS(id, title, markdown)
+      const maxRow = db().prepare(
+        `SELECT COALESCE(MAX(order_index), -1) as m FROM notes WHERE folder_path = ?`
+      ).get(folderPath) as { m: number }
+      db().prepare('UPDATE notes SET order_index = ? WHERE id = ?').run(maxRow.m + 1, id)
+      existing = db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
+    }
+
+    // Append the captured text as a new section
+    const current = services.vault().readNote(existing.path)
+    const now = new Date()
+    const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
+    const appended = current.trimEnd() + `\n\n---\n**${time}**\n\n${text.trim()}\n`
+    services.vault().writeNote(existing.path, appended)
+    services.index().indexNote({
+      id: existing.id, path: existing.path, title,
+      markdown: appended, folderPath, noteType: 'daily',
+    })
+    services.index().syncFTS(existing.id, title, appended)
+  })
+
   ipcMain.handle('notes:save-image', (_e, base64Data: string, ext: string): string => {
     const root    = services.vault().getRoot()
     const imgDir  = join(root, 'attachments', 'images')

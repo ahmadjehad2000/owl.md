@@ -29,8 +29,13 @@ export interface OwlNotesAPI {
   listTags:     () => Promise<Array<{ tag: string; count: number }>>
   notesByTag:   (tag: string) => Promise<Note[]>
   createDaily:  () => Promise<NoteContent>
-  saveImage:    (base64Data: string, ext: string) => Promise<string>
-  getGraphData: () => Promise<GraphData>
+  saveImage:      (base64Data: string, ext: string) => Promise<string>
+  getGraphData:   () => Promise<GraphData>
+  appendToDaily:  (text: string) => Promise<void>
+}
+
+export interface OwlCaptureAPI {
+  hide: () => void
 }
 
 export interface OwlSearchAPI {
@@ -46,11 +51,12 @@ export interface OwlExportAPI {
 }
 
 export interface OwlAPI {
-  vault:  OwlVaultAPI
-  notes:  OwlNotesAPI
-  search: OwlSearchAPI
-  shell:  OwlShellAPI
-  export: OwlExportAPI
+  vault:   OwlVaultAPI
+  notes:   OwlNotesAPI
+  search:  OwlSearchAPI
+  shell:   OwlShellAPI
+  export:  OwlExportAPI
+  capture: OwlCaptureAPI
 }
 
 declare global {

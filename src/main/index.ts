@@ -1,5 +1,5 @@
 // src/main/index.ts
-import { app, BrowserWindow, ipcMain, shell, protocol, net } from 'electron'
+import { app, BrowserWindow, ipcMain, shell, protocol, net, globalShortcut } from 'electron'
 import { join, relative, dirname, basename } from 'path'
 import { pathToFileURL } from 'url'
 import { existsSync } from 'fs'
@@ -189,6 +189,56 @@ app.whenReady().then(() => {
 
   registerExportHandlers(() => win)
 
+  // ── Quick Capture floating window ──────────────────────────────────────────
+  const captureWin = new BrowserWindow({
+    width: 440,
+    height: 260,
+    minWidth: 340,
+    minHeight: 200,
+    maxWidth: 700,
+    maxHeight: 400,
+    resizable: true,
+    alwaysOnTop: true,
+    frame: false,
+    transparent: true,
+    vibrancy: 'under-window',
+    show: false,
+    skipTaskbar: true,
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      contextIsolation: true,
+      sandbox: false,
+    },
+  })
+  captureWin.removeMenu()
+
+  // Hide instead of close (keeps the window alive)
+  captureWin.on('close', e => { e.preventDefault(); captureWin.hide() })
+
+  // Load same renderer with #capture hash
+  if (process.env['ELECTRON_RENDERER_URL']) {
+    captureWin.loadURL(process.env['ELECTRON_RENDERER_URL'] + '#capture')
+  } else {
+    captureWin.loadFile(join(__dirname, '../renderer/index.html'), { hash: 'capture' })
+  }
+
+  // IPC: hide capture window from renderer
+  ipcMain.handle('capture:hide', () => { captureWin.hide() })
+
+  // Global shortcut: Ctrl/Cmd+Shift+Space toggles capture window
+  app.whenReady().then(() => {}).catch(() => {}) // no-op (already in whenReady)
+  globalShortcut.register('CommandOrControl+Shift+Space', () => {
+    if (captureWin.isVisible()) {
+      captureWin.hide()
+    } else {
+      captureWin.center()
+      captureWin.show()
+      captureWin.focus()
+      captureWin.webContents.focus()
+    }
+  })
+  // ──────────────────────────────────────────────────────────────────────────
+
   win.removeMenu()
   win.webContents.on('before-input-event', (_e, input) => {
     if (input.type === 'keyDown' && input.key === 'F12') {
@@ -206,6 +256,8 @@ app.whenReady().then(() => {
     win.loadFile(join(__dirname, '../renderer/index.html'))
   }
 })
+
+app.on('will-quit', () => { globalShortcut.unregisterAll() })
 
 app.on('window-all-closed', async () => {
   for (const session of sessions.values()) {

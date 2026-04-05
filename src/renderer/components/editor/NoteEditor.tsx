@@ -30,6 +30,8 @@ import { FindBar } from './FindBar'
 import { ipc } from '../../lib/ipc'
 import { TabBar } from './TabBar'
 import { CanvasEditor } from '../canvas/CanvasEditor'
+import { RightEditor } from './RightEditor'
+import { useSplitStore } from '../../stores/splitStore'
 import { useEditorStore } from '../../stores/editorStore'
 import { useTabStore } from '../../stores/tabStore'
 import { useVaultStore } from '../../stores/vaultStore'
@@ -61,7 +63,40 @@ export function NoteEditor(): JSX.Element {
   const loadNote    = useEditorStore(s => s.loadNote)
   const setHeadings = useRightPanelStore(s => s.setHeadings)
   const activeTabId = useTabStore(s => s.activeTabId)
+  const isSplit     = useSplitStore(s => s.isSplit)
+  const toggleSplit = useSplitStore(s => s.toggle)
   const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Split pane resizer
+  const splitResizerRef = useRef<{ startX: number; startW: number } | null>(null)
+  const [rightPaneW, setRightPaneW] = useState(0) // 0 = equal halves
+  const splitContainerRef = useRef<HTMLDivElement>(null)
+
+  const onSplitResizerDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    const container = splitContainerRef.current
+    if (!container) return
+    const halfW = container.clientWidth / 2
+    splitResizerRef.current = { startX: e.clientX, startW: rightPaneW || halfW }
+    const onMove = (ev: MouseEvent): void => {
+      if (!splitResizerRef.current || !container) return
+      const dx = ev.clientX - splitResizerRef.current.startX
+      const total = container.clientWidth
+      const newRight = Math.max(240, Math.min(total - 240, splitResizerRef.current.startW - dx))
+      setRightPaneW(newRight)
+    }
+    const onUp = (): void => {
+      splitResizerRef.current = null
+      document.body.style.cursor = ''
+      document.body.style.userSelect = ''
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+    document.body.style.cursor = 'col-resize'
+    document.body.style.userSelect = 'none'
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+  }, [rightPaneW])
 
   const showPreview     = useHoverPreviewStore(s => s.showPreview)
   const setHoverContent = useHoverPreviewStore(s => s.setContent)
@@ -387,7 +422,8 @@ useEffect(() => {
       {note?.noteType === 'canvas' ? (
         <CanvasEditor />
       ) : note ? (
-        <>
+        <div ref={splitContainerRef} className={isSplit ? styles.splitRow : styles.singlePane}>
+          <div className={isSplit ? styles.splitLeft : undefined}>
           {/* Toolbar */}
           <div className={styles.titleBar}>
             <div className={styles.titleActions}>
@@ -421,6 +457,13 @@ useEffect(() => {
                 title={isReadingView ? 'Switch to edit mode' : 'Reading view'}
               >
                 {isReadingView ? '✏️' : '📖'}
+              </button>
+              <button
+                className={`${styles.sourceToggle} ${isSplit ? styles.sourceActive : ''}`}
+                onClick={() => toggleSplit(note?.id, note?.title)}
+                title={isSplit ? 'Close split pane' : 'Open split pane'}
+              >
+                ⊟
               </button>
             </div>
           </div>
@@ -464,7 +507,23 @@ useEffect(() => {
             </div>
           </div>
           <HoverPreview />
-        </>
+          </div>{/* end splitLeft */}
+
+          {isSplit && (
+            <>
+              <div
+                className={styles.splitResizer}
+                onMouseDown={onSplitResizerDown}
+              />
+              <div
+                className={styles.splitRight}
+                style={rightPaneW ? { width: rightPaneW, flex: 'none' } : undefined}
+              >
+                <RightEditor />
+              </div>
+            </>
+          )}
+        </div>{/* end splitRow / singlePane */}
       ) : (
         <div className={styles.empty}>
           <div className={styles.emptyIcon}>🦉</div>

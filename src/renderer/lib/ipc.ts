@@ -32,7 +32,8 @@ export const ipc = {
     notesByTag:  (tag: string): Promise<Note[]>                                   => window.owl.notes.notesByTag(tag),
     createDaily: (): Promise<NoteContent>                                         => window.owl.notes.createDaily(),
     saveImage:   (base64Data: string, ext: string): Promise<string>               => window.owl.notes.saveImage(base64Data, ext),
-    getGraphData: (): Promise<GraphData>                                          => window.owl.notes.getGraphData(),
+    getGraphData:   (): Promise<GraphData>  => window.owl.notes.getGraphData(),
+    appendToDaily:  (text: string): Promise<void> => window.owl.notes.appendToDaily(text),
   },
   export: {
     pdf: (noteTitle: string): Promise<void> => window.owl.export.pdf(noteTitle),

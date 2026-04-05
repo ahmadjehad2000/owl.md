@@ -12,6 +12,7 @@ import { useEditorStore } from './stores/editorStore'
 import { useSearchStore } from './stores/searchStore'
 import { useCommandPaletteStore } from './stores/commandPaletteStore'
 import { useGraphStore } from './stores/graphStore'
+import { useSplitStore } from './stores/splitStore'
 import { ipc } from './lib/ipc'
 import styles from './App.module.css'
 import type { VaultConfig } from '@shared/types/Note'
@@ -200,6 +201,17 @@ export default function App(): JSX.Element {
       if (e.ctrlKey && e.shiftKey && e.key === 'Tab') {
         e.preventDefault()
         useTabStore.getState().prevTab()
+        return
+      }
+
+      // Cmd+Shift+\ — Toggle split pane
+      if (mod && e.shiftKey && e.key === '|') {
+        e.preventDefault()
+        const { isSplit, toggle } = useSplitStore.getState()
+        const activeTab = useTabStore.getState().tabs.find(
+          t => t.id === useTabStore.getState().activeTabId
+        )
+        toggle(activeTab?.noteId, activeTab?.title)
         return
       }
 
