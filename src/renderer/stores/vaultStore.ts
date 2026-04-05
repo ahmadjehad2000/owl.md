@@ -26,6 +26,7 @@ interface VaultState {
   openedConfigs: VaultConfig[]
   notes:         Note[]
   slimNotes:     NoteSlim[]
+  trashedNotes:  Note[]
   pinnedIds:     string[]
   recentIds:     string[]
   openNoteId:    string | null
@@ -36,6 +37,9 @@ interface VaultState {
   loadNotes:     () => Promise<void>
   loadNotesSlim: () => Promise<void>
   loadSessions:  () => Promise<void>
+  loadTrashed:   () => Promise<void>
+  restoreNote:   (id: string) => Promise<void>
+  emptyTrash:    () => Promise<void>
   setOpenNote:   (id: string) => void
   pinNote:       (id: string) => void
   unpinNote:     (id: string) => void
@@ -48,6 +52,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   openedConfigs: [],
   notes:         [],
   slimNotes:     [],
+  trashedNotes:  [],
   pinnedIds:     [],
   recentIds:     [],
   openNoteId:    null,
@@ -58,6 +63,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
     await get().loadNotes()
     await get().loadNotesSlim()
     await get().loadSessions()
+    await get().loadTrashed()
   },
 
   createVault: async (name) => {
@@ -66,6 +72,7 @@ export const useVaultStore = create<VaultState>((set, get) => ({
     await get().loadNotes()
     await get().loadNotesSlim()
     await get().loadSessions()
+    await get().loadTrashed()
   },
 
   activateVault: async (path) => {
@@ -74,11 +81,12 @@ export const useVaultStore = create<VaultState>((set, get) => ({
     await get().loadNotes()
     await get().loadNotesSlim()
     await get().loadSessions()
+    await get().loadTrashed()
   },
 
   closeVault: async (path) => {
     const newConfig = await ipc.vault.close(path)
-    set({ config: newConfig })
+    set({ config: newConfig, trashedNotes: [] })
     await get().loadNotes()
     await get().loadNotesSlim()
     await get().loadSessions()
@@ -111,6 +119,22 @@ export const useVaultStore = create<VaultState>((set, get) => ({
   loadSessions: async () => {
     const openedConfigs = await ipc.vault.getSessions()
     set({ openedConfigs })
+  },
+
+  loadTrashed: async () => {
+    const raw = await ipc.notes.listTrashed()
+    set({ trashedNotes: raw.map(normalizeNote) })
+  },
+
+  restoreNote: async (id) => {
+    await ipc.notes.restore(id)
+    await get().loadNotesSlim()
+    await get().loadTrashed()
+  },
+
+  emptyTrash: async () => {
+    await ipc.notes.emptyTrash()
+    set({ trashedNotes: [] })
   },
 
   setOpenNote: (id) => {

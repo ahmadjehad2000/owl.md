@@ -37,6 +37,10 @@ const owl: OwlAPI = {
     saveImage:   (base64Data, ext)   => ipcRenderer.invoke('notes:save-image',   base64Data, ext),
     getGraphData:   ()               => ipcRenderer.invoke('notes:getGraphData'),
     appendToDaily:  (text)           => ipcRenderer.invoke('notes:appendToDaily', text),
+    trash:          (id)             => ipcRenderer.invoke('notes:trash',         id),
+    listTrashed:    ()               => ipcRenderer.invoke('notes:list-trashed'),
+    restore:        (id)             => ipcRenderer.invoke('notes:restore',       id),
+    emptyTrash:     ()               => ipcRenderer.invoke('notes:empty-trash'),
   },
   export: {
     pdf: (noteTitle) => ipcRenderer.invoke('export:pdf', noteTitle),

@@ -285,6 +285,37 @@ export function registerNotesHandlers(services: {
     services.index().syncFTS(existing.id, title, appended)
   })
 
+  // ── Trash ──────────────────────────────────────────────────────────────────
+
+  ipcMain.handle('notes:trash', (_e, id: string): void => {
+    db().prepare('UPDATE notes SET deleted_at = ?, updated_at = ? WHERE id = ?')
+      .run(Date.now(), Date.now(), id)
+  })
+
+  ipcMain.handle('notes:list-trashed', (): Note[] =>
+    db().prepare('SELECT * FROM notes WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC').all() as Note[]
+  )
+
+  ipcMain.handle('notes:restore', (_e, id: string): void => {
+    db().prepare('UPDATE notes SET deleted_at = NULL, updated_at = ? WHERE id = ?')
+      .run(Date.now(), id)
+  })
+
+  ipcMain.handle('notes:empty-trash', (): void => {
+    const trashed = db().prepare(
+      'SELECT * FROM notes WHERE deleted_at IS NOT NULL'
+    ).all() as Note[]
+    for (const note of trashed) {
+      const raw = note as unknown as Record<string, unknown>
+      if ((raw.note_type ?? raw.noteType) !== 'folder') {
+        try { services.vault().deleteNote(note.path) } catch { /* already gone */ }
+      }
+    }
+    db().prepare('DELETE FROM notes WHERE deleted_at IS NOT NULL').run()
+  })
+
+  // ── Images ─────────────────────────────────────────────────────────────────
+
   ipcMain.handle('notes:save-image', (_e, base64Data: string, ext: string): string => {
     const root    = services.vault().getRoot()
     const imgDir  = join(root, 'attachments', 'images')
