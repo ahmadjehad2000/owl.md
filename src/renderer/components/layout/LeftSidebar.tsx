@@ -61,7 +61,7 @@ function SortableNoteRow({ note, active, depth, onClick, onAuxClick, onContextMe
       {...attributes}
       {...(isRenaming ? {} : listeners)}
     >
-      <span className={styles.icon}>📄</span>
+      <span className={styles.icon}>{note.noteType === 'canvas' ? '🎨' : note.noteType === 'daily' ? '📅' : '📄'}</span>
       {isRenaming ? (
         <input
           ref={inputRef}
@@ -567,7 +567,7 @@ export function LeftSidebar(): JSX.Element {
       <DragOverlay dropAnimation={dropAnimation}>
         {dragItem
           ? <div className={styles.dragGhost}>
-              <span className={styles.dragGhostIcon}>{dragItem.noteType === 'folder' ? '📁' : '📄'}</span>
+              <span className={styles.dragGhostIcon}>{dragItem.noteType === 'folder' ? '📁' : dragItem.noteType === 'canvas' ? '🎨' : '📄'}</span>
               <span className={styles.dragGhostTitle}>{dragItem.title}</span>
             </div>
           : null
@@ -605,7 +605,7 @@ export function LeftSidebar(): JSX.Element {
                   style={{ paddingLeft: 14 }}
                   onClick={() => openTab(note.id, note.title)}
                 >
-                  <span className={styles.icon}>📄</span>
+                  <span className={styles.icon}>{note.noteType === 'canvas' ? '🎨' : note.noteType === 'daily' ? '📅' : '📄'}</span>
                   <span className={styles.title}>{note.title}</span>
                 </button>
               ))}

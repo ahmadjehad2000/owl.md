@@ -44,17 +44,30 @@ export function CommandPalette(): JSX.Element | null {
     }))
 
   const actionItems: PaletteItem[] = !q
-    ? [{
-        id: '__new__',
-        label: 'New Note',
-        description: 'Create a blank note',
-        action: async () => {
-          const { note } = await ipc.notes.create('Untitled', '')
-          await loadNotesSlim()
-          useTabStore.getState().openTab(note.id, note.title)
-          close()
+    ? [
+        {
+          id: '__new__',
+          label: 'New Note',
+          description: 'Create a blank note',
+          action: async () => {
+            const { note } = await ipc.notes.create('Untitled', '')
+            await loadNotesSlim()
+            useTabStore.getState().openTab(note.id, note.title)
+            close()
+          },
         },
-      }]
+        {
+          id: '__new-canvas__',
+          label: 'New Canvas',
+          description: 'Create a spatial workspace',
+          action: async () => {
+            const { note } = await ipc.notes.create('Untitled Canvas', '', 'canvas')
+            await loadNotesSlim()
+            useTabStore.getState().openTab(note.id, note.title)
+            close()
+          },
+        },
+      ]
     : []
 
   const items: PaletteItem[] = [...actionItems, ...noteItems]

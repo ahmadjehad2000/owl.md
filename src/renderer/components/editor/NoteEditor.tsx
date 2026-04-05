@@ -29,6 +29,7 @@ import 'katex/dist/katex.min.css'
 import { FindBar } from './FindBar'
 import { ipc } from '../../lib/ipc'
 import { TabBar } from './TabBar'
+import { CanvasEditor } from '../canvas/CanvasEditor'
 import { useEditorStore } from '../../stores/editorStore'
 import { useTabStore } from '../../stores/tabStore'
 import { useVaultStore } from '../../stores/vaultStore'
@@ -383,7 +384,9 @@ useEffect(() => {
   return (
     <div className={styles.root}>
       <TabBar />
-      {note ? (
+      {note?.noteType === 'canvas' ? (
+        <CanvasEditor />
+      ) : note ? (
         <>
           {/* Toolbar */}
           <div className={styles.titleBar}>

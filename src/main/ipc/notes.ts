@@ -51,7 +51,7 @@ export function registerNotesHandlers(services: {
     return db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
   })
 
-  ipcMain.handle('notes:create', (_e, title: string, folderPath: string): NoteContent => {
+  ipcMain.handle('notes:create', (_e, title: string, folderPath: string, noteType?: string): NoteContent => {
     if (folderPath) {
       const notesRoot = join(services.vault().getRoot(), 'notes')
       const resolved = resolve(join(notesRoot, folderPath))
@@ -69,9 +69,10 @@ export function registerNotesHandlers(services: {
       notePath = folderPath ? `${folderPath}/${fileName}` : fileName
       counter++
     }
-    const markdown = ''
+    const type = noteType ?? 'note'
+    const markdown = type === 'canvas' ? '{"cards":[],"connections":[]}' : ''
     services.vault().writeNote(notePath, markdown)
-    services.index().indexNote({ id, path: notePath, title, markdown, folderPath, noteType: 'note' })
+    services.index().indexNote({ id, path: notePath, title, markdown, folderPath, noteType: type })
     services.index().syncFTS(id, title, markdown)
     const note = db().prepare('SELECT * FROM notes WHERE id = ?').get(id) as Note
     return { note, markdown }

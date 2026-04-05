@@ -18,8 +18,8 @@ export const ipc = {
     listSlim:     (): Promise<NoteSlim[]>                     => window.owl.notes.listSlim(),
     read:         (id: string): Promise<NoteContent>           => window.owl.notes.read(id),
     save:         (id: string, md: string): Promise<Note>      => window.owl.notes.save(id, md),
-    create:       (title: string, folder: string): Promise<NoteContent> =>
-                    window.owl.notes.create(title, folder),
+    create:       (title: string, folder: string, noteType?: string): Promise<NoteContent> =>
+                    window.owl.notes.create(title, folder, noteType),
     delete:       (id: string): Promise<void>                  => window.owl.notes.delete(id),
     getBacklinks: (id: string): Promise<BacklinkResult[]>      => window.owl.notes.getBacklinks(id),
     createFolder: (name: string): Promise<Note>                => window.owl.notes.createFolder(name),

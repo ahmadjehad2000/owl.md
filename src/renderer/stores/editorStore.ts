@@ -38,6 +38,13 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   loadNote: async (id) => {
     const { note: rawNote, markdown: raw } = await ipc.notes.read(id)
     const note = normalizeNote(rawNote)
+    const isCanvas = note.noteType === 'canvas'
+    if (isCanvas) {
+      set({ note, markdown: raw, frontmatter: {}, isDirty: false, saveStatus: 'idle' })
+      const { activeTabId } = useTabStore.getState()
+      if (activeTabId) useTabStore.getState().updateTabContent(activeTabId, raw, {}, false)
+      return
+    }
     const { frontmatter, body } = parseFrontmatter(raw)
     // Ensure content starts with `# Title` so it's visible in the editor.
     // If the file already has an H1 as the first line, use it as-is.
@@ -80,24 +87,27 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     if (!note) return
     set({ saveStatus: 'saving' })
     try {
-      // Sync first H1 heading → note title
-      const h1 = markdown.match(/^#[^\S\n]+(.+?)$/m)?.[1]?.trim() ?? null
       let activeNote = note
-      if (h1 && h1 !== note.title) {
-        const renamed = normalizeNote(await ipc.notes.rename(note.id, h1))
-        activeNote = renamed
-        set({ note: renamed })
-        // Update tab title bar
-        const { activeTabId } = useTabStore.getState()
-        if (activeTabId) {
-          useTabStore.setState(s => ({
-            tabs: s.tabs.map(t => t.noteId === renamed.id ? { ...t, title: renamed.title } : t),
-          }))
+      const isCanvas = note.noteType === 'canvas'
+
+      if (!isCanvas) {
+        // Sync first H1 heading → note title
+        const h1 = markdown.match(/^#[^\S\n]+(.+?)$/m)?.[1]?.trim() ?? null
+        if (h1 && h1 !== note.title) {
+          const renamed = normalizeNote(await ipc.notes.rename(note.id, h1))
+          activeNote = renamed
+          set({ note: renamed })
+          const { activeTabId } = useTabStore.getState()
+          if (activeTabId) {
+            useTabStore.setState(s => ({
+              tabs: s.tabs.map(t => t.noteId === renamed.id ? { ...t, title: renamed.title } : t),
+            }))
+          }
+          void useVaultStore.getState().loadNotes()
         }
-        void useVaultStore.getState().loadNotes()
       }
 
-      const full = serializeFrontmatter(frontmatter, markdown)
+      const full = isCanvas ? markdown : serializeFrontmatter(frontmatter, markdown)
       const updated = normalizeNote(await ipc.notes.save(activeNote.id, full))
       set({ note: updated, isDirty: false, saveStatus: 'saved' })
       const { activeTabId } = useTabStore.getState()

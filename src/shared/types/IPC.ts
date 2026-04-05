@@ -18,7 +18,7 @@ export interface OwlNotesAPI {
   listSlim:     () => Promise<NoteSlim[]>
   read:         (id: string) => Promise<NoteContent>
   save:         (id: string, markdown: string) => Promise<Note>
-  create:       (title: string, folderPath: string) => Promise<NoteContent>
+  create:       (title: string, folderPath: string, noteType?: string) => Promise<NoteContent>
   delete:       (id: string) => Promise<void>
   getBacklinks: (id: string) => Promise<BacklinkResult[]>
   createFolder: (name: string) => Promise<Note>
