@@ -11,6 +11,7 @@ files:
   - '!tests/*'
 asarUnpack:
   - resources/**
+  - node_modules/better-sqlite3/build/Release/*.node
 win:
   executableName: owl-md
 nsis:
@@ -29,4 +30,4 @@ linux:
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
-npmRebuild: false
+npmRebuild: true
