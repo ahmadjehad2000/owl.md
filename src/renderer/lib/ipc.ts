@@ -33,7 +33,11 @@ export const ipc = {
     createDaily: (): Promise<NoteContent>                                         => window.owl.notes.createDaily(),
     saveImage:   (base64Data: string, ext: string): Promise<string>               => window.owl.notes.saveImage(base64Data, ext),
     getGraphData:   (): Promise<GraphData>  => window.owl.notes.getGraphData(),
-    appendToDaily:  (text: string): Promise<void> => window.owl.notes.appendToDaily(text),
+    appendToDaily:  (text: string): Promise<void>  => window.owl.notes.appendToDaily(text),
+    trash:          (id: string): Promise<void>    => window.owl.notes.trash(id),
+    listTrashed:    (): Promise<Note[]>            => window.owl.notes.listTrashed(),
+    restore:        (id: string): Promise<void>    => window.owl.notes.restore(id),
+    emptyTrash:     (): Promise<void>              => window.owl.notes.emptyTrash(),
   },
   export: {
     pdf: (noteTitle: string): Promise<void> => window.owl.export.pdf(noteTitle),

@@ -32,6 +32,10 @@ export interface OwlNotesAPI {
   saveImage:      (base64Data: string, ext: string) => Promise<string>
   getGraphData:   () => Promise<GraphData>
   appendToDaily:  (text: string) => Promise<void>
+  trash:          (id: string) => Promise<void>
+  listTrashed:    () => Promise<Note[]>
+  restore:        (id: string) => Promise<void>
+  emptyTrash:     () => Promise<void>
 }
 
 export interface OwlCaptureAPI {
